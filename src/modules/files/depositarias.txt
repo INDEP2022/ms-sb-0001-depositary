@@ -1,0 +1,167 @@
+Depositarias
+
+      FACTJURREGDESTLEG-Registro de Depositaría: bienes, nombramientos_depositaria, DETPAGO_DEPOSITARIAS, DETREPO_DEPOSITARIAS, DETREPO_DEPOSITARIAS
+      FCONDEPOCONCILPAG-Proceso de Dispersión de Pagos
+      FCONDEPODISPAGOS-Validación de Pagos
+      FACTADBSOLDESTLEG(revisada)-Solicitud/Monitor de Depositaría: DESTINO_LEGAL_X_BIEN2, bienes, seg_usuarios, seg_acceso_x_areas
+      FGERDIRNOMBRADEPO-Reporte de Cédulas de Nombramiento
+      FGENADBBIENESXDEP-Reporte de Bienes por Depositaría
+   FCARGAPAGOSDEP - Carga pagos depositarias
+   FCONDEPOCARGAPAG - carga de pagos de las depositarias
+   FCONDEPOCONDISPAG - dispersion de pagos depositarias
+   FCONDEPOREPINGXBIEN - ordenes de ingreso x bien en depositaria
+   FCONJURMONDESTLEG - monitor de solicitudes de depositaria: destino_legal_x_bien
+   FMASINSPAGDEPOSITARIAS - Carga másiva de carga de depositarias: DETREPO_DEPOSITARIAS, DETPAGO_DEPOSITARIAS
+
+
+nombramientos_depositaria, DETPAGO_DEPOSITARIAS, DETREPO_DEPOSITARIAS, DETREPO_DEPOSITARIAS --> crud y búsquedas básicas.
+DESTINO_LEGAL_X_BIEN2
+destino_legal_x_bien (where: fec_atencion IS NULL; order by: fec_solicitud)
+
+nombramientos_depositaria
+Consultas:
+1. where:no_bien in(SELECT b.no_bien
+                 FROM   expedientes e, bienes b
+                 WHERE  e.no_expediente =b.no_expediente
+                 )
+order; FEC_INI_CONTRATO DESC
+
+2. 
+
+  SELECT 'S'
+  INTO   VN_SI_EXISTE
+  FROM   NOMBRAMIENTOS_DEPOSITARIA
+  WHERE  NO_BIEN       = ?NO_BIEN
+  AND    RESPONSABLE   = ?RESPONSABLE
+  AND    CVE_TIPO_ADMINISTRADOR = 'D'
+  AND    CVE_TIPO_NOMB = 'P';
+  
+  --
+  
+Lear el archivo de entrada y regresas una lista de su contenido:
+  
+PROCEDURE PUP_PREVIEW_DATOS_CSV IS
+   LFIARCHIVO TEXT_IO.FILE_TYPE;
+   LST_ARCHIVO_DESTINO VARCHAR2(4000);
+   LST_CADENA VARCHAR2(4000);
+   V_NO_BIEN           BIENES.NO_BIEN%TYPE;
+   V_FEC_PAGO          DETPAGO_DEPOSITARIAS.FEC_PAGO%TYPE;
+   V_CVE_CONCEPTO_PAGO DETPAGO_DEPOSITARIAS.CVE_CONCEPTO_PAGO%TYPE;
+   V_IMPORTE           DETPAGO_DEPOSITARIAS.IMPORTE%TYPE;
+   V_OBSERVACION       DETPAGO_DEPOSITARIAS.OBSERVACION%TYPE;
+   V_JURIDICO          DETREPO_DEPOSITARIAS.REPORTE%TYPE;
+   V_ADMINISTRA        DETREPO_DEPOSITARIAS.REPORTE%TYPE;
+   VCONT NUMBER(10);
+   VCONP NUMBER(10);
+   VCONC NUMBER(10);
+   VCONE NUMBER(10);
+   V_CHECA NUMBER;
+BEGIN
+   LST_ARCHIVO_DESTINO := 'C:\IMTMPSIAB\CARDEPOSITARIAS.CSV';
+   BEGIN
+      VCONT := 0;
+      VCONP := 0;
+      VCONC := 0;
+      VCONE := 0;
+      :T_REG_LEIDOS := 0;
+      :T_REG_PROCESADOS := 0;
+      :T_REG_CORRECTOS := 0;
+      :T_REG_ERRONEOS := 0;
+      :T_REG_CORJUR := 0;
+      :T_REG_CORADM := 0;
+      GO_BLOCK('TMP_ERRORES');
+      CLEAR_BLOCK(NO_VALIDATE);
+      GO_BLOCK('DETPAGO_DEPOSITARIAS');
+      CLEAR_BLOCK(NO_COMMIT);
+      LFIARCHIVO := TEXT_IO.FOPEN(LST_ARCHIVO_DESTINO, 'r');	
+      LOOP	
+         TEXT_IO.GET_LINE(LFIARCHIVO, LST_CADENA);
+         VCONT := VCONT + 1;
+         :T_REG_LEIDOS := VCONT;
+         BEGIN
+            VCONP := VCONP + 1;
+            :T_REG_PROCESADOS := VCONP;
+            V_NO_BIEN           := TO_NUMBER(GETWORDCSV( LST_CADENA , 1));
+            V_FEC_PAGO          := TO_DATE(GETWORDCSV( LST_CADENA , 2),'DD/MM/YY');
+            V_CVE_CONCEPTO_PAGO := TO_NUMBER(GETWORDCSV( LST_CADENA , 3));
+            V_IMPORTE           := TO_NUMBER(GETWORDCSV( LST_CADENA , 4));
+            V_OBSERVACION       := REPLACE(REPLACE(REPLACE(GETWORDCSV( LST_CADENA , 5),CHR(13),' '),CHR(10),' '),'''','"');
+            V_JURIDICO          := REPLACE(REPLACE(REPLACE(GETWORDCSV( LST_CADENA , 6),CHR(13),' '),CHR(10),' '),'''','"');
+            V_ADMINISTRA        := REPLACE(REPLACE(REPLACE(GETWORDCSV( LST_CADENA , 7),CHR(13),' '),CHR(10),' '),'''','"');
+            BEGIN
+               SELECT 1
+                 INTO V_CHECA
+                 FROM CAT_CONCEPTO_PAGOS
+                WHERE CVE_CONCEPTO_PAGO = V_CVE_CONCEPTO_PAGO;
+            EXCEPTION
+               WHEN OTHERS THEN
+                  V_CVE_CONCEPTO_PAGO := NULL;
+            END;
+            IF :DETPAGO_DEPOSITARIAS.NO_BIEN IS NOT NULL THEN
+               CREATE_RECORD;
+            END IF;
+            :DETPAGO_DEPOSITARIAS.NO_BIEN           := V_NO_BIEN;
+            :DETPAGO_DEPOSITARIAS.FEC_PAGO          := V_FEC_PAGO;
+            :DETPAGO_DEPOSITARIAS.CVE_CONCEPTO_PAGO := V_CVE_CONCEPTO_PAGO;
+            :DETPAGO_DEPOSITARIAS.IMPORTE           := V_IMPORTE;
+            :DETPAGO_DEPOSITARIAS.OBSERVACION       := V_OBSERVACION;
+            :DETPAGO_DEPOSITARIAS.JURIDICO          := V_JURIDICO;
+            :DETPAGO_DEPOSITARIAS.ADMINISTRA        := V_ADMINISTRA;
+            :DETPAGO_DEPOSITARIAS.VALIDADO          := 'N';
+            :DETPAGO_DEPOSITARIAS.VALJUR            := 'N';
+            :DETPAGO_DEPOSITARIAS.VALADM            := 'N';
+            :DETPAGO_DEPOSITARIAS.APLICADO          := 'N';
+            :DETPAGO_DEPOSITARIAS.APLJUR            := 'N';
+            :DETPAGO_DEPOSITARIAS.APLADM            := 'N';
+            VCONC := VCONC + 1;
+            :T_REG_CORRECTOS := VCONC;
+         EXCEPTION
+            WHEN OTHERS THEN
+               VCONE := VCONE + 1;
+               :T_REG_ERRONEOS := VCONE;
+               GO_BLOCK('TMP_ERRORES');
+               IF :TMP_ERRORES.DESCRIPCION IS NOT NULL THEN
+                  CREATE_RECORD;
+               END IF;
+               :TMP_ERRORES.DESCRIPCION := SUBSTR(LST_CADENA,1,4000);
+               GO_BLOCK('DETPAGO_DEPOSITARIAS');
+         END;
+         SYNCHRONIZE;
+      END LOOP;	
+   EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+         TEXT_IO.FCLOSE(LFIARCHIVO);  
+   END;	
+   FIRST_RECORD;
+END;  
+
+
+---
+               INSERT INTO DETPAGO_DEPOSITARIAS ( NO_NOMBRAMIENTO,
+                                                  FEC_PAGO,
+                                                  CVE_CONCEPTO_PAGO,
+                                                  IMPORTE,
+                                                  OBSERVACION
+                                                )
+                                         VALUES ( :DETPAGO_DEPOSITARIAS.NO_NOMBRAMIENTO,
+                                                  :DETPAGO_DEPOSITARIAS.FEC_PAGO,
+                                                  :DETPAGO_DEPOSITARIAS.CVE_CONCEPTO_PAGO,
+                                                  :DETPAGO_DEPOSITARIAS.IMPORTE,
+                                                  :DETPAGO_DEPOSITARIAS.OBSERVACION
+                                                );
+               
+			   
+---
+               INSERT INTO DETREPO_DEPOSITARIAS ( NO_NOMBRAMIENTO,
+                                                  FEC_REPO,
+                                                  CVE_REPORTE,
+                                                  REPORTE
+                                                )
+                                         VALUES ( :DETPAGO_DEPOSITARIAS.NO_NOMBRAMIENTO,
+                                                  :DETPAGO_DEPOSITARIAS.FEC_PAGO,
+                                                  1,
+                                                  :DETPAGO_DEPOSITARIAS.JURIDICO
+                                                );
+               :DETPAGO_DEPOSITARIAS.APLJUR := 'S';
+
+--			   
