@@ -16,7 +16,7 @@ export class DepositaryPaymentDetEntity {
     paymentDate: Date;
 
     @PrimaryColumn("integer", { name: "cve_concepto_pago", nullable: false })
-    cvePaymentConcept: number;
+    paymentConceptKey: number;
 
     @Column("integer", { name: "importe"})
     amount: number;

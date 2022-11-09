@@ -18,7 +18,7 @@ export class DepositaryPaymentDetService {
     async createDepositaryPaymentDet(depositaryPaymentDetDTO: DepositaryPaymentDetDTO) {
         const task = await this.entity.findOne({ where: { 
             appointmentNumber:depositaryPaymentDetDTO.appointmentNumber,
-            cvePaymentConcept:depositaryPaymentDetDTO.cvePaymentConcept,
+            paymentConceptKey:depositaryPaymentDetDTO.paymentConceptKey,
             paymentDate:depositaryPaymentDetDTO.paymentDate} });
         if (task) return {status:403,message:'Record already exists'}
         return await this.entity.save(depositaryPaymentDetDTO)  ;
@@ -46,7 +46,7 @@ export class DepositaryPaymentDetService {
         
         queryBuilder.where(`no_nombramiento = coalesce(:nomb,no_nombramiento)`,{nomb:data.appointmentNumber|| null})
         queryBuilder.andWhere(`fec_pago = coalesce(:date,fec_pago)`,{date:data.paymentDate || null})
-        queryBuilder.andWhere(`cve_concepto_pago = coalesce(:payment,cve_concepto_pago)`,{payment:data.cvePaymentConcept || null})
+        queryBuilder.andWhere(`cve_concepto_pago = coalesce(:payment,cve_concepto_pago)`,{payment:data.paymentConceptKey || null})
        
         queryBuilder.take(pageSize || 10)
         queryBuilder.skip((inicio - 1) * pageSize || 0)
@@ -65,7 +65,7 @@ export class DepositaryPaymentDetService {
     async updateDepositaryPaymentDet(depositaryPaymentDetDTO:DepositaryPaymentDetDTO) {
         const keys =  { 
             appointmentNumber:depositaryPaymentDetDTO.appointmentNumber,
-           cvePaymentConcept:depositaryPaymentDetDTO.cvePaymentConcept,
+            paymentConceptKey:depositaryPaymentDetDTO.paymentConceptKey,
            paymentDate:depositaryPaymentDetDTO.paymentDate
         }
         return await this.entity.update(keys, depositaryPaymentDetDTO);

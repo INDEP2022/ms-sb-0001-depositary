@@ -16,7 +16,7 @@ export class DepositaryDetRepoEntity {
     repoDate: Date;
 
     @PrimaryColumn("integer", { name: "cve_reporte", nullable: false })
-    cveReport: number;
+    reportKey: number;
 
     @Column("character varying", { name: 'reporte', length: 4000 })
     report: string;

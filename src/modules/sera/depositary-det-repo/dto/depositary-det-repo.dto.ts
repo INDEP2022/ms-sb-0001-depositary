@@ -3,7 +3,7 @@ export class DepositaryDetRepoDTO{
 
     repoDate: Date;
 
-    cveReport: number;
+    reportKey: number;
 
     report: string;
 

@@ -5,7 +5,7 @@ export class SearchDepositaryPaymentDetDTO {
 
     paymentDate: Date;
 
-    cvePaymentConcept: number;
+    paymentConceptKey: number;
 
    
 }

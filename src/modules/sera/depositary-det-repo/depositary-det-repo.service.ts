@@ -19,7 +19,7 @@ export class DepositaryDetRepoService {
     async createDepositaryDetRepo(depositaryDetRepoDTO: DepositaryDetRepoDTO) {
         const task = await this.entity.findOne({ where: { 
             appointmentNumber:depositaryDetRepoDTO.appointmentNumber,
-            cveReport:depositaryDetRepoDTO.cveReport,
+            reportKey:depositaryDetRepoDTO.reportKey,
             repoDate:depositaryDetRepoDTO.repoDate} });
         if (task) return {status:403,message:'Record already exists'}
         return await this.entity.save(depositaryDetRepoDTO)  ;
@@ -47,7 +47,7 @@ export class DepositaryDetRepoService {
         
         queryBuilder.where(`no_nombramiento = coalesce(:nomb,no_nombramiento)`,{nomb:data.appointmentNumber|| null})
         queryBuilder.andWhere(`fec_repo = coalesce(:date,fec_repo)`,{date:data.repoDate || null})
-        queryBuilder.andWhere(`cve_reporte = coalesce(:cve,cve_reporte)`,{cve:data.cveReport || null})
+        queryBuilder.andWhere(`cve_reporte = coalesce(:cve,cve_reporte)`,{cve:data.reportKey || null})
        
         queryBuilder.take(pageSize || 10)
         queryBuilder.skip((inicio - 1) * pageSize || 0)
@@ -66,7 +66,7 @@ export class DepositaryDetRepoService {
     async updateDepositaryDetRepo(depositaryDetRepoDTO:DepositaryDetRepoDTO) {
         const keys =  { 
             appointmentNumber:depositaryDetRepoDTO.appointmentNumber,
-            cveReport:depositaryDetRepoDTO.cveReport,
+            reportKey:depositaryDetRepoDTO.reportKey,
             repoDate:depositaryDetRepoDTO.repoDate
         }
         return await this.entity.update(keys, depositaryDetRepoDTO);

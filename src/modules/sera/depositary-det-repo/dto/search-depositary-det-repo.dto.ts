@@ -3,7 +3,7 @@ export class SearchDepositaryDetRepoDTO{
 
     repoDate: Date;
 
-    cveReport: number;
+    reportKey: number;
 
     report: string;
 
