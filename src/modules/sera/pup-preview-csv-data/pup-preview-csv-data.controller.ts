@@ -14,9 +14,7 @@ export class PupPreviewCsvDataController {
     @MessagePattern({ cmd: 'pupPreviewCsvData' })
     async pupPreviewCsvData(file:any){
         var rows = await this.service.previewData(file);
-       /* if(rows.count == 0) return {status:404,message:'No results found'}
-        return  rows*/
-        return rows
+        return {statusCode:200,data:rows,message:['OK']}
     }
 
 

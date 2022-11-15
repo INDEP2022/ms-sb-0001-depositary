@@ -6,6 +6,7 @@ import { DepositaryPaymentDetDTO } from './dto/depositary-payment-det.dto';
 import { DepositaryPaymentDetEntity } from './entity/depositary-payment-det.entity';
 import { Text } from 'src/shared/config/text'
 import { SearchDepositaryPaymentDetDTO } from './dto/filter-depositary-payment-det.dto';
+import { DepositaryAppointmentEntity } from '../depositary-appointment/entity/depositary-appointment.entity';
 
 @Injectable()
 export class DepositaryPaymentDetService {
@@ -16,57 +17,67 @@ export class DepositaryPaymentDetService {
 
 
     async createDepositaryPaymentDet(depositaryPaymentDetDTO: DepositaryPaymentDetDTO) {
-        const task = await this.entity.findOne({ where: { 
-            appointmentNumber:depositaryPaymentDetDTO.appointmentNumber,
-            paymentConceptKey:depositaryPaymentDetDTO.paymentConceptKey,
-            paymentDate:depositaryPaymentDetDTO.paymentDate} });
-        if (task) return {status:403,message:'Record already exists'}
-        return await this.entity.save(depositaryPaymentDetDTO)  ;
+        const task = await this.entity.findOne({
+            where: {
+                appointmentNumber: depositaryPaymentDetDTO.appointmentNumber,
+                paymentConceptKey: depositaryPaymentDetDTO.paymentConceptKey,
+                paymentDate: depositaryPaymentDetDTO.paymentDate
+            }
+        });
+        if (task) return { statusCode: 400, message: 'Este registro ya existe!' }
+        try {
+            return await this.entity.save(depositaryPaymentDetDTO);
+            
+        } catch (error) {
+            return { statusCode: 400, message: error.message }
+        }
     }
 
-    async getAllDepositaryPaymentDet({ inicio=1, pageSize=10, text }: PaginationDto) {
+    async getAllDepositaryPaymentDet({ inicio = 1, pageSize = 10, text }: PaginationDto) {
         const queryBuilder = await this.entity.createQueryBuilder('table');
-        //queryBuilder.innerJoinAndMapOne('table.appointmentNumber','nombramientos_depositaria','fk','table.no_nombramiento=fk.no_nombramiento')
+        queryBuilder.innerJoinAndMapOne('table.appointmentNumber', DepositaryAppointmentEntity, 'fk', 'table.no_nombramiento=fk.no_nombramiento')
 
         if (text) {
             queryBuilder.where(`${Text.formatTextDb('table.observacion')} LIKE '%${Text.formatText(text)}%'`)
         }
         queryBuilder.take(pageSize || 10)
-        queryBuilder.orderBy("","DESC")
+        queryBuilder.orderBy("", "DESC")
         queryBuilder.skip((inicio - 1) * pageSize || 0)
         const [result, total] = await queryBuilder.getManyAndCount();
         return {    
+            statusCode:200,
+            message:["OK"],
             data: result,
             count: total
         }
     }
 
-    async filterDepositaryPaymentDet(data:SearchDepositaryPaymentDetDTO,{ inicio=1, pageSize=10 }:PaginationDto){
+    async filterDepositaryPaymentDet(data: SearchDepositaryPaymentDetDTO, { inicio = 1, pageSize = 10 }: PaginationDto) {
         const queryBuilder = this.entity.createQueryBuilder();
-        
-        queryBuilder.where(`no_nombramiento = coalesce(:nomb,no_nombramiento)`,{nomb:data.appointmentNumber|| null})
-        queryBuilder.andWhere(`fec_pago = coalesce(:date,fec_pago)`,{date:data.paymentDate || null})
-        queryBuilder.andWhere(`cve_concepto_pago = coalesce(:payment,cve_concepto_pago)`,{payment:data.paymentConceptKey || null})
-       
+
+        queryBuilder.where(`no_nombramiento = coalesce(:nomb,no_nombramiento)`, { nomb: data.appointmentNumber || null })
+        queryBuilder.andWhere(`fec_pago = coalesce(:date,fec_pago)`, { date: data.paymentDate || null })
+        queryBuilder.andWhere(`cve_concepto_pago = coalesce(:payment,cve_concepto_pago)`, { payment: data.paymentConceptKey || null })
+
         queryBuilder.take(pageSize || 10)
         queryBuilder.skip((inicio - 1) * pageSize || 0)
         const [result, total] = await queryBuilder.getManyAndCount();
-        return {    
+        return {
             data: result,
             count: total
         }
     }
 
-    parseNotNull(value:string){
-        return value?value.length> 0?`${value}`:null:null
+    parseNotNull(value: string) {
+        return value ? value.length > 0 ? `${value}` : null : null
     }
 
 
-    async updateDepositaryPaymentDet(depositaryPaymentDetDTO:DepositaryPaymentDetDTO) {
-        const keys =  { 
-            appointmentNumber:depositaryPaymentDetDTO.appointmentNumber,
-            paymentConceptKey:depositaryPaymentDetDTO.paymentConceptKey,
-           paymentDate:depositaryPaymentDetDTO.paymentDate
+    async updateDepositaryPaymentDet(depositaryPaymentDetDTO: DepositaryPaymentDetDTO) {
+        const keys = {
+            appointmentNumber: depositaryPaymentDetDTO.appointmentNumber,
+            paymentConceptKey: depositaryPaymentDetDTO.paymentConceptKey,
+            paymentDate: depositaryPaymentDetDTO.paymentDate
         }
         return await this.entity.update(keys, depositaryPaymentDetDTO);
     }

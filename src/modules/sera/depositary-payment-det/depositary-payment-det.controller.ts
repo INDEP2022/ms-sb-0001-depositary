@@ -16,7 +16,7 @@ export class DepositaryPaymentDetController {
     @MessagePattern({ cmd: 'getAllDepositaryPaymentDet' })
     async getAllDepositaryPaymentDet( pagination:PaginationDto){
         var rows = await this.service.getAllDepositaryPaymentDet(pagination);
-        if(rows.count == 0) return {status:404,message:'No results found'}
+        if(rows.count == 0) return {statusCode:404,message:'No results found'}
         return  rows
     }
 
@@ -26,23 +26,21 @@ export class DepositaryPaymentDetController {
     
     async filterDepositaryPaymentDet( data:any){
         var rows = await this.service.filterDepositaryPaymentDet(data.filter,data.pagination)
-        if(rows.count == 0) return {status:404,message:'No results found'}
+        if(rows.count == 0) return {statusCode:404,message:'No results found'}
         return rows
     }
     @MessagePattern({ cmd: 'createDepositaryPaymentDet' })
     async createDepositaryPaymentDet( depositaryPaymentDetDTO:DepositaryPaymentDetDTO){
-
         const task = await this.service.createDepositaryPaymentDet(depositaryPaymentDetDTO);
-        return task?task:
-        { statusCode: 503, message: "This depositaryPaymentDet was not created", error: "Create Error"};
+        return task['statusCode']?task:{data:task, statusCode:200}
     }
 
     @MessagePattern({ cmd: 'updateDepositaryPaymentDet' })
     async updateDepositaryPaymentDet( depositaryPaymentDetDTO:DepositaryPaymentDetDTO){
 
         const {affected} = await this.service.updateDepositaryPaymentDet(depositaryPaymentDetDTO);
-        return affected==1?{status:200,message:'Update succesfull'}:
-        { statusCode: 403, message: "This depositaryPaymentDet was not update", error: "Update Error"};
+        return affected==1?{statusCode:200,message:['Actualizado correctamente!']}:
+        { statusCode: 400, message: ["No se realizarón cambios!"]};
     }
 
 }

@@ -38,7 +38,7 @@ export class ExpExel2Service {
         await xlsx.write(workBook, { bookType: 'xlsx', type: 'binary' })
         await xlsx.writeFile(workBook, name)
         var f = fs.readFileSync(name, { encoding: 'base64' })
-        return { data: query, file: { name: `PUP_LANZA_REPORTE.xlsx`, base64: query.length > 0 ? f : '' } }
+        return {  file: { name: `excel2.xlsx`, base64: query.length > 0 ? f : '' }, preview:query }
         
 
     }

@@ -35,16 +35,21 @@ export class LoadClientService {
             AND			PXD.NO_NOMBRAMIENTO = ${appointmentNumber};
             `)
             return {
-                'executionDate':new Date(),
-                'process':'S',
-                'sentSirsae':'N',
-                'modifyStatus':'N'
+                
+                statusCode:200,
+                message:["OK"],
+                data:{
+                    'executionDate':new Date(),
+                    'process':'S',
+                    'sentSirsae':'N',
+                    'modifyStatus':'N'
+                }
+               
             }
         }else{
             return{
-                statusCode:'404',
-                message:'No result found',
-                error:'Not found'
+                statusCode:400,
+                message:["No se encontraron resultados!"],
             }
         }
 

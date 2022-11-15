@@ -13,7 +13,7 @@ export class ValidBlackListController {
     
     @MessagePattern({ cmd: 'validBlackList' })
     async validBlackList( eventId:number){
-        var rows = await this.service.validBlackList(eventId);
-        return  rows
+        var row = await this.service.validBlackList(eventId);
+        return {statusCode:200, data:row, message:["OK"]}
     }
 }

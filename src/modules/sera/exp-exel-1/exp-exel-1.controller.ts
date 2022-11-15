@@ -12,7 +12,7 @@ export class ExpExel1Controller {
     
     @MessagePattern({ cmd: 'getFileExcel1' })
     async getFileExcel1( data:any){
-        var rows = await this.service.createFileExcel(data.propertyNumber,data.paymentId);
-        return  rows
+        var res = await this.service.createFileExcel(data.propertyNumber,data.paymentId);
+        return  {statusCode:200,data:res,message:["OK"]}
     }
 }

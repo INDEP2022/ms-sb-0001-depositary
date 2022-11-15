@@ -18,13 +18,23 @@ export class DepositaryAppointmentService {
 
     async createDepositaryAppointment(depositaryAppointmentDTO: DepositaryAppointmentDTO) {
         const task = await this.entity.findOne({ where: {appointmentNumber:depositaryAppointmentDTO.appointmentNumber} });
-        if (task) return {status:403,message:'Record already exists'}
-        return await this.entity.save(depositaryAppointmentDTO)  ;
+        if (task) return { statusCode: 400, message: ['Este registro ya existe!'] }
+        
+        try {
+            const row = await this.entity.save(depositaryAppointmentDTO);
+            return {    
+                statusCode:200,
+                message:["OK"],
+                data: row,
+            }
+            
+        } catch (error) {
+            return { statusCode: 500, message: [error.message] }
+        }
     }
 
     async getAllDepositaryAppointment({ inicio=1, pageSize=10, text }: PaginationDto) {
-        const queryBuilder = await this.entity.createQueryBuilder('table');
-        //queryBuilder.innerJoinAndMapOne('table.appointmentNumber','nombramientos_depositaria','fk','table.no_nombramiento=fk.no_nombramiento')
+        const queryBuilder = this.entity.createQueryBuilder('table');
         queryBuilder.innerJoinAndMapOne('table.personNumber',PersonEntity,'p','table.no_persona = p.no_persona')
        // queryBuilder.innerJoinAndMapOne('table.seraRepresentative',SegUsersEntity,'u','table.representante_sera = u.usuario')
 
@@ -36,6 +46,8 @@ export class DepositaryAppointmentService {
         queryBuilder.skip((inicio - 1) * pageSize || 0)
         const [result, total] = await queryBuilder.getManyAndCount();
         return {    
+            statusCode:200,
+            message:["OK"],
             data: result,
             count: total
         }

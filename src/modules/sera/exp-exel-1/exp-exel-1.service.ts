@@ -64,7 +64,7 @@ export class ExpExel1Service {
         await xlsx.writeFile(workBook, name)
         
         var f = fs.readFileSync(name, { encoding: 'base64' })
-        return { file: { name: `EXCEL1.xlsx`, base64: f } }
+        return { file: { name: `EXCEL1.xlsx`, base64: f} }
     }
 
 }
