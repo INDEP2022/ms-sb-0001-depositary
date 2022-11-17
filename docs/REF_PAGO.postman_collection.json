@@ -1,0 +1,118 @@
+{
+	"info": {
+		"_postman_id": "9db2c2ba-ef2a-4653-9581-6444e00eeb7f",
+		"name": "REF_PAGO",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "calculateCondensedDate",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"year\": 2000,\r\n  \"month\": 12,\r\n  \"day\": 31\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3001/api/v1/ref-pago/calculateCondensedDate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"v1",
+						"ref-pago",
+						"calculateCondensedDate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "calculateImpCondensed",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": null
+			},
+			"response": []
+		},
+		{
+			"name": "checkedDigitCalculation",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3001/api/v1/ref-pago/checkedDigitCalculation/123asd",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"v1",
+						"ref-pago",
+						"checkedDigitCalculation",
+						"123asd"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "checkedDigitCalculationHSBC",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3001/api/v1/ref-pago/checkedDigitCalculationHSBC/123",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"v1",
+						"ref-pago",
+						"checkedDigitCalculationHSBC",
+						"123"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "checkedDigitCalculationScotia",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3001/api/v1/ref-pago/checkedDigitCalculationScotia/123",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"v1",
+						"ref-pago",
+						"checkedDigitCalculationScotia",
+						"123"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

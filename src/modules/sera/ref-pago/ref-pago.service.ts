@@ -281,6 +281,9 @@ export class RefPagoService {
                 L_COUNT = 0;
               
             }
+            console.log('====================================');
+            console.log(ref);
+            console.log('====================================');
         
             REFERENCIAS[J]= ref
  
@@ -290,7 +293,7 @@ export class RefPagoService {
 
         REFERENCIAS.forEach(item => {
             Y++
-            L_SUMAREF += REFERENCIAS[Y][`D${Y}`]
+            L_SUMAREF += REFERENCIAS[Y][`D${Y}`]||0
         });
         return {
             statusCode: 200,
