@@ -15,6 +15,7 @@ import { ValidBlackListModule } from './modules/sera/valid-black-list/valid-blac
 import { ExpExel1Module } from './modules/sera/exp-exel-1/exp-exel-1.module';
 import { ExpExel2Module } from './modules/sera/exp-exel-2/exp-exel-2.module';
 import { LoadClientModule } from './modules/sera/load-client/load-client.module';
+import { RefPagoModule } from './modules/sera/ref-pago/ref-pago.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { LoadClientModule } from './modules/sera/load-client/load-client.module'
     ExpExel1Module,
     ExpExel2Module,
     LoadClientModule,
+    RefPagoModule,
    
   ],
   controllers: [],
