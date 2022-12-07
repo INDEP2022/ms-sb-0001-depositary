@@ -17,6 +17,7 @@ import { ExpExel2Module } from './modules/sera/exp-exel-2/exp-exel-2.module';
 import { LoadClientModule } from './modules/sera/load-client/load-client.module';
 import { RefPagoModule } from './modules/sera/ref-pago/ref-pago.module';
 import { ValidatePaymentsRefModule } from './modules/sera/validate-payments-ref/validate-payments-ref.module';
+import { ComerPaymentModule } from './modules/sera/comer-payment/comer-payment.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { ValidatePaymentsRefModule } from './modules/sera/validate-payments-ref/
     LoadClientModule,
     RefPagoModule,
     ValidatePaymentsRefModule,
+    ComerPaymentModule,
    
   ],
   controllers: [],
