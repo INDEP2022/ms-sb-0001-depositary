@@ -18,6 +18,7 @@ import { LoadClientModule } from './modules/sera/load-client/load-client.module'
 import { RefPagoModule } from './modules/sera/ref-pago/ref-pago.module';
 import { ValidatePaymentsRefModule } from './modules/sera/validate-payments-ref/validate-payments-ref.module';
 import { ComerPaymentModule } from './modules/sera/comer-payment/comer-payment.module';
+import { RealStateDispersalModule } from './modules/sera/real-state-dispersal/real-state-dispersal.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { ComerPaymentModule } from './modules/sera/comer-payment/comer-payment.m
     RefPagoModule,
     ValidatePaymentsRefModule,
     ComerPaymentModule,
+    RealStateDispersalModule,
    
   ],
   controllers: [],
