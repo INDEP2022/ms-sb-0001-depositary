@@ -107,7 +107,7 @@ export class RealStateDispersalService {
     G_MANDDEV                   :string
     G_USAUTORIZA                :string
     constructor(@InjectRepository(ComerLotsEntity) private entity: Repository<ComerLotsEntity>) {
-        this.adjustPaymentRefGens(16,191921)
+        this.adjustPaymentRefGens(16,19921)
     }
 
     //PROCEDIMIENTO PARA AJUSTAR LOS IMPORTES DE PAGOS VS IMPORTES DE LOTES EN DETALLE MANDATOS
@@ -201,13 +201,12 @@ export class RealStateDispersalService {
                 pi_RESUL = `No se pudieron obtener los importes por Lote ${lot}`
             }
            
-        console.log(query);
         
          return pi_RESUL
     }
 
     // -- PROCEDIMIENTO PARA AJUSTAR LOS IMPORTES DE PAGOS VS IMPORTES DE LOTES --
-    async adjustPaymentRefGens(event:number,lot:number){
+    async adjustPaymentRefGens(event:number,lot:number) : Promise<string>{
         var ni_ID_EVENTO        = event
         var ni_ID_LOTE          = lot
         var ni_IVA_LOTE         :number
@@ -227,8 +226,97 @@ export class RealStateDispersalService {
         ni_IVA_LOTE = query[0].param1|| 0
         ni_MONTO_APP_IVA = query[0].param2 || 0
         ni_MONTO_NOAPP_IVA = query[0].param3 ||0
-        console.log(ni_MONTO_NOAPP_IVA);
+
+
+        var obj = this.tab_VALPENALOTE.filter(x=>x.ID_LOTE==ni_ID_LOTE)[0];
+
+        if((ni_IVA_LOTE + ni_MONTO_APP_IVA + ni_MONTO_NOAPP_IVA) == (obj.IVA_LOTE + obj.MONTO_APP_IVA +obj.MONTO_NOAPP_IVA)){
+            if(ni_IVA_LOTE != obj.IVA_LOTE || ni_MONTO_APP_IVA != obj.MONTO_APP_IVA || ni_MONTO_NOAPP_IVA != obj.MONTO_NOAPP_IVA){
+                const query1:any[] = await this.entity.query(` SELECT MAX(ID_PAGOREFGENS) as mx
+                    FROM sera.COMER_PAGOSREFGENS PRG
+                    WHERE ID_EVENTO = ${ni_ID_EVENTO} 
+                        AND ID_LOTE = ${ni_ID_LOTE} 
+                        AND EXISTS (SELECT 1 FROM sera.COMER_PAGOREF PR WHERE PR.ID_PAGO = PRG.ID_PAGO AND IDORDENINGRESO IS NULL)
+                        AND TIPO = 'N'`)
+                 console.log('====================================');
+                 console.log(query1);
+                 console.log('====================================');
+            }
+        }
+
+        return pi_RESUL
         
     }    
+
+    //-- CORRIGE LOS DECIMALES Y SIMPLIFICA LOS REGISTRO POR MANDATO DE LO QUE SE ENVIARA A SIRSAE --
+
+
+    async utitDecGroup(amount:number){
+        var PRIMERA_VEZ =1
+        var H           =0
+        var UD_NUEVO    =1
+
+        this.DETAUX = []
+
+        this.DETOI.forEach(element => {
+            if(PRIMERA_VEZ ==1 ){
+                H = H + 1;
+                var detauxObj:ACUMDETALLESOI = {}
+                detauxObj.IDENTIFICADOR =   element.IDENTIFICADOR;
+                detauxObj.MANDATO    = element.MANDATO;
+                detauxObj.INGRESO    = element.INGRESO;
+                detauxObj.IMPORTE    = element.IMPORTE;
+                detauxObj.IVA        = element.IVA;
+                detauxObj.REFERENCIA    = element.REFERENCIA;
+                detauxObj.INDTIPO    = element.INDTIPO;
+                detauxObj.LOTESIAB    = element.LOTESIAB;
+                detauxObj.DESCRIPCION    = element.DESCRIPCION;
+                detauxObj.EVENTO    = element.EVENTO;
+                detauxObj.LOTE        = element.LOTE;
+                detauxObj.VTALOTE    = element.VTALOTE;
+                detauxObj.MONTORET    = element.MONTORET;
+                detauxObj.MONSIVA    = element.MONSIVA;
+                detauxObj.TIPO_PAGO  = element.TIPO_PAGO;
+                this.DETAUX.push(detauxObj)
+
+            }else{
+                UD_NUEVO = 1;
+
+                for (let index = 0; index < this.DETAUX.length; index++) {
+                    if(this.DETAUX[index].MANDATO == element.MANDATO){
+                        this.DETAUX[index].IMPORTE = this.DETAUX[index].IMPORTE + element.IMPORTE;
+                        this.DETAUX[index].IVA = this.DETAUX[index].IVA + element.IVA;
+                        this.DETAUX[index].MONSIVA = this.DETAUX[index].MONSIVA + element.MONSIVA;
+                        this.DETAUX[index].MONTORET = this.DETAUX[index].MONTORET + element.MONTORET;
+                      
+                        UD_NUEVO = 0;
+                        break
+                    }
+                    
+                }
+
+                if( UD_NUEVO ==1){
+                   
+                    this.DETAUX[H].IDENTIFICADOR     = element.IDENTIFICADOR;
+                    this.DETAUX[H].MANDATO           = element.MANDATO;
+                    this.DETAUX[H].INGRESO           = element.INGRESO;
+                    this.DETAUX[H].IMPORTE           = element.IMPORTE;
+                    this.DETAUX[H].IVA               = element.IVA;
+                    this.DETAUX[H].REFERENCIA        = element.REFERENCIA;
+                    this.DETAUX[H].INDTIPO           = element.INDTIPO;
+                    this.DETAUX[H].LOTESIAB          = element.LOTESIAB;
+                    this.DETAUX[H].DESCRIPCION       = element.DESCRIPCION;
+                    this.DETAUX[H].EVENTO            = element.EVENTO;
+                    this.DETAUX[H].LOTE              = element.LOTE;
+                    this.DETAUX[H].VTALOTE           = element.VTALOTE;
+                    this.DETAUX[H].MONTORET          = element.MONTORET;
+                    this.DETAUX[H].MONSIVA           = element.MONSIVA;
+                    this.DETAUX[H].TIPO_PAGO         = element.TIPO_PAGO;
+                    H = H + 1;
+                }
+            }
+            PRIMERA_VEZ = PRIMERA_VEZ + 1;
+        });
+    }
 
 }
