@@ -1890,33 +1890,35 @@ export class RealStateDispersalService {
                 this.tab_VALPENALOTE[element.id_lote] = {MONTO_PENA:0};
                 if (this.n_PORPENAIP > 0) {
                     if (element.precio_final > this.n_PFMPENAIP) {
-                        this.tab_VALPENALOTE[element.id_lote].MONTO_PENA = this.tab_VALPENALOTE[element.id_lote].MONTO_PENA + Math.round(element.PRECIO_FINAL * this.n_PORPENAIP); //TODO: metodos
+                        this.tab_VALPENALOTE[element.id_lote] = {MONTO_PENA:this.tab_VALPENALOTE[element.id_lote].MONTO_PENA + Math.round(element.PRECIO_FINAL * this.n_PORPENAIP)}; //TODO: metodos
                     } else {
-                        this.tab_VALPENALOTE[element.id_lote].MONTO_PENA = this.tab_VALPENALOTE[element.id_lote].MONTO_PENA + element.PRECIO_GARANTIA;
+                        this.tab_VALPENALOTE[element.id_lote] ={MONTO_PENA: this.tab_VALPENALOTE[element.id_lote].MONTO_PENA + element.PRECIO_GARANTIA};
                     }
                     this.l_BANP = false;
                 }
                 if (this.n_MONPENAIP > 0) {
-                    this.tab_VALPENALOTE[element.id_lote].MONTO_PENA = this.tab_VALPENALOTE[element.id_lote].MONTO_PENA + this.n_MONPENAIP;
+                    this.tab_VALPENALOTE[element.id_lote] = {MONTO_PENA:this.tab_VALPENALOTE[element.id_lote].MONTO_PENA + this.n_MONPENAIP};
                     this.l_BANP = false;
                 }
                 if (this.n_ADPGPENAIP > 0) {
-                    this.tab_VALPENALOTE[element.id_lote].MONTO_PENA = this.tab_VALPENALOTE[element.id_lote].MONTO_PENA + element.PRECIO_GARANTIA;
+                    this.tab_VALPENALOTE[element.id_lote] = {MONTO_PENA:this.tab_VALPENALOTE[element.id_lote].MONTO_PENA + element.PRECIO_GARANTIA};
                     this.l_BANP = false;
                 }
                 if (this.l_BANP) {
-                    this.tab_VALPENALOTE[element.id_lote].MONTO_PENA = element.PRECIO_GARANTIA;
+                    this.tab_VALPENALOTE[element.id_lote] = {MONTO_PENA:element.PRECIO_GARANTIA};
                 }
-
-                this.tab_VALPENALOTE[element.id_lote].MONTO_GCUMPLE = Math.round(element.PRECIO_FINAL * this.n_PORGARCUMSE);
-                this.tab_VALPENALOTE[element.id_lote].MONTO_POR_APLIC = 0;
-                this.tab_VALPENALOTE[element.id_lote].IND_PENA = element.IND_CANC_USUARIO;
-                this.tab_VALPENALOTE[element.id_lote].IND_CANC_SIN_PENA = element.IND_CANC_SIN_PENA;
-                this.tab_VALPENALOTE[element.id_lote].PORC_APP_IVA = element.PORC_APP_IVA;
-                this.tab_VALPENALOTE[element.id_lote].IVA_LOTE = element.IVA_LOTE;
-                this.tab_VALPENALOTE[element.id_lote].MONTO_APP_IVA = element.MONTO_APP_IVA;
-                this.tab_VALPENALOTE[element.id_lote].MONTO_NOAPP_IVA = element.MONTO_NOAPP_IVA;
-                this.tab_VALPENALOTE[element.id_lote].SALDO_ANTICIPO = 0;
+                var ob1:any = {
+                    MONTO_GCUMPLE : Math.round(element.PRECIO_FINAL * this.n_PORGARCUMSE),
+                    MONTO_POR_APLIC :0,
+                    IND_PENA : element.IND_CANC_USUARIO,
+                    IND_CANC_SIN_PENA : element.IND_CANC_SIN_PENA,
+                    PORC_APP_IVA : element.PORC_APP_IVA,
+                    IVA_LOTE : element.IVA_LOTE,
+                    MONTO_APP_IVA : element.MONTO_APP_IVA,
+                    MONTO_NOAPP_IVA : element.MONTO_NOAPP_IVA,
+                    SALDO_ANTICIPO : 0
+                }
+                this.tab_VALPENALOTE[element.id_lote] = ob1
 
             });
 
@@ -2038,15 +2040,15 @@ export class RealStateDispersalService {
 
 
         const queryPagoRef: any[] = await this.entity.query(`SELECT COALESCE(MAX(ID_PAGOREFGENS),0)
-                    AS this.n_ID_PAGOREFGENS
+                    AS n_ID_PAGOREFGENS
                     FROM sera.COMER_PAGOSREFGENS
                     WHERE ID_EVENTO = ${this.n_ID_EVENTO}`);
         this.n_ID_PAGOREFGENS = queryPagoRef[0].n_ID_PAGOREFGENS;
         if (!this.n_ID_PAGOREFGENS) {
             this.n_ID_PAGOREFGENS = 0;
         }
-        const queryIva: any[] = await this.entity.query(`SELECT 1 + TO_NUMBER(VALOR)/100 AS n_PORC_IVA, 
-                TO_NUMBER(VALOR) AS n_TASAIVA 
+        const queryIva: any[] = await this.entity.query(`SELECT 1 + (VALOR::numeric/100) AS n_PORC_IVA, 
+                VALOR AS n_TASAIVA 
                 FROM sera.COMER_PARAMETROSMOD PAR
                 WHERE PAR.PARAMETRO = 'IVA'
                 AND PAR.DIRECCION = 'C'`);
@@ -2130,7 +2132,10 @@ export class RealStateDispersalService {
             });
 
         }
+        if(this.c_ERROR.length > 0){
+            return {statusCode:400,message:[this.c_ERROR]};
 
+        }
         var p_RESUL = 'Correcto.';
         return {statusCode:200,message:[p_RESUL]};
 

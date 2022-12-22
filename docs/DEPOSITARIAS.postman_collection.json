@@ -1,0 +1,833 @@
+{
+	"info": {
+		"_postman_id": "05e7c5d6-0888-4f91-a71e-2ad0771667e3",
+		"name": "DEPOSITARIAS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "DET_REPO_DEPOSITARIA",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/depositary-det-repo?inicio=1&pageSize=11",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"depositary-det-repo"
+							],
+							"query": [
+								{
+									"key": "inicio",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "11"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"appointmentNumber\": \"2958\",\r\n    \"repoDate\": \"2008-03-04T04:00:00.000Z\",\r\n    \"reportKey\": \"2\",\r\n    \"report\": \"Informe Mensual\",\r\n    \"registerNumber\": \"23266271\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/depositary-det-repo",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"depositary-det-repo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "filter",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"appointmentNumber\": \"295\",\r\n    \"repoDate\": \"2008-03-04T04:00:00.000Z\",\r\n    \"reportKey\": \"2\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/depositary-det-repo/filter",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"depositary-det-repo",
+								"filter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"appointmentNumber\": 295,\r\n    \"repoDate\": \"2008-03-04T04:00:00.000Z\",\r\n    \"reportKey\":2,\r\n    \"report\": \"Informe Mensual\",\r\n    \"registerNumber\": 23266271\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/depositary-det-repo",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"depositary-det-repo"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DEPOSITARIA_PAYMENT_DET",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/depositary-payment-det?inicio=1&pageSize=11\n&text=á",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"depositary-payment-det"
+							],
+							"query": [
+								{
+									"key": "inicio",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "11\n"
+								},
+								{
+									"key": "text",
+									"value": "á"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "save",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"appointmentNumber\": \"3789\",\r\n    \"paymentDate\": \"2009-05-14T04:00:00.000Z\",\r\n    \"paymentConceptKey\": \"1\",\r\n    \"amount\": \"4600.00\",\r\n    \"observation\": null,\r\n    \"registerNumber\": \"30364158\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/depositary-payment-det",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"depositary-payment-det"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"appointmentNumber\": \"3789\",\r\n    \"paymentDate\": \"2009-05-14T04:00:00.000Z\",\r\n    \"paymentConceptKey\": \"1\",\r\n    \"amount\": \"4600.00\",\r\n    \"observation\": null,\r\n    \"registerNumber\": \"30364158\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/depositary-payment-det",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"depositary-payment-det"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "filter",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"appointmentNumber\": \"3789\",\r\n    \"paymentDate\": \"2009-05-14T04:00:00.000Z\",\r\n    \"paymentConceptKey\": \"1\",\r\n    \"amount\": \"4600.00\",\r\n    \"observation\": null,\r\n    \"registerNumber\": \"30364158\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/depositary-payment-det/filter",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"depositary-payment-det",
+								"filter"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PREVIEW_CSV",
+			"item": [
+				{
+					"name": "preview",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/C:/Users/JP/Documents/data.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/pup-preview-csv-data",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"pup-preview-csv-data"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "LEGAL_DESTINATION_FOR_PROPERTY",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/legal-destination-for-property?inicio=1&pageSize=11",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"legal-destination-for-property"
+							],
+							"query": [
+								{
+									"key": "inicio",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "11"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"propertyNumber\": 1,\r\n    \"requestDate\": \"2022-10-27T18:04:36.926Z\",\r\n    \"requestType\": \"T\",\r\n    \"applicantSera\": \"string\",\r\n    \"attentionDelegationNumber\": 0,\r\n    \"attentionSubDelegationNumber\": 0,\r\n    \"attentionDepartmentNumber\": 0,\r\n    \"attentionDate\": \"2022-10-27T18:04:36.926Z\",\r\n    \"attentionUser\": \"string\",\r\n    \"registerNumber\": 0,\r\n    \"proposedCandidate\": \"string\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/legal-destination-for-property",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"legal-destination-for-property"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"propertyNumber\": 1,\r\n    \"requestDate\": \"2022-10-27T18:04:36.926Z\",\r\n    \"requestType\": \"T\",\r\n    \"applicantSera\": \"123\",\r\n    \"attentionDelegationNumber\": 0,\r\n    \"attentionSubDelegationNumber\": 0,\r\n    \"attentionDepartmentNumber\": 0,\r\n    \"attentionDate\": \"2022-10-27T18:04:36.926Z\",\r\n    \"attentionUser\": \"string\",\r\n    \"registerNumber\": 0,\r\n    \"proposedCandidate\": \"string\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/legal-destination-for-property",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"legal-destination-for-property"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "filter",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"propertyNumber\": 1,\r\n    \"requestDate\": \"2022-10-27T18:04:36.926Z\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/legal-destination-for-property/filter",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"legal-destination-for-property",
+								"filter"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "REF_PAGO",
+			"item": [
+				{
+					"name": "condensedDate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"year\": 2012,\r\n  \"month\": 10,\r\n  \"day\": 32\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/ref-pago/calculateCondensedDate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"ref-pago",
+								"calculateCondensedDate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "impCondensed",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/ref-pago/calculateImpCondensed/123",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"ref-pago",
+								"calculateImpCondensed",
+								"123"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "checckedDigitCalculation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/ref-pago/checkedDigitCalculation/123",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"ref-pago",
+								"checkedDigitCalculation",
+								"123"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "checkedDigitCalculationHBSC",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/ref-pago/checkedDigitCalculationHSBC/123123",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"ref-pago",
+								"checkedDigitCalculationHSBC",
+								"123123"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "cchecckedDigitCalculationScotia",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/ref-pago/checkedDigitCalculationScotia/2313231",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"ref-pago",
+								"checkedDigitCalculationScotia",
+								"2313231"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "validatePaymentRef",
+			"item": [
+				{
+					"name": "validate",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/validate-payments-ref/get-parameters-values",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"validate-payments-ref",
+								"get-parameters-values"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "presencialBM",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"eventId\":1,\r\n    \"date\":\"02-02-2010\",\r\n    \"lot\":2,\r\n    \"phase\":1,\r\n    \"address\":\"I\",\r\n    \"clientId\":1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/validate-payments-ref/presencial-bm",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"validate-payments-ref",
+								"presencial-bm"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CURRENT_REAL_STATE_SALE",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"event\": 1,\r\n  \"phase\": 1,\r\n  \"date\": \"2022-12-22T17:11:49.213Z\",\r\n  \"lot\": 2,\r\n  \"address\": \"M\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/validate-payments-ref/current-real-state-sale",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"validate-payments-ref",
+								"current-real-state-sale"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "realstatesale",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"event\": 1,\r\n  \"phase\": 1,\r\n  \"date\": \"2022-12-22T17:14:18.778Z\",\r\n  \"lot\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/validate-payments-ref/real-state-sale",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"validate-payments-ref",
+								"real-state-sale"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update_lit",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"event\": 16,\r\n  \"phase\": 1,\r\n  \"publicLot\": 12,\r\n  \"lot\": 12\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/validate-payments-ref/current-update-lot",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"validate-payments-ref",
+								"current-update-lot"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "EXPEXCEL1",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3001/api/v1/exp-exel-1/property/10127/payment/609",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"v1",
+						"exp-exel-1",
+						"property",
+						"10127",
+						"payment",
+						"609"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "EXPEXCEL2",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3001/api/v1/exp-exel-2/event/6",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"v1",
+						"exp-exel-2",
+						"event",
+						"6"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "VALID_BLACK_LIST",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3001/api/v1/valid-black-list/appointment/100",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"v1",
+						"valid-black-list",
+						"appointment",
+						"100"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "LOAD_CLIENT",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3001/api/v1/load-client/appointment/1310",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"v1",
+						"load-client",
+						"appointment",
+						"1310"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "dispersal",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"event\": 14,\r\n  \"cveEjec\": 2,\r\n  \"relLots\": \"\",\r\n  \"indEnd\": 1,\r\n  \"client\": 211,\r\n  \"indRepro\": 3\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3001/api/v1/real-state-dispersal",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"v1",
+						"real-state-dispersal"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

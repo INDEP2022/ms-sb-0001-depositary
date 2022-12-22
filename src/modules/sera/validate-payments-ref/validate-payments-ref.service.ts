@@ -4811,7 +4811,7 @@ export class ValidatePaymentsRefService {
                         });
                 } else {
                         const LOTBR: any[] = await this.entity.query(`
-                                SELECT DISTINCT CLOT.ID_LOTE
+                                SELECT DISTINCT CLOT.ID_LOTE as id_lote 
                                 FROM sera.COMER_LOTES CLOT, sera.COMER_PAGOREF CPAG
                                 WHERE CLOT.ID_EVENTO = ${params.event}
                                 AND CLOT.ID_LOTE = CPAG.ID_LOTE
@@ -4835,7 +4835,7 @@ export class ValidatePaymentsRefService {
                                                 AND CCXE.ID_CLIENTE = CLOT.ID_CLIENTE
                                                 AND CCXE.PROCESAR = 'S'
                                         )`)
-                        V_ID_LOTE = LOTBR[0].id_lote
+                        V_ID_LOTE = LOTBR[0]?.id_lote || 0
                         LOTBR.forEach(async element => {
                                 await this.entity.query(` UPDATE sera.COMER_PAGOREF 
                                         SET VALIDO_SISTEMA = 'A'
@@ -5659,7 +5659,7 @@ export class ValidatePaymentsRefService {
                                 }
                         } else {
                                 if (params.phase == 1) {
-                                        var C_GARS: any[] = await this.entity.query(` SELECT ID_ESTATUSVTA, PRECIO_FINAL, SUM(MONTO) MONTO 
+                                        var C_GARS: any[] = await this.entity.query(` SELECT ID_ESTATUSVTA, PRECIO_FINAL, SUM(MONTO) as  MONTO 
                                         FROM (
                                         SELECT CLOT.ID_ESTATUSVTA,
                                                CLOT.PRECIO_FINAL,
@@ -5675,8 +5675,8 @@ export class ValidatePaymentsRefService {
                                            AND CE.ID_EVENTO = ${params.event}
                                            AND CLOT.ID_LOTE = ${params.lot}
                                            AND CLOT.ID_ESTATUSVTA NOT IN ('PAG')
-                                           AND CP.VALIDO_SISTEMA = 'S')
-                                         GROUP BY ID_ESTATUSVTA, PRECIO_FINAL`)
+                                           AND CP.VALIDO_SISTEMA = 'S') as C
+                                         GROUP BY C.ID_ESTATUSVTA, C.PRECIO_FINAL`)
                                         C_GARS.forEach(async element => {
                                                 V_ID_ESTATUSVTA = element.id_estatusvta
                                                 V_PRECIO_FINAL = element.precio_final
