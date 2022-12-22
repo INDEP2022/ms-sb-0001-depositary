@@ -32,7 +32,7 @@ class ConfigService {
 
       entities: ['dist/**/*.entity.js'], 
       synchronize: false, 
-      ssl: false,
+      ssl: true,
       extra: {
         ssl: {
           rejectUnauthorized: false,

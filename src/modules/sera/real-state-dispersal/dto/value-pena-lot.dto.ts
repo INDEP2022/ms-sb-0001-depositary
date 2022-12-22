@@ -15,4 +15,14 @@ export class ValuePenaLot{
     IVA_LOTE          ?:number
     MONTO_APP_IVA     ?:number
     MONTO_NOAPP_IVA   ?:number
+    PRECIO_GARANTIA ?: number
+}
+
+export class ValPenaLot{
+    ID_LOTE         ?: number
+    PRECIO_FINAL    ?: number
+    PRECIO_GARANTIA ?: number
+    SALDO_ANTICIPO  ?: number
+    MONTO_PENA      ?: number
+    MONTO_POR_APLIC ?: number
 }
