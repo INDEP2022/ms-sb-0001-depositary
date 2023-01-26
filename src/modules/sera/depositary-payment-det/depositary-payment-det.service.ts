@@ -33,16 +33,16 @@ export class DepositaryPaymentDetService {
         }
     }
 
-    async getAllDepositaryPaymentDet({ inicio = 1, pageSize = 10, text }: PaginationDto) {
+    async getAllDepositaryPaymentDet({ page = 1, limit = 10, text }: PaginationDto) {
         const queryBuilder = await this.entity.createQueryBuilder('table');
         queryBuilder.innerJoinAndMapOne('table.appointmentNumber', DepositaryAppointmentEntity, 'fk', 'table.no_nombramiento=fk.no_nombramiento')
 
         if (text) {
             queryBuilder.where(`${Text.formatTextDb('table.observacion')} LIKE '%${Text.formatText(text)}%'`)
         }
-        queryBuilder.take(pageSize || 10)
+        queryBuilder.take(limit || 10)
         queryBuilder.orderBy("", "DESC")
-        queryBuilder.skip((inicio - 1) * pageSize || 0)
+        queryBuilder.skip((page - 1) * limit || 0)
         const [result, total] = await queryBuilder.getManyAndCount();
         return {    
             statusCode:200,
@@ -52,15 +52,15 @@ export class DepositaryPaymentDetService {
         }
     }
 
-    async filterDepositaryPaymentDet(data: SearchDepositaryPaymentDetDTO, { inicio = 1, pageSize = 10 }: PaginationDto) {
+    async filterDepositaryPaymentDet(data: SearchDepositaryPaymentDetDTO, { page = 1, limit = 10 }: PaginationDto) {
         const queryBuilder = this.entity.createQueryBuilder();
 
         queryBuilder.where(`no_nombramiento = coalesce(:nomb,no_nombramiento)`, { nomb: data.appointmentNumber || null })
         queryBuilder.andWhere(`fec_pago = coalesce(:date,fec_pago)`, { date: data.paymentDate || null })
         queryBuilder.andWhere(`cve_concepto_pago = coalesce(:payment,cve_concepto_pago)`, { payment: data.paymentConceptKey || null })
 
-        queryBuilder.take(pageSize || 10)
-        queryBuilder.skip((inicio - 1) * pageSize || 0)
+        queryBuilder.take(limit || 10)
+        queryBuilder.skip((page - 1) * limit || 0)
         const [result, total] = await queryBuilder.getManyAndCount();
         return {
             data: result,

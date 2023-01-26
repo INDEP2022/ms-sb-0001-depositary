@@ -14,7 +14,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:3001/api/v1/depositary-det-repo?inicio=1&pageSize=11",
+							"raw": "http://localhost:3001/api/v1/depositary-det-repo?page=1&limit=11",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -27,11 +27,11 @@
 							],
 							"query": [
 								{
-									"key": "inicio",
+									"key": "page",
 									"value": "1"
 								},
 								{
-									"key": "pageSize",
+									"key": "limit",
 									"value": "11"
 								}
 							]
@@ -141,7 +141,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:3001/api/v1/depositary-payment-det?inicio=1&pageSize=11\n&text=á",
+							"raw": "http://localhost:3001/api/v1/depositary-payment-det?page=1&limit=11\n&text=á",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -154,11 +154,11 @@
 							],
 							"query": [
 								{
-									"key": "inicio",
+									"key": "page",
 									"value": "1"
 								},
 								{
-									"key": "pageSize",
+									"key": "limit",
 									"value": "11\n"
 								},
 								{
@@ -308,7 +308,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:3001/api/v1/legal-destination-for-property?inicio=1&pageSize=11",
+							"raw": "http://localhost:3001/api/v1/legal-destination-for-property?page=1&limit=11",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -321,11 +321,11 @@
 							],
 							"query": [
 								{
-									"key": "inicio",
+									"key": "page",
 									"value": "1"
 								},
 								{
-									"key": "pageSize",
+									"key": "limit",
 									"value": "11"
 								}
 							]

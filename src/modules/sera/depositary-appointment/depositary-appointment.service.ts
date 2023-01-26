@@ -33,7 +33,7 @@ export class DepositaryAppointmentService {
         }
     }
 
-    async getAllDepositaryAppointment({ inicio=1, pageSize=10, text }: PaginationDto) {
+    async getAllDepositaryAppointment({ page=1, limit=10, text }: PaginationDto) {
         const queryBuilder = this.entity.createQueryBuilder('table');
         queryBuilder.innerJoinAndMapOne('table.personNumber',PersonEntity,'p','table.no_persona = p.no_persona')
        // queryBuilder.innerJoinAndMapOne('table.seraRepresentative',SegUsersEntity,'u','table.representante_sera = u.usuario')
@@ -41,9 +41,9 @@ export class DepositaryAppointmentService {
         if (text) {
             queryBuilder.where(`${Text.formatTextDb('table.cve_contrato')} LIKE '%${Text.formatText(text)}%'`)
         }
-        queryBuilder.take(pageSize || 10)
+        queryBuilder.take(limit || 10)
         queryBuilder.orderBy("","DESC")
-        queryBuilder.skip((inicio - 1) * pageSize || 0)
+        queryBuilder.skip((page - 1) * limit || 0)
         const [result, total] = await queryBuilder.getManyAndCount();
         return {    
             statusCode:200,

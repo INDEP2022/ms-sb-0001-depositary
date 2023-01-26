@@ -4,12 +4,12 @@ export class PaginationDto {
     @IsNumber()
     @IsPositive()
     @IsOptional()
-    inicio: number;
+    page: number;
 
     @IsNumber()
     @IsPositive()
     @IsOptional()
-    pageSize: number;
+    limit: number;
 
     @IsOptional()
     text?:string

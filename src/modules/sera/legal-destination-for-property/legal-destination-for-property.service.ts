@@ -38,16 +38,16 @@ export class LegalDestinationForPropertyService {
         }
     }
 
-    async getAllLegalDestinationForProperty({ inicio = 1, pageSize = 10, text }: PaginationDto) {
+    async getAllLegalDestinationForProperty({ page = 1, limit = 10, text }: PaginationDto) {
         const queryBuilder = await this.entity.createQueryBuilder('table');
         //queryBuilder.innerJoinAndMapOne('table.appointmentNumber','nombramientos_depositaria','fk','table.no_nombramiento=fk.no_nombramiento')
 
         if (text) {
             queryBuilder.where(`${Text.formatTextDb('table.candidato_propuesto')} LIKE '%${Text.formatText(text)}%'`)
         }
-        queryBuilder.take(pageSize || 10)
+        queryBuilder.take(limit || 10)
         queryBuilder.orderBy("fec_solicitud", "DESC")
-        queryBuilder.skip((inicio - 1) * pageSize || 0)
+        queryBuilder.skip((page - 1) * limit || 0)
         const [result, total] = await queryBuilder.getManyAndCount();
         return {    
             statusCode:200,
@@ -70,8 +70,8 @@ export class LegalDestinationForPropertyService {
 
 
 
-        // queryBuilder.take(pageSize || 10)
-        // queryBuilder.skip((inicio - 1) * pageSize || 0)
+        // queryBuilder.take(limit || 10)
+        // queryBuilder.skip((page - 1) * limit || 0)
         const [result, total] = await queryBuilder.getManyAndCount();
         return {    
             statusCode:200,
