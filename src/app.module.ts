@@ -2,10 +2,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WinstonModule } from 'nest-winston';
 
-import { PrometheusModule } from 'nestjs-prometheus';
 import * as path from 'path';
 import * as winston from 'winston';
-import { configService } from './shared/config/config.service';
 import { DepositaryPaymentDetModule } from './modules/sera/depositary-payment-det/depositary-payment-det.module';
 import { DepositaryDetRepoModule } from './modules/sera/depositary-det-repo/depositary-det-repo.module';
 import { DepositaryAppointmentModule } from './modules/sera/depositary-appointment/depositary-appointment.module';
@@ -19,6 +17,7 @@ import { RefPagoModule } from './modules/sera/ref-pago/ref-pago.module';
 import { ValidatePaymentsRefModule } from './modules/sera/validate-payments-ref/validate-payments-ref.module';
 import { ComerPaymentModule } from './modules/sera/comer-payment/comer-payment.module';
 import { RealStateDispersalModule } from './modules/sera/real-state-dispersal/real-state-dispersal.module';
+import { configService } from 'sigebi-lib-common';
 
 @Module({
   imports: [
@@ -53,7 +52,6 @@ import { RealStateDispersalModule } from './modules/sera/real-state-dispersal/re
         new winston.transports.Console({ level: 'debug' }),
       ],
     }),
-    PrometheusModule.register(),
     DepositaryPaymentDetModule,
     DepositaryDetRepoModule,
     DepositaryAppointmentModule,

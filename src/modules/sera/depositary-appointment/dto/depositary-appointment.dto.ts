@@ -84,5 +84,6 @@ export class DepositaryAppointmentDTO {
 
     withKitchenware :string
 
+    goodNumber: number;
 
 }

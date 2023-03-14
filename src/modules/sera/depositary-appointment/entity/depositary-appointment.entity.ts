@@ -132,11 +132,14 @@ export class DepositaryAppointmentEntity {
     @Column("character varying", { name: 'referencia' , length: 30 })
     reference :string
 
-    @Column("integer", { name: "folio_regreso"})
+    @Column("integer", { name: "iva"})
     iva : number;
 
     @Column("character varying", { name: 'con_menaje' , length: 1 })
     withKitchenware :string
+
+    @Column("numeric", { name: "no_bien"})
+    goodNumber: number;
 
 
 }
