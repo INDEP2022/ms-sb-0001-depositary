@@ -8,7 +8,7 @@ async function bootstrap() {
     transport: Transport.TCP,
     options:{
       host:'127.0.0.1',
-      port:3005
+      port: process.env.MS_PORT_MICRO ? Number(process.env.MS_PORT_MICRO) : 3000
     }
   });
   app.listen();
