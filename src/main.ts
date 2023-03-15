@@ -4,14 +4,15 @@ import { AppModule } from './app.module';
 
 
 async function bootstrap() {
-  
+
   const ms_port_micro = process.env.MS_PORT_MICRO ? Number(process.env.MS_PORT_MICRO) : 3001;
   const app_port = process.env.HOST_PORT ? Number(process.env.HOST_PORT) : 3000;
+  const host_name = process.env.HOST_NAME ? process.env.HOST_NAME : '127.0.0.1';
 
-  const app = await NestFactory.createMicroservice(AppModule,{
+  const app = await NestFactory.createMicroservice(AppModule, {
     transport: Transport.TCP,
-    options:{
-      host:'127.0.0.1',
+    options: {
+      host: host_name,
       port: ms_port_micro
     }
   });
