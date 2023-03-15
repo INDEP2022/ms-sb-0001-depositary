@@ -18,9 +18,13 @@ import { ValidatePaymentsRefModule } from './modules/sera/validate-payments-ref/
 import { ComerPaymentModule } from './modules/sera/comer-payment/comer-payment.module';
 import { RealStateDispersalModule } from './modules/sera/real-state-dispersal/real-state-dispersal.module';
 import { configService } from 'sigebi-lib-common';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot(
       configService.getTypeOrmConfig(),),
     WinstonModule.forRoot({
