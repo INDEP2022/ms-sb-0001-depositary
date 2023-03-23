@@ -4626,7 +4626,7 @@ export class ValidatePaymentsRefService {
                                 AND CPAG.CONCILIADO IS NULL
                                 AND CPAG.IDORDENINGRESO IS NULL
                                 AND EXISTS (SELECT 1
-                                                FROM sera.COMER_BIENESXLOTE CBXL, sera.BIENES BNS
+                                                FROM sera.COMER_BIENESXLOTE CBXL, sera.bien BNS
                                                 WHERE CBXL.ID_LOTE = CLOT.ID_LOTE
                                                 AND CBXL.NO_BIEN = BNS.NO_BIEN
                                                 AND BNS.ESTATUS IN ('VEN','VPP','VPT','CXR','VTR') )
@@ -4659,7 +4659,7 @@ export class ValidatePaymentsRefService {
                                         AND IDORDENINGRESO IS  NULL`)
                                 await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
                                         SELECT NO_BIEN, ESTATUS, current_date+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
-                                        FROM sera.BIENES BIE
+                                        FROM sera.bien BIE
                                         WHERE ESTATUS IN ('VPP','VPT')
                                         AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
                                                         WHERE BXL.NO_BIEN = BIE.NO_BIEN
@@ -4678,12 +4678,12 @@ export class ValidatePaymentsRefService {
                                                 )`)
 
 
-                                await this.entity.query(`UPDATE sera.BIENES 
+                                await this.entity.query(`UPDATE sera.bien 
                                         SET ESTATUS = 'VEN'
                                         WHERE ESTATUS IN ('VPP','VPT')
                                         AND EXISTS (SELECT 1
                                                         FROM sera.COMER_BIENESXLOTE BXL
-                                                        WHERE BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                        WHERE BXL.NO_BIEN = sera.bien.NO_BIEN
                                                         AND BXL.ID_LOTE = ${V_ID_LOTE}
                                                         AND EXISTS (SELECT 1
                                                                         FROM sera.COMER_LOTES LOT
@@ -4701,7 +4701,7 @@ export class ValidatePaymentsRefService {
                                 `)
                                 await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
                                         SELECT NO_BIEN, ESTATUS, SYSDATE+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
-                                        FROM sera.BIENES BIE
+                                        FROM sera.bien BIE
                                         WHERE ESTATUS IN ('VTR')
                                         AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
                                                         WHERE BXL.NO_BIEN = BIE.NO_BIEN
@@ -4719,12 +4719,12 @@ export class ValidatePaymentsRefService {
                                                 );
                                 `)
 
-                                await this.entity.query(`UPDATE sera.BIENES
+                                await this.entity.query(`UPDATE sera.bien
                                         SET ESTATUS = 'CXR'
                                         WHERE ESTATUS IN ('VTR')
                                         AND EXISTS (SELECT 1
                                                 FROM sera.COMER_BIENESXLOTE BXL
-                                                WHERE BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                WHERE BXL.NO_BIEN = sera.bien.NO_BIEN
                                                 AND BXL.ID_LOTE = ${V_ID_LOTE}
                                                 AND EXISTS (SELECT 1
                                                                 FROM sera.COMER_LOTES LOT
@@ -4821,7 +4821,7 @@ export class ValidatePaymentsRefService {
                                 AND CPAG.CONCILIADO IS NULL
                                 AND CPAG.IDORDENINGRESO IS NULL
                                 AND EXISTS (SELECT 1
-                                                FROM sera.COMER_BIENESXLOTE CBXL, sera.BIENES BNS
+                                                FROM sera.COMER_BIENESXLOTE CBXL, sera.bien BNS
                                                 WHERE CBXL.ID_LOTE = CLOT.ID_LOTE
                                                 AND CBXL.NO_BIEN = BNS.NO_BIEN
                                                 
@@ -4854,7 +4854,7 @@ export class ValidatePaymentsRefService {
                                         AND IDORDENINGRESO IS  NULL`)
                                 await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
                                         SELECT NO_BIEN, ESTATUS, current_date+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
-                                        FROM sera.BIENES BIE
+                                        FROM sera.bien BIE
                                         WHERE ESTATUS IN ('VPP','VPT')
                                         AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
                                                         WHERE BXL.NO_BIEN = BIE.NO_BIEN
@@ -4872,12 +4872,12 @@ export class ValidatePaymentsRefService {
                                                                 )
                                                 )`)
 
-                                await this.entity.query(`UPDATE sera.BIENES 
+                                await this.entity.query(`UPDATE sera.bien 
                                         SET ESTATUS = 'VEN'
                                         WHERE ESTATUS IN ('VPP','VPT')
                                         AND EXISTS (SELECT 1
                                                         FROM sera.COMER_BIENESXLOTE BXL
-                                                        WHERE BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                        WHERE BXL.NO_BIEN = sera.bien.NO_BIEN
                                                         AND BXL.ID_LOTE = ${V_ID_LOTE}
                                                         AND EXISTS (SELECT 1
                                                                         FROM sera.COMER_LOTES LOT
@@ -4896,7 +4896,7 @@ export class ValidatePaymentsRefService {
 
                                 await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
                                         SELECT NO_BIEN, ESTATUS, SYSDATE+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
-                                        FROM sera.BIENES BIE
+                                        FROM sera.bien BIE
                                         WHERE ESTATUS IN ('VTR')
                                         AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
                                                         WHERE BXL.NO_BIEN = BIE.NO_BIEN
@@ -4914,12 +4914,12 @@ export class ValidatePaymentsRefService {
                                                 );
                                 `)
 
-                                await this.entity.query(`UPDATE sera.BIENES
+                                await this.entity.query(`UPDATE sera.bien
                                         SET ESTATUS = 'CXR'
                                         WHERE ESTATUS IN ('VTR')
                                         AND EXISTS (SELECT 1
                                                 FROM sera.COMER_BIENESXLOTE BXL
-                                                WHERE BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                WHERE BXL.NO_BIEN = sera.bien.NO_BIEN
                                                 AND BXL.ID_LOTE = ${V_ID_LOTE}
                                                 AND EXISTS (SELECT 1
                                                                 FROM sera.COMER_LOTES LOT
@@ -5048,7 +5048,7 @@ export class ValidatePaymentsRefService {
                                 AND CPAG.CONCILIADO IS NULL
                                 AND CPAG.IDORDENINGRESO IS NULL
                                 AND EXISTS (SELECT 1
-                                                FROM sera.COMER_BIENESXLOTE CBXL, sera.BIENES BNS
+                                                FROM sera.COMER_BIENESXLOTE CBXL, sera.bien BNS
                                                 WHERE CBXL.ID_LOTE = CLOT.ID_LOTE
                                                 AND CBXL.NO_BIEN = BNS.NO_BIEN
                                                 AND BNS.ESTATUS IN ('VEN','VPP','VPT','CXR','VTR') )
@@ -5081,7 +5081,7 @@ export class ValidatePaymentsRefService {
                                         AND IDORDENINGRESO IS  NULL`)
                         await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
                                         SELECT NO_BIEN, ESTATUS, current_date+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
-                                        FROM sera.BIENES BIE
+                                        FROM sera.bien BIE
                                         WHERE ESTATUS IN ('VPP','VPT')
                                         AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
                                                         WHERE BXL.NO_BIEN = BIE.NO_BIEN
@@ -5100,12 +5100,12 @@ export class ValidatePaymentsRefService {
                                                 )`)
 
 
-                        await this.entity.query(`UPDATE sera.BIENES 
+                        await this.entity.query(`UPDATE sera.bien 
                                         SET ESTATUS = 'VEN'
                                         WHERE ESTATUS IN ('VPP','VPT')
                                         AND EXISTS (SELECT 1
                                                         FROM sera.COMER_BIENESXLOTE BXL
-                                                        WHERE BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                        WHERE BXL.NO_BIEN = sera.bien.NO_BIEN
                                                         AND BXL.ID_LOTE = ${V_ID_LOTE}
                                                         AND EXISTS (SELECT 1
                                                                         FROM sera.COMER_LOTES LOT
@@ -5123,7 +5123,7 @@ export class ValidatePaymentsRefService {
                                 `)
                         await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
                                         SELECT NO_BIEN, ESTATUS, SYSDATE+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
-                                        FROM sera.BIENES BIE
+                                        FROM sera.bien BIE
                                         WHERE ESTATUS IN ('VTR')
                                         AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
                                                         WHERE BXL.NO_BIEN = BIE.NO_BIEN
@@ -5141,12 +5141,12 @@ export class ValidatePaymentsRefService {
                                                 );
                                 `)
 
-                        await this.entity.query(`UPDATE sera.BIENES
+                        await this.entity.query(`UPDATE sera.bien
                                         SET ESTATUS = 'CXR'
                                         WHERE ESTATUS IN ('VTR')
                                         AND EXISTS (SELECT 1
                                                 FROM sera.COMER_BIENESXLOTE BXL
-                                                WHERE BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                WHERE BXL.NO_BIEN = sera.bien.NO_BIEN
                                                 AND BXL.ID_LOTE = ${V_ID_LOTE}
                                                 AND EXISTS (SELECT 1
                                                                 FROM sera.COMER_LOTES LOT
@@ -5303,12 +5303,12 @@ export class ValidatePaymentsRefService {
                                                                            AND GEN.TIPO = 'N'
                                                                            AND GEN.ID_LOTE = sera.COMER_LOTES .ID_LOTE
                                                                        )`)
-                                                        await this.entity.query(` UPDATE    sera.BIENES
+                                                        await this.entity.query(` UPDATE    sera.bien
                                                         SET    ESTATUS = ( SELECT ESP.ESTATUS_FINAL
                                                                                  FROM sera.ESTATUS_X_PANTALLA ESP
                                                                                 WHERE CVE_PANTALLA = 'VTAMUETOT'
-                                                                                  AND ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                                  AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                                  AND ESP.ESTATUS = sera.bien.ESTATUS
+                                                                                  AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                                              )
                                                       WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                          FROM sera.COMER_BIENESXLOTE BXL
@@ -5326,7 +5326,7 @@ export class ValidatePaymentsRefService {
                                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                                      )
                                                                                      )
-                                                                          AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                                          AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                                       )
                                                         `)
                                                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE
@@ -5375,12 +5375,12 @@ export class ValidatePaymentsRefService {
                                                                            AND GEN.TIPO = 'N'
                                                                            AND GEN.ID_LOTE = sera.COMER_LOTES.ID_LOTE
                                                                        )`)
-                                                        await this.entity.query(` UPDATE    sera.BIENES
+                                                        await this.entity.query(` UPDATE    sera.bien
                                                                 SET    ESTATUS = ( SELECT ESP.ESTATUS_FINAL
                                                                                         FROM sera.ESTATUS_X_PANTALLA ESP
                                                                                         WHERE CVE_PANTALLA = 'VTAMUEPAR'
-                                                                                                AND ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                                                AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                                                AND ESP.ESTATUS = sera.bien.ESTATUS
+                                                                                                AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                                                         )
                                                                 WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                                 FROM sera.COMER_BIENESXLOTE BXL
@@ -5398,7 +5398,7 @@ export class ValidatePaymentsRefService {
                                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                                         )
                                                                                         )
-                                                                                AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                                                AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                                         )
                                                         `)
 
@@ -5464,12 +5464,12 @@ export class ValidatePaymentsRefService {
                                                                                 AND GEN.TIPO = 'N'
                                                                                 AND GEN.ID_LOTE = sera.COMER_LOTES .ID_LOTE
                                                                         )`)
-                                                        await this.entity.query(` UPDATE    sera.BIENES
+                                                        await this.entity.query(` UPDATE    sera.bien
                                                         SET    ESTATUS = ( SELECT ESP.ESTATUS_FINAL
                                                                                         FROM sera.ESTATUS_X_PANTALLA ESP
                                                                                 WHERE CVE_PANTALLA = 'VTAMUETOT'
-                                                                                        AND ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                                        AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                                        AND ESP.ESTATUS = sera.bien.ESTATUS
+                                                                                        AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                                                 )
                                                         WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                                 FROM sera.COMER_BIENESXLOTE BXL
@@ -5487,7 +5487,7 @@ export class ValidatePaymentsRefService {
                                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                                         )
                                                                                         )
-                                                                                AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                                                AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                                         )
                                                         `)
                                                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE
@@ -5553,12 +5553,12 @@ export class ValidatePaymentsRefService {
                                                                                 AND GEN.TIPO = 'N'
                                                                                 AND GEN.ID_LOTE = sera.COMER_LOTES .ID_LOTE
                                                                         )`)
-                                                        await this.entity.query(` UPDATE    sera.BIENES
+                                                        await this.entity.query(` UPDATE    sera.bien
                                                         SET    ESTATUS = ( SELECT ESP.ESTATUS_FINAL
                                                                                         FROM sera.ESTATUS_X_PANTALLA ESP
                                                                                 WHERE CVE_PANTALLA = 'VTAMUETOT'
-                                                                                        AND ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                                        AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                                        AND ESP.ESTATUS = sera.bien.ESTATUS
+                                                                                        AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                                                 )
                                                         WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                                 FROM sera.COMER_BIENESXLOTE BXL
@@ -5576,7 +5576,7 @@ export class ValidatePaymentsRefService {
                                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                                         )
                                                                                         )
-                                                                                AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                                                AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                                         )
                                                         `)
                                                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE
@@ -5607,7 +5607,7 @@ export class ValidatePaymentsRefService {
 
                                                 } else if (V_MONTO < V_PRECIO_FINAL && (V_ID_ESTATUSVTA == "CAN")) {
 
-                                                        await this.entity.query(` UPDATE    sera.BIENES 
+                                                        await this.entity.query(` UPDATE    sera.bien 
                                                         SET    ESTATUS = 'CPV'
                                                         WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                          FROM sera.COMER_BIENESXLOTE BXL
@@ -5625,7 +5625,7 @@ export class ValidatePaymentsRefService {
                                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                                      )
                                                                                      )
-                                                                          AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                                          AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                                       )
                                                         `)
                                                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE
@@ -5702,12 +5702,12 @@ export class ValidatePaymentsRefService {
                                                                            AND GEN.TIPO = 'N'
                                                                            AND GEN.ID_LOTE = sera.COMER_LOTES .ID_LOTE
                                                                        )`)
-                                                        await this.entity.query(` UPDATE    sera.BIENES
+                                                        await this.entity.query(` UPDATE    sera.bien
                                                         SET    ESTATUS = ( SELECT ESP.ESTATUS_FINAL
                                                                                  FROM sera.ESTATUS_X_PANTALLA ESP
                                                                                 WHERE CVE_PANTALLA = 'VTAMUETOT'
-                                                                                  AND ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                                  AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                                  AND ESP.ESTATUS = sera.bien.ESTATUS
+                                                                                  AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                                              )
                                                       WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                          FROM sera.COMER_BIENESXLOTE BXL
@@ -5725,7 +5725,7 @@ export class ValidatePaymentsRefService {
                                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                                      )
                                                                                      )
-                                                                          AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                                          AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                                       )
                                                         `)
                                                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE
@@ -5774,12 +5774,12 @@ export class ValidatePaymentsRefService {
                                                                            AND GEN.TIPO = 'N'
                                                                            AND GEN.ID_LOTE = sera.COMER_LOTES.ID_LOTE
                                                                        )`)
-                                                        await this.entity.query(` UPDATE    sera.BIENES
+                                                        await this.entity.query(` UPDATE    sera.bien
                                                                 SET    ESTATUS = ( SELECT ESP.ESTATUS_FINAL
                                                                                         FROM sera.ESTATUS_X_PANTALLA ESP
                                                                                         WHERE CVE_PANTALLA = 'VTAMUEPAR'
-                                                                                                AND ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                                                AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                                                AND ESP.ESTATUS = sera.bien.ESTATUS
+                                                                                                AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                                                         )
                                                                 WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                                 FROM sera.COMER_BIENESXLOTE BXL
@@ -5797,7 +5797,7 @@ export class ValidatePaymentsRefService {
                                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                                         )
                                                                                         )
-                                                                                AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                                                AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                                         )
                                                         `)
 
@@ -5884,12 +5884,12 @@ export class ValidatePaymentsRefService {
                                                                                 AND GEN.TIPO = 'N'
                                                                                 AND GEN.ID_LOTE = sera.COMER_LOTES .ID_LOTE
                                                                         )`)
-                                                        await this.entity.query(` UPDATE    sera.BIENES
+                                                        await this.entity.query(` UPDATE    sera.bien
                                                         SET    ESTATUS = ( SELECT ESP.ESTATUS_FINAL
                                                                                         FROM sera.ESTATUS_X_PANTALLA ESP
                                                                                 WHERE CVE_PANTALLA = 'VTAMUEPAR'
-                                                                                        AND ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                                        AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                                        AND ESP.ESTATUS = sera.bien.ESTATUS
+                                                                                        AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                                                 )
                                                         WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                                 FROM sera.COMER_BIENESXLOTE BXL
@@ -5907,7 +5907,7 @@ export class ValidatePaymentsRefService {
                                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                                         )
                                                                                         )
-                                                                                AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                                                AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                                         )
                                                         `)
                                                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE
@@ -5994,12 +5994,12 @@ export class ValidatePaymentsRefService {
                                                                                 AND GEN.TIPO = 'N'
                                                                                 AND GEN.ID_LOTE = sera.COMER_LOTES .ID_LOTE
                                                                         )`)
-                                                        await this.entity.query(` UPDATE    sera.BIENES
+                                                        await this.entity.query(` UPDATE    sera.bien
                                                         SET    ESTATUS = ( SELECT ESP.ESTATUS_FINAL
                                                                                         FROM sera.ESTATUS_X_PANTALLA ESP
                                                                                 WHERE CVE_PANTALLA = 'VTAMUEPAR'
-                                                                                        AND ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                                        AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                                        AND ESP.ESTATUS = sera.bien.ESTATUS
+                                                                                        AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                                                 )
                                                         WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                                 FROM sera.COMER_BIENESXLOTE BXL
@@ -6017,7 +6017,7 @@ export class ValidatePaymentsRefService {
                                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                                         )
                                                                                         )
-                                                                                AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                                                AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                                         )
                                                         `)
                                                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE
@@ -6104,12 +6104,12 @@ export class ValidatePaymentsRefService {
                                                                                 AND GEN.TIPO = 'N'
                                                                                 AND GEN.ID_LOTE = sera.COMER_LOTES .ID_LOTE
                                                                         )`)
-                                                        await this.entity.query(` UPDATE    sera.BIENES
+                                                        await this.entity.query(` UPDATE    sera.bien
                                                         SET    ESTATUS = ( SELECT ESP.ESTATUS_FINAL
                                                                                         FROM sera.ESTATUS_X_PANTALLA ESP
                                                                                 WHERE CVE_PANTALLA = 'VTAMUEPAR'
-                                                                                        AND ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                                        AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                                        AND ESP.ESTATUS = sera.bien.ESTATUS
+                                                                                        AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                                                 )
                                                         WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                                 FROM sera.COMER_BIENESXLOTE BXL
@@ -6127,7 +6127,7 @@ export class ValidatePaymentsRefService {
                                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                                         )
                                                                                         )
-                                                                                AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                                                AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                                         )
                                                         `)
                                                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE
@@ -6214,12 +6214,12 @@ export class ValidatePaymentsRefService {
                                                                                 AND GEN.TIPO = 'N'
                                                                                 AND GEN.ID_LOTE = sera.COMER_LOTES .ID_LOTE
                                                                         )`)
-                                                        await this.entity.query(` UPDATE    sera.BIENES
+                                                        await this.entity.query(` UPDATE    sera.bien
                                                         SET    ESTATUS = ( SELECT ESP.ESTATUS_FINAL
                                                                                         FROM sera.ESTATUS_X_PANTALLA ESP
                                                                                 WHERE CVE_PANTALLA = 'VTAMUEPAR'
-                                                                                        AND ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                                        AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                                        AND ESP.ESTATUS = sera.bien.ESTATUS
+                                                                                        AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                                                 )
                                                         WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                                 FROM sera.COMER_BIENESXLOTE BXL
@@ -6237,7 +6237,7 @@ export class ValidatePaymentsRefService {
                                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                                         )
                                                                                         )
-                                                                                AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                                                AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                                         )
                                                         `)
                                                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE
@@ -6268,7 +6268,7 @@ export class ValidatePaymentsRefService {
 
                                                 } else if (V_MONTO < V_PRECIO_FINAL && (V_ID_ESTATUSVTA == "CAN")) {
 
-                                                        await this.entity.query(` UPDATE    sera.BIENES 
+                                                        await this.entity.query(` UPDATE    sera.bien 
                                                         SET    ESTATUS = 'CPV'
                                                         WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                          FROM sera.COMER_BIENESXLOTE BXL
@@ -6286,7 +6286,7 @@ export class ValidatePaymentsRefService {
                                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                                      )
                                                                                      )
-                                                                          AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                                          AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                                       )
                                                         `)
                                                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE
@@ -6376,12 +6376,12 @@ export class ValidatePaymentsRefService {
                                                         WHERE GEN.ID_EVENTO = ${params.event}
                                                         AND GEN.TIPO = 'N'
                                                         AND GEN.ID_LOTE = sera.COMER_LOTES.ID_LOTE )`)
-                                        await this.entity.query(`UPDATE    sera.BIENES  
+                                        await this.entity.query(`UPDATE    sera.bien  
                                                         SET    ESTATUS = ( SELECT ESP.ESTATUS_FINAL
                                                                 FROM sera.ESTATUS_X_PANTALLA ESP
                                                                 WHERE CVE_PANTALLA = 'VTAINMUTOT'
-                                                                AND ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                AND ESP.ESTATUS = sera.bien.ESTATUS
+                                                                AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                         )
                                                         WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                 FROM  sera.COMER_BIENESXLOTE BXL
@@ -6399,7 +6399,7 @@ export class ValidatePaymentsRefService {
                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                 )
                                                                 )
-                                                        AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                        AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                 )`)
                                         await this.entity.query(`  UPDATE     sera.COMER_BIENESXLOTE 
                                                 SET    ID_EVENTO_COMER   = ${params.event},
@@ -6447,12 +6447,12 @@ export class ValidatePaymentsRefService {
                                                 WHERE GEN.ID_EVENTO = ${params.event}
                                                 AND GEN.TIPO = 'N'
                                                 AND GEN.ID_LOTE = sera.COMER_LOTES.ID_LOTE )`)
-                                        await this.entity.query(`UPDATE    sera.BIENES  
+                                        await this.entity.query(`UPDATE    sera.bien  
                                                 SET    ESTATUS = ( SELECT ESP.ESTATUS_FINAL
                                                         FROM sera.ESTATUS_X_PANTALLA ESP
                                                         WHERE CVE_PANTALLA = 'VTAINMUGARA'
-                                                        AND ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                        AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                        AND ESP.ESTATUS = sera.bien.ESTATUS
+                                                        AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                 )
                                                 WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                         FROM  sera.COMER_BIENESXLOTE BXL
@@ -6470,7 +6470,7 @@ export class ValidatePaymentsRefService {
                                                                                 AND CXE.ENVIADO_SIRSAE = 'N'
                                                                         )
                                                         )
-                                                AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                         )`)
                                         await this.entity.query(`  UPDATE     sera.COMER_BIENESXLOTE 
                                         SET    ID_EVENTO_COMER   = ${params.event},
@@ -6550,12 +6550,12 @@ export class ValidatePaymentsRefService {
                                                         WHERE GEN.ID_EVENTO = ${params.event}
                                                         AND GEN.TIPO = 'N'
                                                         AND GEN.ID_LOTE = sera.COMER_LOTES.ID_LOTE )`)
-                                        await this.entity.query(`UPDATE    sera.BIENES  
+                                        await this.entity.query(`UPDATE    sera.bien  
                                                         SET    ESTATUS = ( SELECT ESP.ESTATUS_FINAL
                                                                 FROM sera.ESTATUS_X_PANTALLA ESP
                                                                 WHERE CVE_PANTALLA = 'VTAINMUGARA'
-                                                                AND ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                AND ESP.ESTATUS = sera.bien.ESTATUS
+                                                                AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                         )
                                                         WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                 FROM  sera.COMER_BIENESXLOTE BXL
@@ -6573,7 +6573,7 @@ export class ValidatePaymentsRefService {
                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                 )
                                                                 )
-                                                        AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                        AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                         
                                                 )AND    ESTATUS NOT IN ('VPP')`)
                                         await this.entity.query(`  UPDATE     sera.COMER_BIENESXLOTE 
@@ -6654,12 +6654,12 @@ export class ValidatePaymentsRefService {
                                                         WHERE GEN.ID_EVENTO = ${params.event}
                                                         AND GEN.TIPO = 'N'
                                                         AND GEN.ID_LOTE = sera.COMER_LOTES.ID_LOTE )`)
-                                        await this.entity.query(`UPDATE    sera.BIENES  
+                                        await this.entity.query(`UPDATE    sera.bien  
                                                         SET    ESTATUS = ( SELECT ESP.ESTATUS_FINAL
                                                                 FROM sera.ESTATUS_X_PANTALLA ESP
                                                                 WHERE CVE_PANTALLA = 'VTAINMUGARA'
-                                                                AND ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                AND ESP.ESTATUS = sera.bien.ESTATUS
+                                                                AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                         )
                                                         WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                 FROM  sera.COMER_BIENESXLOTE BXL
@@ -6677,7 +6677,7 @@ export class ValidatePaymentsRefService {
                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                 )
                                                                 )
-                                                        AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                        AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                         
                                                 )AND   ESTATUS NOT IN ('VPP')`)
                                         await this.entity.query(`  UPDATE     sera.COMER_BIENESXLOTE 
@@ -6760,12 +6760,12 @@ export class ValidatePaymentsRefService {
                                                         WHERE GEN.ID_EVENTO = ${params.event}
                                                         AND GEN.TIPO = 'N'
                                                         AND GEN.ID_LOTE = sera.COMER_LOTES.ID_LOTE )`)
-                                        await this.entity.query(`UPDATE    sera.BIENES  
+                                        await this.entity.query(`UPDATE    sera.bien  
                                                         SET    ESTATUS = ( SELECT ESP.ESTATUS_FINAL
                                                                 FROM sera.ESTATUS_X_PANTALLA ESP
                                                                 WHERE CVE_PANTALLA = 'VTAINMUTOT'
-                                                                AND ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                AND ESP.ESTATUS = sera.bien.ESTATUS
+                                                                AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                         )
                                                         WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                 FROM  sera.COMER_BIENESXLOTE BXL
@@ -6783,7 +6783,7 @@ export class ValidatePaymentsRefService {
                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                 )
                                                                 )
-                                                        AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                        AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                 )`)
                                         await this.entity.query(`  UPDATE     sera.COMER_BIENESXLOTE 
                                                 SET    ID_EVENTO_COMER   = ${params.event},
@@ -6857,12 +6857,12 @@ export class ValidatePaymentsRefService {
                                                         WHERE GEN.ID_EVENTO = ${params.event}
                                                         AND GEN.TIPO = 'N'
                                                         AND GEN.ID_LOTE = sera.COMER_LOTES.ID_LOTE )`)
-                                        await this.entity.query(`UPDATE    sera.BIENES  
+                                        await this.entity.query(`UPDATE    sera.bien  
                                                         SET    ESTATUS = ( SELECT ESP.ESTATUS_FINAL
                                                                 FROM sera.ESTATUS_X_PANTALLA ESP
                                                                 WHERE CVE_PANTALLA = 'VTAINMUGARA'
-                                                                AND ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                AND ESP.ESTATUS = sera.bien.ESTATUS
+                                                                AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                         )
                                                         WHERE    EXISTS (SELECT BXL.NO_BIEN
                                                                 FROM  sera.COMER_BIENESXLOTE BXL
@@ -6880,7 +6880,7 @@ export class ValidatePaymentsRefService {
                                                                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                                                                 )
                                                                 )
-                                                        AND BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                        AND BXL.NO_BIEN = sera.bien.NO_BIEN
                                                 )`)
                                         await this.entity.query(`  UPDATE     sera.COMER_BIENESXLOTE 
                                                 SET    ID_EVENTO_COMER   = ${params.event},
@@ -6950,7 +6950,7 @@ export class ValidatePaymentsRefService {
                                                `)
                                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE 
                                                 SET    ESTATUS_COMER = (    SELECT    BIE.ESTATUS
-                                                                        FROM    sera.BIENES BIE
+                                                                        FROM    sera.bien BIE
                                                                         WHERE    BIE.NO_BIEN = sera.COMER_BIENESXLOTE.NO_BIEN
                                                                         )
                                                 WHERE    EXISTS (SELECT    1
@@ -6958,23 +6958,23 @@ export class ValidatePaymentsRefService {
                                                     WHERE    LOT.ID_LOTE = ${A_LOTE}
                                                     AND        LOT.ID_LOTE = sera.COMER_BIENESXLOTE.ID_LOTE
                                                     )`)
-                                        await this.entity.query(`UPDATE    sera.BIENES 
+                                        await this.entity.query(`UPDATE    sera.bien 
                                                 SET    ESTATUS =     (SELECT    ESP.ESTATUS_FINAL
                                                                         FROM    sera.ESTATUS_X_PANTALLA ESP
                                                                         WHERE    CVE_PANTALLA = 'VTAINMUTOT'
-                                                                        AND    ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                        AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                        AND    ESP.ESTATUS = sera.bien.ESTATUS
+                                                                        AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                                         )
                                                 WHERE    EXISTS (SELECT    1
                                                                 FROM    sera.COMER_BIENESXLOTE BXL
                                                                 WHERE    BXL.ID_LOTE = ${A_LOTE}
-                                                                AND        BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                                AND        BXL.NO_BIEN = sera.bien.NO_BIEN
                                                                 )
                                                 AND        ESTATUS != (SELECT    ESP.ESTATUS_FINAL
                                                                         FROM    sera.ESTATUS_X_PANTALLA ESP
                                                                         WHERE    CVE_PANTALLA = 'VTAINMUTOT'
-                                                                        AND        ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                        AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                        AND        ESP.ESTATUS = sera.bien.ESTATUS
+                                                                        AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                             )`)
                                 } else if (A_ACUMULADO < A_FINAL && params.phase != 2 ) {
                                         await this.entity.query(` UPDATE sera.COMER_LOTES
@@ -6984,12 +6984,12 @@ export class ValidatePaymentsRefService {
                                                 WHERE ID_LOTE = ${A_LOTE}
                                        `)
                                        if(params.phase != 3 ){
-                                                await this.entity.query(`UPDATE    sera.BIENES 
-                                                        SET    sera.BIENES.ESTATUS =(    SELECT    ESP.ESTATUS_FINAL
+                                                await this.entity.query(`UPDATE    sera.bien 
+                                                        SET    sera.bien.ESTATUS =(    SELECT    ESP.ESTATUS_FINAL
                                                                     FROM    sera.ESTATUS_X_PANTALLA ESP
                                                                     WHERE    CVE_PANTALLA = 'VTAINMUGARA'
-                                                                    AND        ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                    AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                    AND        ESP.ESTATUS = sera.bien.ESTATUS
+                                                                    AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                                  )
                                                          WHERE   NO_BIEN IN (SELECT    BXL.NO_BIEN
                                                                     FROM    sera.COMER_BIENESXLOTE BXL
@@ -7035,7 +7035,7 @@ export class ValidatePaymentsRefService {
                                                `)
                                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE 
                                                 SET    ESTATUS_COMER = (    SELECT    BIE.ESTATUS
-                                                                        FROM    sera.BIENES BIE
+                                                                        FROM    sera.bien BIE
                                                                         WHERE    BIE.NO_BIEN = sera.COMER_BIENESXLOTE.NO_BIEN
                                                                         )
                                                 WHERE    EXISTS (SELECT    1
@@ -7043,23 +7043,23 @@ export class ValidatePaymentsRefService {
                                                     WHERE    LOT.ID_LOTE = ${A_LOTE}
                                                     AND        LOT.ID_LOTE = sera.COMER_BIENESXLOTE.ID_LOTE
                                                     )`)
-                                        await this.entity.query(`UPDATE    sera.BIENES 
+                                        await this.entity.query(`UPDATE    sera.bien 
                                                 SET    ESTATUS =     (SELECT    ESP.ESTATUS_FINAL
                                                                         FROM    sera.ESTATUS_X_PANTALLA ESP
                                                                         WHERE    CVE_PANTALLA = 'VTAINMUTOT'
-                                                                        AND    ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                        AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                        AND    ESP.ESTATUS = sera.bien.ESTATUS
+                                                                        AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                                         )
                                                 WHERE    EXISTS (SELECT    1
                                                                 FROM    sera.COMER_BIENESXLOTE BXL
                                                                 WHERE    BXL.ID_LOTE = ${A_LOTE}
-                                                                AND        BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                                AND        BXL.NO_BIEN = sera.bien.NO_BIEN
                                                                 )
                                                 AND        ESTATUS != (SELECT    ESP.ESTATUS_FINAL
                                                                         FROM    sera.ESTATUS_X_PANTALLA ESP
                                                                         WHERE    CVE_PANTALLA = 'VTAINMUTOT'
-                                                                        AND        ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                        AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                        AND        ESP.ESTATUS = sera.bien.ESTATUS
+                                                                        AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                             )`)
                                 } else if (A_ACUMULADO < A_FINAL && params.phase != 2 ) {
                                         await this.entity.query(` UPDATE sera.COMER_LOTES
@@ -7069,12 +7069,12 @@ export class ValidatePaymentsRefService {
                                                 WHERE ID_LOTE = ${A_LOTE}
                                        `)
                                        if(params.phase != 3 ){
-                                                await this.entity.query(`UPDATE    sera.BIENES 
-                                                        SET    sera.BIENES.ESTATUS =(    SELECT    ESP.ESTATUS_FINAL
+                                                await this.entity.query(`UPDATE    sera.bien 
+                                                        SET    sera.bien.ESTATUS =(    SELECT    ESP.ESTATUS_FINAL
                                                                     FROM    sera.ESTATUS_X_PANTALLA ESP
                                                                     WHERE    CVE_PANTALLA = 'VTAINMUGARA'
-                                                                    AND        ESP.ESTATUS = sera.BIENES.ESTATUS
-                                                                    AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                                    AND        ESP.ESTATUS = sera.bien.ESTATUS
+                                                                    AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                                  )
                                                          WHERE   NO_BIEN IN (SELECT    BXL.NO_BIEN
                                                                     FROM    sera.COMER_BIENESXLOTE BXL
@@ -7110,10 +7110,10 @@ export class ValidatePaymentsRefService {
                                         AND        GEN.TIPO = 'P'
                                         AND        GEN.ID_LOTE = sera.COMER_LOTES.ID_LOTE
                                     )`)
-                        await this.entity.query(`UPDATE    sera.BIENES 
+                        await this.entity.query(`UPDATE    sera.bien 
                         SET    ESTATUS = ( SELECT    ESTATUS_ANT
                                             FROM     sera.COMER_BIENESXLOTE BXL
-                                            WHERE    BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                            WHERE    BXL.NO_BIEN = sera.bien.NO_BIEN
                                             AND        EXISTS (SELECT    1
                                                             FROM    sera.COMER_LOTES LOT
                                                             WHERE    LOT.ID_EVENTO = ${params.event}
@@ -7144,7 +7144,7 @@ export class ValidatePaymentsRefService {
                                                                     AND     CXE.ENVIADO_SIRSAE = 'N'
                                                                     )
                                                     )
-                                    AND        sera.BIENES.NO_BIEN = BXL.NO_BIEN
+                                    AND        sera.bien.NO_BIEN = BXL.NO_BIEN
                                     AND        BXL.ID_EVENTO_REMESA IS NULL
                                     )`);
                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE 
@@ -7209,10 +7209,10 @@ export class ValidatePaymentsRefService {
                                                 )
                                 AND        ID_EVENTO_COMER IS NULL`)
 
-                        await this.entity.query(`UPDATE    sera.BIENES 
+                        await this.entity.query(`UPDATE    sera.bien 
                                 SET    ESTATUS = ( SELECT    ESTATUS_ANT
                                                     FROM     COMER_BIENESXLOTE BXL
-                                                    WHERE    BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                    WHERE    BXL.NO_BIEN = sera.bien.NO_BIEN
                                                     AND        EXISTS (SELECT    1
                                                                     FROM    sera.COMER_LOTES LOT
                                                                     WHERE    LOT.ID_EVENTO = ${params.event}
@@ -7247,7 +7247,7 @@ export class ValidatePaymentsRefService {
 
                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE 
                                 SET    ESTATUS_COMER = (    SELECT    BIE.ESTATUS
-                                                        FROM    sera.BIENES BIE
+                                                        FROM    sera.bien BIE
                                                         WHERE    BIE.NO_BIEN = sera.COMER_BIENESXLOTE.NO_BIEN
                                                         )
                                 WHERE    EXISTS (SELECT    1
@@ -7258,10 +7258,10 @@ export class ValidatePaymentsRefService {
                                         AND        LOT.ID_ESTATUSVTA = 'CAN'
                                         AND        LOT.ID_LOTE     = ${params.lot}
                                         )`)
-                        await this.entity.query(`UPDATE    sera.BIENES 
+                        await this.entity.query(`UPDATE    sera.bien 
                                 SET    ESTATUS = ( SELECT    ESTATUS_ANT
                                                 FROM     sera.COMER_BIENESXLOTE BXL
-                                                WHERE    BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                WHERE    BXL.NO_BIEN = sera.bien.NO_BIEN
                                                 AND        EXISTS (SELECT    1
                                                                 FROM    sera.COMER_LOTES LOT
                                                                 WHERE    LOT.ID_EVENTO = ${params.event}
@@ -7279,7 +7279,7 @@ export class ValidatePaymentsRefService {
                                                         AND        BXL.ID_LOTE = LOT.ID_LOTE
                                                         AND        LOT.ID_LOTE = ${params.lot}
                                                         )
-                                        AND        sera.BIENES.NO_BIEN = BXL.NO_BIEN
+                                        AND        sera.bien.NO_BIEN = BXL.NO_BIEN
                                         )`)
                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE 
                                         SET    ID_EVENTO_COMER = NULL, ID_LOTE_COMER = NULL, VENDIDO = NULL, SELECCIONADO = NULL
@@ -7311,10 +7311,10 @@ export class ValidatePaymentsRefService {
                                 AND        LOT.ID_EVENTO = ${params.event}
                                 AND        LOT.LOTE_PUBLICO != 0
                                 AND        LOT.ID_LOTE = ${params.lot}`)
-                        await this.entity.query(` UPDATE    sera.BIENES 
+                        await this.entity.query(` UPDATE    sera.bien 
                                 SET    ESTATUS = ( SELECT    ESTATUS_ANT
                                                 FROM     sera.COMER_BIENESXLOTE BXL
-                                                WHERE    BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                                WHERE    BXL.NO_BIEN = sera.bien.NO_BIEN
                                                 AND        EXISTS (SELECT    1
                                                                 FROM    sera.COMER_LOTES LOT
                                                                 WHERE    LOT.ID_EVENTO = ${params.event}
@@ -7325,7 +7325,7 @@ export class ValidatePaymentsRefService {
                                                 )
                                 WHERE    EXISTS (SELECT    1
                                         FROM    sera.COMER_BIENESXLOTE BXL
-                                        WHERE    sera.BIENES.NO_BIEN = BXL.NO_BIEN
+                                        WHERE    sera.bien.NO_BIEN = BXL.NO_BIEN
                                         AND        EXISTS (SELECT    1
                                                         FROM    sera.COMER_LOTES LOT
                                                         WHERE    LOT.ID_EVENTO = ${params.event}
@@ -7334,7 +7334,7 @@ export class ValidatePaymentsRefService {
                                                         AND        LOT.ID_LOTE = ${params.lot}
                                                         )
                                         )
-                                AND        sera.BIENES.ESTATUS NOT IN ('VEN','CXR')`)
+                                AND        sera.bien.ESTATUS NOT IN ('VEN','CXR')`)
                         await this.entity.query(` UPDATE    sera.COMER_BIENESXLOTE  
                                         SET    ID_EVENTO_COMER = NULL, ID_LOTE_COMER = NULL, VENDIDO = NULL, SELECCIONADO = NULL
                                 WHERE    EXISTS (SELECT    1
@@ -8141,10 +8141,10 @@ export class ValidatePaymentsRefService {
                                         )
                                 )
                         AND    VALIDO_SISTEMA = 'S'`);
-                await this.entity.query(`  UPDATE    sera.BIENES 
+                await this.entity.query(`  UPDATE    sera.bien 
                         SET    ESTATUS = (    SELECT    BXL1.ESTATUS_COMER
                                 FROM    sera.COMER_BIENESXLOTE BXL1
-                                WHERE    sera.BIENES.NO_BIEN = BXL1.NO_BIEN
+                                WHERE    sera.bien.NO_BIEN = BXL1.NO_BIEN
                                 AND    EXISTS (SELECT     1
                                         FROM    sera.COMER_LOTES LOT1
                                         WHERE    LOT1.ID_EVENTO = ${event}
@@ -8160,7 +8160,7 @@ export class ValidatePaymentsRefService {
                                 )
                         WHERE    EXISTS (SELECT    1
                                 FROM    sera.COMER_BIENESXLOTE BXL
-                                WHERE    BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                WHERE    BXL.NO_BIEN = sera.bien.NO_BIEN
                                 AND    EXISTS    (SELECT 1
                                         FROM    sera.COMER_LOTES LOT
                                         WHERE    LOT.ID_EVENTO = ${event}
@@ -8813,12 +8813,12 @@ export class ValidatePaymentsRefService {
                                         AND        GEN.TIPO = 'N'
                                         AND        GEN.ID_LOTE = sera.COMER_LOTES.ID_LOTE
                                         )`);
-                await this.entity.query(`UPDATE sera.BIENES  
+                await this.entity.query(`UPDATE sera.bien  
                                 SET    ESTATUS = (    SELECT    ESP.ESTATUS_FINAL
                                                 FROM    sera.ESTATUS_X_PANTALLA ESP
                                                 WHERE    CVE_PANTALLA = 'VTAMUETOT'
-                                                AND        ESP.ESTATUS = sera.BIENES.ESTATUS
-                                AND ESP.PROCESO_EXT_DOM = sera.BIENES.PROCESO_EXT_DOM
+                                                AND        ESP.ESTATUS = sera.bien.ESTATUS
+                                AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                         )
                                 WHERE    EXISTS (SELECT    BXL.NO_BIEN
                                         FROM    sera.COMER_BIENESXLOTE BXL
@@ -8835,7 +8835,7 @@ export class ValidatePaymentsRefService {
                                                                         AND     CXE.ENVIADO_SIRSAE = 'N'
                                                                         )
                                                         )
-                                        AND        BXL.NO_BIEN = sera.BIENES.NO_BIEN
+                                        AND        BXL.NO_BIEN = sera.bien.NO_BIEN
                                         )`);
                 await this.entity.query(`UPDATE    sera.COMER_LOTES
                                 SET    VALIDO_SISTEMA = 'S', ID_ESTATUSVTA = 'CAN'
@@ -8855,10 +8855,10 @@ export class ValidatePaymentsRefService {
                                         AND        GEN.TIPO = 'P'
                                         AND        GEN.ID_LOTE = sera.COMER_LOTES.ID_LOTE
                             )`)
-                await this.entity.query(`UPDATE    sera.BIENES 
+                await this.entity.query(`UPDATE    sera.bien 
                         SET    ESTATUS = ( SELECT    ESTATUS_ANT
                          FROM     sera.COMER_BIENESXLOTE BXL2
-                            WHERE    BXL2.NO_BIEN = sera.BIENES .NO_BIEN
+                            WHERE    BXL2.NO_BIEN = sera.bien .NO_BIEN
                             AND    EXISTS (SELECT    1
                                     FROM    sera.COMER_LOTES LOT
                                     WHERE    LOT.ID_EVENTO = ${event}
@@ -8889,7 +8889,7 @@ export class ValidatePaymentsRefService {
                                                 AND     CXE.ENVIADO_SIRSAE = 'N'
                                                 )
                                         )
-                                AND    sera.BIENES .NO_BIEN = BXL.NO_BIEN
+                                AND    sera.bien .NO_BIEN = BXL.NO_BIEN
                                 AND    BXL.ID_EVENTO_REMESA IS NULL
                      )`)
                 await this.entity.query(` UPDATE    sera.COMER_BIENESXLOTE  
@@ -8991,10 +8991,10 @@ export class ValidatePaymentsRefService {
                                 AND    BXL2.ID_EVENTO_REMESA IS NOT NULL
                                 )
                         AND    ID_EVENTO_COMER IS NULL`)
-                await this.entity.query(`UPDATE    sera.BIENES 
+                await this.entity.query(`UPDATE    sera.bien 
                 SET    ESTATUS = ( SELECT    ESTATUS_ANT
                          FROM     sera.COMER_BIENESXLOTE BXL2
-                            WHERE    BXL2.NO_BIEN = sera.BIENES.NO_BIEN
+                            WHERE    BXL2.NO_BIEN = sera.bien.NO_BIEN
                             AND    EXISTS (SELECT    1
                                     FROM    sera.COMER_LOTES LOT2
                                     WHERE    LOT2.ID_EVENTO = ${event}
@@ -9025,14 +9025,14 @@ export class ValidatePaymentsRefService {
                                         AND     CXE.ENVIADO_SIRSAE = 'N'
                                         )
                                 )
-                        AND    sera.BIENES.NO_BIEN = BXL.NO_BIEN
+                        AND    sera.bien.NO_BIEN = BXL.NO_BIEN
                         AND    BXL.ID_EVENTO_REMESA IS NULL
                      )`)
                 await this.entity.query(`
-                        UPDATE    sera.BIENES 
+                        UPDATE    sera.bien 
                         SET    ESTATUS = ( SELECT    ESTATUS_ANT
                                 FROM     sera.COMER_BIENESXLOTE BXL2
-                                WHERE    BXL2.NO_BIEN = sera.BIENES.NO_BIEN
+                                WHERE    BXL2.NO_BIEN = sera.bien.NO_BIEN
                                 AND    EXISTS (SELECT    1
                                         FROM    sera.COMER_LOTES LOT2
                                         WHERE    LOT2.ID_EVENTO = ${event}
@@ -9051,7 +9051,7 @@ export class ValidatePaymentsRefService {
                                         AND    BXL.ID_LOTE = LOT.ID_LOTE
                                         AND    LOT.ID_CLIENTE IS NULL
                                         )
-                                AND    sera.BIENES.NO_BIEN = BXL.NO_BIEN
+                                AND    sera.bien.NO_BIEN = BXL.NO_BIEN
                                 AND    BXL.ID_EVENTO_REMESA IS NULL
              )`)
         }
@@ -9063,7 +9063,7 @@ export class ValidatePaymentsRefService {
                 var R_BIENESDISPO       = 0 
 
                 var R1:any[]  = await this.entity.query(`SELECT    BXL.ID_BIENXLOTE_REMESA as remesa, BXL.ID_LOTE       
-                FROM    sera.COMER_BIENESXLOTE BXL, sera.BIENES BIE
+                FROM    sera.COMER_BIENESXLOTE BXL, sera.bien BIE
                 WHERE    BXL.NO_BIEN = BIE.NO_BIEN
                 AND    EXISTS (SELECT    1
                         FROM    sera.COMER_LOTES LOT

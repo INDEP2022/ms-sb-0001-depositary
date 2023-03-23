@@ -17,7 +17,7 @@ export class ExpExel1Service {
                     SELECT B.NO_BIEN,
                     B.ESTATUS,ND.CVE_CONTRATO,ND.FEC_INI_CONTRATO
                 FROM sera.NOMBRAMIENTOS_DEPOSITARIA ND,
-                    sera.BIENES B 
+                    sera.bien B 
                 WHERE B.NO_BIEN = ND.NO_BIEN
                 AND ND.NO_BIEN = ${propertyNumber} 
                 AND ND.REVOCACION = 'N';

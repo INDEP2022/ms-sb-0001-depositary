@@ -106,7 +106,7 @@ export class RealStateDispersalService {
     G_MANDDEV: string
     G_USAUTORIZA: string
     constructor(@InjectRepository(ComerLotsEntity) private entity: Repository<ComerLotsEntity>) {
-        this.detailAdjustMandates(16)
+        //this.detailAdjustMandates(16)
     }
 
 
@@ -133,7 +133,7 @@ export class RealStateDispersalService {
                             SUM(BXL.MONTO_NOAPP_IVA) BXL_MONTO_NOAPP_IVA
                     FROM sera.COMER_BIENESXLOTE BXL,
                             sera.CAT_TRANSFERENTE CAT,
-                            sera.BIENES BIE
+                            sera.bien BIE
                     WHERE BIE.NO_BIEN = BXL.NO_BIEN
                         AND BXL.NO_TRANSFERENTE = CAT.NO_TRANSFERENTE
                         AND BXL.ID_LOTE = ${lot}
@@ -678,7 +678,7 @@ export class RealStateDispersalService {
         /* << JACG 24-07-17 Se realizan los ajustes para determinar los importes correctos de lso bienes para cuando se desagregan los mandatos. */
         //TODO: verify cursor
         var C3: any[] = await this.entity.query(`SELECT BXL.PCTSLOTE, COALESCE(CAT.CVMAN,'0'), BXL.NO_BIEN, SUBSTR(BIE.DESCRIPCION,1,438), DECODE(PDIRECCION,'I',BXL.MONTO_APP_IVA,DECODE(CL.PORC_APP_IVA,1,BXL.PRECIO_SIN_IVA,0)), BXL.MONTO_NOAPP_IVA, BXL.IVA_FINAL
-            FROM sera.COMER_BIENESXLOTE BXL, sera.CAT_TRANSFERENTE CAT, sera.BIENES BIE, sera.COMER_LOTES CL
+            FROM sera.COMER_BIENESXLOTE BXL, sera.CAT_TRANSFERENTE CAT, sera.bien BIE, sera.COMER_LOTES CL
             WHERE BXL.ID_LOTE = ${P_ID_LOTE}
                 AND BXL.ID_LOTE = CL.ID_LOTE
                 AND BIE.NO_BIEN     = BXL.NO_BIEN
@@ -1355,7 +1355,7 @@ export class RealStateDispersalService {
                                 WHERE ID_EVENTO = ${this.n_ID_EVENTO}
                                 AND ID_CLIENTE = ${this.n_REL_CLIENTE}
                                 AND LOTE_PUBLICO != 0)`);
-            await this.entity.query(`UPDATE sera.BIENES
+            await this.entity.query(`UPDATE sera.bien
                 SET ESTATUS = 'VEN'
             WHERE NO_BIEN IN (SELECT NO_BIEN
                                 FROM sera.COMER_BIENESXLOTE
@@ -1444,7 +1444,7 @@ export class RealStateDispersalService {
                 SET ESTATUS_ANT = ESTATUS_COMER,
                     ESTATUS_COMER = 'CPV'
             WHERE ID_LOTE = TO_NUMBER(${this.c_REL_LOTES})`);
-            await this.entity.query(`UPDATE sera.BIENES
+            await this.entity.query(`UPDATE sera.bien
                 SET ESTATUS = 'VEN'
             WHERE NO_BIEN IN (SELECT NO_BIEN
                                 FROM sera.COMER_BIENESXLOTE
