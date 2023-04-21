@@ -122,7 +122,7 @@ export class SegUsersEntity {
   daysValidityPass: number;
 
   @Column("timestamp without time zone", { 
-    name: "dias_vigencia_password", 
+    name: "fec_ultimo_cambio_password", 
     nullable: true, 
     default: () => "CURRENT_TIMESTAMP" 
   })
@@ -223,14 +223,6 @@ export class SegUsersEntity {
 
   keyProfileMim: string | null;
 
-  @Column("timestamp without time zone", { 
-    name: "fec_libera", 
-    nullable: true, 
-    default: () => "CURRENT_TIMESTAMP" 
-  })
-
-  dateFree: Date | null;
-
   @Column({ 
     type: "character varying", 
     name: "name_ad", 
@@ -248,5 +240,13 @@ export class SegUsersEntity {
   })
 
   keyPosPrev: string | null;
+
+  @Column({ 
+    type: "character varying", 
+    name: "nb_origen", 
+    nullable: true
+  })
+
+  originNb: string | null;
 
 }

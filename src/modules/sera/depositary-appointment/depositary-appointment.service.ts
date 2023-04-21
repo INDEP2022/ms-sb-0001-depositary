@@ -7,35 +7,75 @@ import { DepositaryAppointmentEntity } from './entity/depositary-appointment.ent
 import { PersonEntity } from './entity/person.entity';
 import { SegUsersEntity } from './entity/seg-users.entity';
 import { FilterOperator, paginate, Paginate, PaginateQuery } from 'nestjs-paginate';
+import { GoodEntity } from './entity/good.entity';
 
 @Injectable()
 export class DepositaryAppointmentService {
 
     constructor(
         @InjectRepository(DepositaryAppointmentEntity) private entity: Repository<DepositaryAppointmentEntity>,
+        @InjectRepository(GoodEntity) private repositoryGood: Repository<GoodEntity>,
+        @InjectRepository(SegUsersEntity) private repositoryUser: Repository<SegUsersEntity>,
+        @InjectRepository(PersonEntity) private repositoryPerson: Repository<PersonEntity>
     ) { }
-
 
     async createDepositaryAppointment(depositaryAppointmentDTO: DepositaryAppointmentDTO) {
         const task = await this.entity.findOne({ where: { appointmentNumber: depositaryAppointmentDTO.appointmentNumber } });
-        if (task) return { statusCode: 400, message: ['Este registro ya existe!'] }
-
-        try {
-            const row = await this.entity.save(depositaryAppointmentDTO);
-            return {
-                statusCode: 200,
-                message: ["OK"],
-                data: row,
+        if (!task) {
+            const good = await this.repositoryGood.findOne({ where: { id: depositaryAppointmentDTO.goodNumber } });
+            if (good) {
+                const user = await this.repositoryUser.findOne({ where: { users: depositaryAppointmentDTO.seraRepresentative } });
+                if (user) {
+                    const person = await this.repositoryPerson.findOne({ where: { id: depositaryAppointmentDTO.personNumber } });
+                    if (person) {
+                        try {
+                            const resp = await this.entity.save(depositaryAppointmentDTO);
+                                return {
+                                    statusCode: HttpStatus.OK,
+                                    message: ["Registro creado correctamente!"],
+                                    data: resp,
+                                }
+                        } catch (error) {
+                            return {
+                                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                                message: [error.message],
+                                data: null,
+                            }
+                        }    
+                    }else{
+                        return {
+                            statusCode: HttpStatus.BAD_REQUEST,
+                            message: ['El campo: no_persona no se encuentran registrado en la tabla sera.cat_personas'],
+                            data: null,
+                        }
+                    }
+                }else{
+                    return {
+                        statusCode: HttpStatus.BAD_REQUEST,
+                        message: ['El campo: representante_sera no coincide con la columna usuario en la tabla sera.seg_usuarios'],
+                        data: null,
+                    }
+                }
+            }else{
+                return {
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    message: ['El campo: no_bien no se encuentran registrado en la tabla sera.bien'],
+                    data: null,
+                }
             }
-
-        } catch (error) {
-            return { statusCode: 500, message: [error.message] }
+        }
+        return {
+            statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+            message: ['ID previamente registrado'],
+            data: null,
         }
     }
 
     async getAllDepositaryAppointment(query: PaginateQuery) {
         const queryBuilder = this.entity.createQueryBuilder('table');
-        queryBuilder.innerJoinAndMapOne('table.personNumber', PersonEntity, 'p', 'table.no_persona = p.no_persona')
+            queryBuilder.innerJoinAndMapOne('table.personNumber', PersonEntity, 'p', 'table.no_persona = p.no_persona')
+            queryBuilder.innerJoinAndMapOne('table.good', GoodEntity, 'tg', 'table.no_bien = tg.no_bien')
+            queryBuilder.innerJoinAndMapOne('table.user', SegUsersEntity, 'tsu', 'table.representante_sera = tsu.usuario')
         const res = await paginate<DepositaryAppointmentEntity>(query, queryBuilder, {
             sortableColumns: [
                 "appointmentNumber","appointmentNumber","nameProvDate","revocationDate","revocation",
@@ -95,7 +135,6 @@ export class DepositaryAppointmentService {
                 iva: [FilterOperator.EQ, FilterOperator.IN, FilterOperator.ILIKE, FilterOperator.NOT, FilterOperator.NULL],
                 withKitchenware: [FilterOperator.EQ, FilterOperator.IN, FilterOperator.ILIKE, FilterOperator.NULL, FilterOperator.NULL],
                 goodNumber: [FilterOperator.EQ, FilterOperator.IN, FilterOperator.ILIKE, FilterOperator.NULL, FilterOperator.NULL]
-
             }
         })
 
