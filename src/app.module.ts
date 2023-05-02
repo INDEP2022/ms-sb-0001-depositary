@@ -19,6 +19,15 @@ import { ComerPaymentModule } from './modules/sera/comer-payment/comer-payment.m
 import { RealStateDispersalModule } from './modules/sera/real-state-dispersal/real-state-dispersal.module';
 import { configService } from 'sigebi-lib-common';
 import { ConfigModule } from '@nestjs/config';
+import { DestinyLegalByGoodModule } from './modules/sera/destiny-legal-by-good/destiny-legal-by-good.module';
+import { DedPayDepositaryModule } from './modules/sera/ded-pay-depositary/ded-pay-depositary.module';
+import { DetrepoDepositaryModule } from './modules/sera/detrepo-depositary/detrepo-depositary.module';
+import { DepositaryAppointmentsModule } from './modules/sera/depositary-appointments/depositary-appointments.module';
+import { DetailsDepositaryModule } from './modules/sera/details-depositary/details-depositary.module';
+import { InfoDepositaryModule } from './modules/sera/info-depositary/info-depositary.module';
+import { ParametersModDepositaryModule } from './modules/sera/parameters-mod-depositary/parameters-mod-depositary.module';
+import { PersonsModDepositaryModule } from './modules/sera/persons-mod-depositary/persons-mod-depositary.module';
+import { RequestsDepositaryModule } from './modules/sera/requests-depositary/requests-depositary.module';
 
 @Module({
   imports: [
@@ -69,6 +78,15 @@ import { ConfigModule } from '@nestjs/config';
     ValidatePaymentsRefModule,
     ComerPaymentModule,
     RealStateDispersalModule,
+    DestinyLegalByGoodModule,
+    DedPayDepositaryModule,
+    DetrepoDepositaryModule,
+    DepositaryAppointmentsModule,
+    DetailsDepositaryModule,
+    InfoDepositaryModule,
+    ParametersModDepositaryModule,
+    PersonsModDepositaryModule,
+    RequestsDepositaryModule,
    
   ],
   controllers: [],

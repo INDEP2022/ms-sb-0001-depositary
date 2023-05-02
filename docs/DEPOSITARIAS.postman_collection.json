@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "05e7c5d6-0888-4f91-a71e-2ad0771667e3",
+		"_postman_id": "b7ee6744-711c-4503-af99-4c6bdf964975",
 		"name": "DEPOSITARIAS",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19564673"
 	},
 	"item": [
 		{
@@ -698,6 +699,1278 @@
 								"v1",
 								"validate-payments-ref",
 								"current-update-lot"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DESTINO_LEGAL_X_BIEN",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3015/api/v1/destiny-legal-by-good",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"destiny-legal-by-good"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetOne",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\r\n    \"goodNumber\": \"92547\",\r\n            \"dateApplication\": \"2003-04-25\"\r\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/destiny-legal-by-good/one",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"destiny-legal-by-good",
+								"one"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"goodNumber\": \"92547\",\r\n            \"dateApplication\": \"2023-02-01\",\r\n            \"typeApplication\": \"D\",\r\n            \"applicantSera\": \"Prueba\",\r\n            \"delegationAttentionNum\": \"6\",\r\n            \"subdelegationAttentionNum\": \"0\",\r\n            \"departmentAttentionNum\": \"1\",\r\n            \"dateAttention\": null,\r\n            \"userAttended\": \"juanA\",\r\n            \"registryNum\": \"9999999\",\r\n            \"candidateProposed\": null,\r\n            \"nbOrigin\": null\r\n            }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/destiny-legal-by-good",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"destiny-legal-by-good"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"goodNumber\": \"92547\",\r\n            \"dateApplication\": \"2023-02-01\",\r\n            \"typeApplication\": \"D\",\r\n            \"applicantSera\": \"Prueba\",\r\n            \"delegationAttentionNum\": \"6\",\r\n            \"subdelegationAttentionNum\": \"0\",\r\n            \"departmentAttentionNum\": \"1\",\r\n            \"dateAttention\": null,\r\n            \"userAttended\": \"juanA\",\r\n            \"registryNum\": \"9999999\",\r\n            \"candidateProposed\": null,\r\n            \"nbOrigin\": null\r\n            }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/destiny-legal-by-good",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"destiny-legal-by-good"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"goodNumber\": \"92547\",\r\n            \"dateApplication\": \"2023-02-01\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/destiny-legal-by-good",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"destiny-legal-by-good"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DETPAGO_DEPOSITARIAS",
+			"item": [
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3015/api/v1/ded-pay-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"ded-pay-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"appointmentNum\": \"3789\",\r\n            \"datePay\": \"2009-05-14\",\r\n            \"conceptPayKey\": \"1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/ded-pay-depositary/one",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"ded-pay-depositary",
+								"one"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"appointmentNum\": \"3789\",\r\n        \"datePay\": \"2023-01-02\",\r\n        \"conceptPayKey\": \"5\",\r\n        \"amount\": \"4600.00\",\r\n        \"observation\": null,\r\n        \"registryNum\": \"30364158\",\r\n        \"nbOrigin\": null\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/ded-pay-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"ded-pay-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"appointmentNum\": \"3789\",\r\n        \"datePay\": \"2023-01-02\",\r\n        \"conceptPayKey\": \"5\",\r\n        \"amount\": \"4600.00\",\r\n        \"observation\": null,\r\n        \"registryNum\": \"30364158\",\r\n        \"nbOrigin\": null\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/ded-pay-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"ded-pay-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"appointmentNum\": \"3789\",\r\n        \"datePay\": \"2023-01-02\",\r\n        \"conceptPayKey\": \"5\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/ded-pay-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"ded-pay-depositary"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DETREPO_DEPOSITARIAS",
+			"item": [
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3015/api/v1/detrepo-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"detrepo-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"appointmentNum\": \"987\",\r\n            \"dateRepo\": \"2009-12-31\",\r\n            \"reportKey\": \"2\"\r\n            }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/detrepo-depositary/one",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"detrepo-depositary",
+								"one"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"appointmentNum\": \"987\",\r\n        \"dateRepo\": \"2023-12-31\",\r\n        \"reportKey\": \"2\",\r\n        \"report\": \"prueba\",\r\n        \"registryNum\": \"99999\",\r\n        \"nbOrigin\": null\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/detrepo-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"detrepo-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"appointmentNum\": \"987\",\r\n        \"dateRepo\": \"2023-12-31\",\r\n        \"reportKey\": \"2\",\r\n        \"report\": \"prueba\",\r\n        \"registryNum\": \"99999\",\r\n        \"nbOrigin\": null\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/detrepo-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"detrepo-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"appointmentNum\": \"987\",\r\n        \"dateRepo\": \"2023-12-31\",\r\n        \"reportKey\": \"2\"\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/detrepo-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"detrepo-depositary"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "NOMBRAMIENTOS_DEPOSITARIA",
+			"item": [
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3015/api/v1/depositary-appointments",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"depositary-appointments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3015/api/v1/depositary-appointments/3923",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"depositary-appointments",
+								"3923"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"appointmentNum\": \"99999\",\r\n        \"nameProvDete\": null,\r\n        \"revocationDate\": null,\r\n        \"revocation\": \"N\",\r\n        \"contractKey\": \"DG/DEBI/COMODATO/018/2022\",\r\n        \"startContractDate\": null,\r\n        \"endContractDate\": null,\r\n        \"amount\": null,\r\n        \"nameTypeKey\": \"P\",\r\n        \"administratorTypeKey\": \"C\",\r\n        \"assignmentDate\": null,\r\n        \"appointmentDate\": null,\r\n        \"cardAppointmentId\": null,\r\n        \"typeDepositary\": \"3\",\r\n        \"observations\": null,\r\n        \"jobRevocationNum\": null,\r\n        \"amountConsideration\": \"0.00\",\r\n        \"amountFee\": \"0.00\",\r\n        \"jobProvisionalNum\": null,\r\n        \"exhibit\": null,\r\n        \"jobBoardgovtDate\": null,\r\n        \"jobBoardgovtNum\": null,\r\n        \"shipmentDirgralDate\": null,\r\n        \"replyDirgralDate\": null,\r\n        \"jobShiftNum\": null,\r\n        \"shiftDate\": null,\r\n        \"returnDate\": null,\r\n        \"jobReplyNum\": null,\r\n        \"agreementAppointment\": null,\r\n        \"cardAppointmentIdBoardgovt\": null,\r\n        \"jobAnswerDirgralNum\": null,\r\n        \"authorityorderAssignment\": null,\r\n        \"responsible\": \"CONAGUA\",\r\n        \"representativeSera\": \"APATRICIO\",\r\n        \"goodNum\": \"2553466\",\r\n        \"registryNum\": \"947085504\",\r\n        \"validity\": null,\r\n        \"amountVat\": null,\r\n        \"folioUniversal\": null,\r\n        \"folioReturn\": null,\r\n        \"personNum\": \"794\",\r\n        \"reference\": null,\r\n        \"vat\": null,\r\n        \"withHousehold\": null,\r\n        \"nbOrigin\": null\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/depositary-appointments",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"depositary-appointments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "uptade",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"appointmentNum\": \"99999\",\r\n        \"nameProvDete\": null,\r\n        \"revocationDate\": null,\r\n        \"revocation\": \"N\",\r\n        \"contractKey\": \"DG/DEBI/COMODATO/018/2022\",\r\n        \"startContractDate\": null,\r\n        \"endContractDate\": null,\r\n        \"amount\": null,\r\n        \"nameTypeKey\": \"P\",\r\n        \"administratorTypeKey\": \"C\",\r\n        \"assignmentDate\": null,\r\n        \"appointmentDate\": null,\r\n        \"cardAppointmentId\": null,\r\n        \"typeDepositary\": \"3\",\r\n        \"observations\": null,\r\n        \"jobRevocationNum\": null,\r\n        \"amountConsideration\": \"0.00\",\r\n        \"amountFee\": \"0.00\",\r\n        \"jobProvisionalNum\": null,\r\n        \"exhibit\": null,\r\n        \"jobBoardgovtDate\": null,\r\n        \"jobBoardgovtNum\": null,\r\n        \"shipmentDirgralDate\": null,\r\n        \"replyDirgralDate\": null,\r\n        \"jobShiftNum\": null,\r\n        \"shiftDate\": null,\r\n        \"returnDate\": null,\r\n        \"jobReplyNum\": null,\r\n        \"agreementAppointment\": null,\r\n        \"cardAppointmentIdBoardgovt\": null,\r\n        \"jobAnswerDirgralNum\": null,\r\n        \"authorityorderAssignment\": null,\r\n        \"responsible\": \"CONAGUA\",\r\n        \"representativeSera\": \"APATRICIO\",\r\n        \"goodNum\": \"2553466\",\r\n        \"registryNum\": \"947085504\",\r\n        \"validity\": null,\r\n        \"amountVat\": null,\r\n        \"folioUniversal\": null,\r\n        \"folioReturn\": null,\r\n        \"personNum\": \"794\",\r\n        \"reference\": null,\r\n        \"vat\": null,\r\n        \"withHousehold\": null,\r\n        \"nbOrigin\": null\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/depositary-appointments",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"depositary-appointments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3015/api/v1/depositary-appointments/99999",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"depositary-appointments",
+								"99999"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DETALLES_DEPOSITARIAS",
+			"item": [
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3015/api/v1/details-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"details-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\r\n            \"id\": \"864\",\r\n            \"consecutive\": \"1\",\r\n            \"goodNum\": \"104556\",\r\n            \"appointmentNum\": \"577\"\r\n            \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/details-depositary/one",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"details-depositary",
+								"one"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\r\n        \"id\": \"9999\",\r\n        \"consecutive\": \"1\",\r\n        \"mandate\": \"810010\",\r\n        \"income\": \"32000001\",\r\n        \"amount\": \"4546.78\",\r\n        \"vat\": \"727.48\",\r\n        \"amountDedu\": \"0.00\",\r\n        \"indtype\": \"N\",\r\n        \"goodNum\": \"10499999556\",\r\n        \"description\": \"PAGO DE LA CONTRAPRESTACION DEL MES DE JULIO DE 2022\",\r\n        \"aresponsable\": \"003100\",\r\n        \"appointmentNum\": \"577\",\r\n        \"reference\": \"040062009001045568\",\r\n        \"typeIncome\": \"32000001\",\r\n        \"porcVat\": \"16\",\r\n        \"porcDedu\": \"0.00\",\r\n        \"orderRecordedId\": \"13062\",\r\n        \"nbOrigin\": null\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/details-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"details-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"id\": 9999,\r\n        \"consecutive\": 1,\r\n        \"mandate\": \"810010\",\r\n        \"income\": \"32000001\",\r\n        \"amount\": 4546.78,\r\n        \"vat\": 727.48,\r\n        \"amountDedu\": 0,\r\n        \"indtype\": \"N\",\r\n        \"goodNum\": 10499999556,\r\n        \"description\": \"PAGO DE LA CONTRAPRESTACION DEL MES DE JULIO DE 2022\",\r\n        \"aresponsable\": \"003100\",\r\n        \"appointmentNum\": 577,\r\n        \"reference\": \"040062009001045568\",\r\n        \"typeIncome\": 32000001,\r\n        \"porcVat\": 16,\r\n        \"porcDedu\": 0,\r\n        \"orderRecordedId\": 13062,\r\n        \"nbOrigin\": null\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/details-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"details-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n            \"id\": \"9999\",\r\n            \"consecutive\": \"1\",\r\n            \"goodNum\": \"10499999556\",\r\n            \"appointmentNum\": \"577\"\r\n            \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/details-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"details-depositary"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "INFORMES_DEPOSITARIAS",
+			"item": [
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3015/api/v1/info-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"info-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n            \"reportDate\": \"2003-10-06\",\r\n            \"personNum\": \"JSENECTUD\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/info-depositary/one",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"info-depositary",
+								"one"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"reportDate\": \"2023-10-06\",\r\n        \"report\": \"PRESENTA INFORME DE GESTION CORRESPONDIENTE A LOS MESES DE JUNIO A SEPTIEMBRE DEL 2003, RELACION DE COMPROBANTES DE GASTOS EFECTUADOS ASI COMO DIVERSAS PROPUESTAS PARA SER CONSIDERADAS POR EL SAE EN RELACION A LA CONTRAPRESTACION ESTABLECIDA EN EL NOMBRAMIENTO, PRESENTA ADEMAS COPIA DE LA POLIZA DE SEGURO DE COBERTURA AMPLIA CON ENDOSO A FAVOR DEL SAE.\",\r\n        \"personNum\": \"hellow\",\r\n        \"goodNum\": \"3900\",\r\n        \"registryNum\": 2147023,\r\n        \"nbOrigin\": null\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/info-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"info-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\r\n        \"reportDate\": \"2023-10-06T00:00:00.000Z\",\r\n        \"report\": \"PRESENTA INFORME DE GESTION CORRESPONDIENTE A LOS MESES DE JUNIO A SEPTIEMBRE DEL 2003, RELACION DE COMPROBANTES DE GASTOS EFECTUADOS ASI COMO DIVERSAS PROPUESTAS PARA SER CONSIDERADAS POR EL SAE EN RELACION A LA CONTRAPRESTACION ESTABLECIDA EN EL NOMBRAMIENTO, PRESENTA ADEMAS COPIA DE LA POLIZA DE SEGURO DE COBERTURA AMPLIA CON ENDOSO A FAVOR DEL SAE.\",\r\n        \"personNum\": \"hellow\",\r\n        \"goodNum\": \"3900\",\r\n        \"registryNum\": 2147023,\r\n        \"nbOrigin\": null\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/info-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"info-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\r\n        \"reportDate\": \"2023-10-06T00:00:00.000Z\",\r\n        \"personNum\": \"hellow\"\r\n }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/info-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"info-depositary"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PARAMETROSMOD_DEPOSITARIAS",
+			"item": [
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3015/api/v1/parameters-mod-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"parameters-mod-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"parameter\": \"UR\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/parameters-mod-depositary/one",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"parameters-mod-depositary",
+								"one"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"parameter\": \"XX\",\r\n        \"value\": \"003100\",\r\n        \"description\": \"UNIDAD RESPONSABLE PARA DEPOSITARIA\",\r\n        \"address\": \"D\",\r\n        \"nbOrigin\": null\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/parameters-mod-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"parameters-mod-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"parameter\": \"XX\",\r\n        \"value\": \"003100\",\r\n        \"description\": \"UNIDAD RESPONSABLE PARA DEPOSITARIA\",\r\n        \"address\": \"D\",\r\n        \"nbOrigin\": null\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/parameters-mod-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"parameters-mod-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"parameter\": \"XX\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/parameters-mod-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"parameters-mod-depositary"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PERSONASXNOM_DEPOSITARIAS",
+			"item": [
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3015/api/v1/persons-mod-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"persons-mod-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3015/api/v1/persons-mod-depositary/3908",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"persons-mod-depositary",
+								"3908"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"appointmentNum\": \"99999\",\r\n        \"personNum\": \"791\",\r\n        \"process\": \"S\",\r\n        \"dateExecution\": \"2022-07-05\",\r\n        \"sentSirsae\": \"N\",\r\n        \"modifyStatus\": \"N\",\r\n        \"indicted\": null,\r\n        \"dateShipment\": null,\r\n        \"sendSirsae\": null,\r\n        \"nbOrigin\": null\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/persons-mod-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"persons-mod-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"appointmentNum\": \"99999\",\r\n        \"personNum\": \"791\",\r\n        \"process\": \"S\",\r\n        \"dateExecution\": \"2022-07-05\",\r\n        \"sentSirsae\": \"N\",\r\n        \"modifyStatus\": \"N\",\r\n        \"indicted\": null,\r\n        \"dateShipment\": null,\r\n        \"sendSirsae\": null,\r\n        \"nbOrigin\": null\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/persons-mod-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"persons-mod-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3015/api/v1/persons-mod-depositary/99999",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"persons-mod-depositary",
+								"99999"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "SOLICITUDES_DEPOSITARIA",
+			"item": [
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3015/api/v1/requests-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"requests-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3015/api/v1/requests-depositary/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"requests-depositary",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\"applicationNum\":1,\r\n\"dateApplication\":\"2023/01/01\",\r\n\"areaOfAttention\":1,\r\n\"typeApplicationKey\":\"a\",\r\n\"dateAttention\":\"2023/01/01\",\r\n\"personAttended\":\"string\",\r\n\"applicantSera\":\"string\",\r\n\"registryNum\":1,\r\n\"personNum\":\"string\",\r\n\"nbOrigin\":\"string\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/requests-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"requests-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\"applicationNum\":1,\r\n\"dateApplication\":\"2023/01/01\",\r\n\"areaOfAttention\":1,\r\n\"typeApplicationKey\":\"a\",\r\n\"dateAttention\":\"2023/01/01\",\r\n\"personAttended\":\"string\",\r\n\"applicantSera\":\"string\",\r\n\"registryNum\":1,\r\n\"personNum\":\"string\",\r\n\"nbOrigin\":\"string\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3015/api/v1/requests-depositary",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"requests-depositary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3015/api/v1/requests-depositary/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3015",
+							"path": [
+								"api",
+								"v1",
+								"requests-depositary",
+								"1"
 							]
 						}
 					},
