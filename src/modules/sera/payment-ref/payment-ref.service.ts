@@ -1,10 +1,10 @@
 import { Injectable, HttpStatus } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { ParametersmodDepositoryEntity } from "../infrastructure/entities/parametersmod-depository.entity";
-import { refpayDepositoriesEntity } from "../infrastructure/entities/refpay-depositories.entity";
-import { TmpPagosGensDepEntity } from '../infrastructure/entities/tmp-pagosgens-dep.entity';
-import { paymentsgensDepositaryEntity } from "../infrastructure/entities/paymentsgens-depositary.entity";
+import { ParametersmodDepositoryEntity } from "../../infrastructure/entities/parametersmod-depository.entity";
+import { refpayDepositoriesEntity } from "../../infrastructure/entities/refpay-depositories.entity";
+import { TmpPagosGensDepEntity } from '../../infrastructure/entities/tmp-pagosgens-dep.entity';
+import { paymentsgensDepositaryEntity } from "../../infrastructure/entities/paymentsgens-depositary.entity";
 import { ExecDeductionsDto, FillAccreditationsDto, FillPaymentsDto, GenericParamsDto, PrepOIDto, RemoveDisperPaymentsRefDto, ValidDepDto, } from "./dto/param.dto";
 
 @Injectable()
@@ -76,7 +76,7 @@ export class PaymentRefService {
             const parameters = await parameterQuery.getRawMany();
 
             const reducedResponse = parameters.reduce((acc, cur) => {
-                const matchingParam = lParameters.find(p => p.param === cur.parametro && p.address === cur.direccion);
+                const matchingParam = lParameters.find(p => p.param == cur.parametro && p.address == cur.direccion);
                 if (matchingParam) {
                     const value = cur.valor;
                     if (value !== undefined) {
@@ -353,17 +353,18 @@ export class PaymentRefService {
             const L3 = await this.TmpPagosGensDepRepository.find({
                 order: { payGensId: 'ASC' },
             });
+            console.log(L3)
 
             for (const row of L3) {
-                if (row.status === 'A') {
+                if (row.status == 'A') {
                     lStatus += 1;
                 } else {
                     lStatus = 0;
                 }
 
                 if (
-                    (row.origin === 'DB' && [ 'C', 'A' ].includes(row.status)) ||
-                    (row.origin === null && row.status !== 'C')
+                    (row.origin == 'DB' && [ 'C', 'A' ].includes(row.status)) ||
+                    (row.origin == null && row.status !== 'C')
                 ) {
                     if (lStatus <= 1) {
                         dG = dG + 1;
@@ -378,8 +379,8 @@ export class PaymentRefService {
                             noTransferable: row.noTransferable,
                             iva: row.iva.toFixed(2),
                             amountIva: row.amountIva.toFixed(2),
-                            paymentAct: row.origin === 'DB' ? row.paymentAct.toFixed(2) : `0.0`,
-                            status: row.origin === 'DB' ? row.status : 'A',
+                            paymentAct: row.origin == 'DB' ? row.paymentAct.toFixed(2) : `0.0`,
+                            status: row.origin == 'DB' ? row.status : 'A',
                             payment: row.payment.toFixed(2),
                             deduxcent: row.deduxcent,
                             deduValue: row.deduValue.toFixed(2),
@@ -397,14 +398,14 @@ export class PaymentRefService {
                         // TODO: Consultar si se va a guardar en la tabla temporal
                         // await this.TmpPagosGensDepRepository.save(rDispercionAbonos[dG]);
 
-                        if (gAppointment === 0 || gReference === null) {
+                        if (gAppointment == 0 || gReference == null) {
                             gAppointment = row.noAppointment;
                             gReference = row.reference;
                         }
                     }
                 }
             }
-
+            console.log(rDispercionAbonos)
             let response = {
                 "rDispercionAbonos": rDispercionAbonos,
             };
@@ -1501,7 +1502,7 @@ export class PaymentRefService {
      * @return {*}  {Promise<any>}
      * @memberof PACKAGE BODY SERA.PAGOSREF_DEPOSITARIA lineas 1930-2160
      */
-    async prerpOI(dto: PrepOIDto): Promise<any> {
+    async prepOI(dto: PrepOIDto): Promise<any> {
 
     }
     //#endregion

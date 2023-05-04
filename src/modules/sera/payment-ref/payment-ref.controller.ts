@@ -1,176 +1,88 @@
 import { Controller, Get, HttpStatus } from "@nestjs/common";
-import { ApiCreatedResponse } from "@nestjs/swagger";
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger/dist";
 
-import { Paginate, PaginateQuery } from 'nestjs-paginate';
-import { Body, Delete, Post, Put, Query } from "@nestjs/common/decorators";
-import { ResponseDataDTO } from "src/shared/dto/response.data.dto";
 import { PaymentRefService } from "./payment-ref.service";
 import { ExecDeductionsDto, FillAccreditationsDto, GenericParamsDto, PrepOIDto, RemoveDisperPaymentsRefDto, ValidDepDto } from "./dto/param.dto";
-import { Any } from "typeorm";
+import { MessagePattern } from "@nestjs/microservices";
 
-@ApiCreatedResponse()
-@ApiTags('payment-ref')
 @Controller('payment-ref')
 export class PaymentRefController {
     constructor(private readonly service: PaymentRefService) { }
 
-    @ApiOperation({ summary: 'PROCEDURE DISPERCION_ABONOS' })
-    @ApiBody({ type: GenericParamsDto })
-    @ApiResponse({
-        status: 200,
-        description: 'Se ejecuto el procedimiento con exito!',
-        type: Object,
-    })
-    @Post('/dispersionAccreditations')
-    async dispersionAccreditations(@Body() dto: GenericParamsDto) {
-
-        return await this.service.dispersionAccreditations(dto);
+    // POST PROCEDURE DISPERCION_ABONOS
+    @MessagePattern({ cmd: 'dispersionAccreditations' })
+    async dispersionAccreditations(dto: GenericParamsDto) {
+        return this.service.dispersionAccreditations(dto);
     }
 
-    @ApiOperation({ summary: 'PROCEDURE DISP_DEDUCCIONES' })
-    @ApiResponse({
-        status: 200,
-        description: 'Se ejecuto el procedimiento con exito!',
-        type: Object,
-    })
-    @Get('/dispersionDeductions')
+    //Get PROCEDURE DISP_DEDUCCIONES
+    @MessagePattern({ cmd: 'dispersionDeductions' })
     async dispersionDeductions() {
-
-        return await this.service.dispersionDeductions();
+        return this.service.dispersionDeductions();
     }
 
-    @ApiOperation({ summary: 'PROCEDURE EJEC_DEDUCCIONES' })
-    @ApiBody({ type: ExecDeductionsDto })
-    @ApiResponse({
-        status: 200,
-        description: 'Se ejecuto el procedimiento con exito!',
-        type: Object,
-    })
-    @Post('/execDeductions')
-    async execDeductions(@Body() dto: ExecDeductionsDto) {
-        return await this.service.execDeductions(dto);
+    //Post PROCEDURE EJEC_DEDUCCIONES
+    @MessagePattern({ cmd: 'execDeductions' })
+    async execDeductions(dto: ExecDeductionsDto) {
+        return this.service.execDeductions(dto);
     }
 
-    @ApiOperation({ summary: 'PROCEDURE LIQ_PAGOS_DISP' })
-    @ApiResponse({
-        status: 200,
-        description: 'Se ejecuto el procedimiento con exito!',
-        type: Object,
-    })
-    @Get('/fillPaymentsDisp')
+    //Get PROCEDURE LIQ_PAGOS_DISP
+    @MessagePattern({ cmd: 'fillPaymentsDisp' })
     async fillPaymentsDisp() {
-        return await this.service.fillPaymentsDisp();
+        return this.service.fillPaymentsDisp();
     }
 
-    @ApiOperation({ summary: 'PROCEDURE LLENA_ABONOS' })
-    @ApiBody({ type: GenericParamsDto })
-    @ApiResponse({
-        status: 200,
-        description: 'Se ejecuto el procedimiento con exito!',
-        type: Object,
-    })
-    @Post('/fillAccreditations')
-    async fillAccreditations(@Body() dto: FillAccreditationsDto) {
-
-        return await this.service.fillAccreditations(dto);
+    //Post PROCEDURE LLENA_ABONOS
+    @MessagePattern({ cmd: 'fillAccreditations' })
+    async fillAccreditations(dto: FillAccreditationsDto) {
+        return this.service.fillAccreditations(dto);
     }
 
-    @ApiOperation({ summary: 'PROCEDURE LLENA_ABONOS_DISPER' })
-    @ApiResponse({
-        status: 200,
-        description: 'Se ejecuto el procedimiento con exito!',
-        type: Object,
-    })
-    @Get()
+    //Get PROCEDURE LLENA_ABONOS_DISPER
+    @MessagePattern({ cmd: 'fillAccreditationDisper' })
     async fillAccreditationDisper() {
-
-        return await this.service.fillAccreditationDisper();
+        return this.service.fillAccreditationDisper();
     }
 
-    @ApiOperation({ summary: 'PROCEDURE INS_DISPERSION' })
-    @ApiBody({ type: GenericParamsDto })
-    @ApiResponse({
-        status: 200,
-        description: 'Se ejecuto el procedimiento con exito!',
-        type: Object,
-    })
-    @Post()
-    async insertDispersion(@Body() dto: GenericParamsDto) {
-
-        return await this.service.insertDispersion(dto);
+    //Post PROCEDURE INS_DISPERSION
+    @MessagePattern({ cmd: 'insertDispersion' })
+    async insertDispersion(dto: GenericParamsDto) {
+        return this.service.insertDispersion(dto);
     }
 
-    @ApiOperation({ summary: 'PROCEDURE INS_DISPERSIONBD' })
-    @ApiBody({ type: GenericParamsDto })
-    @ApiResponse({
-        status: 200,
-        description: 'Se ejecuto el procedimiento con exito!',
-        type: Object,
-    })
-    @Post()
-    async insertDispersionDb(@Body() dto: GenericParamsDto) {
-
-        return await this.service.insertDispersionDb(dto);
+    //Post PROCEDURE INS_DISPERSIONBD
+    @MessagePattern({ cmd: 'insertDispersionDb' })
+    async insertDispersionDb(dto: GenericParamsDto) {
+        return this.service.insertDispersionDb(dto);
     }
 
-    @ApiOperation({ summary: 'PROCEDURE ACT_ABONOSGENS' })
-    @ApiBody({ type: GenericParamsDto })
-    @ApiResponse({
-        status: 200,
-        description: 'Se ejecuto el procedimiento con exito!',
-        type: Object,
-    })
-    @Put()
-    async updateAccreditationGens(@Body() dto: GenericParamsDto) {
-
-        return await this.service.updateAccreditationGens(dto);
+    //Put PROCEDURE ACT_ABONOSGENS
+    @MessagePattern({ cmd: 'updateAccreditationGens' })
+    async updateAccreditationGens(dto: GenericParamsDto) {
+        return this.service.updateAccreditationGens(dto);
     }
 
-    @ApiOperation({ summary: 'PROCEDURE ACT_PAGOSREF' })
-    @ApiBody({ type: GenericParamsDto })
-    @ApiResponse({
-        status: 200,
-        description: 'Se ejecuto el procedimiento con exito!',
-        type: Object,
-    })
-    @Put()
-    async updatePaymentsRef(@Body() dto: GenericParamsDto) {
-
-        return await this.service.updatePaymentsRef(dto);
+    //Put PROCEDURE ACT_PAGOSREF
+    @MessagePattern({ cmd: 'updatePaymentsRef' })
+    async updatePaymentsRef(dto: GenericParamsDto) {
+        return this.service.updatePaymentsRef(dto);
     }
 
-    @ApiOperation({ summary: 'PROCEDURE ELIM_DISPER_PAGOREF' })
-    @ApiParam({
-        name: 'id',
-        description: 'Identificador tabla',
-    })
-    @Delete()
-    async removeDisperPaymentsRef(@Body() dto: RemoveDisperPaymentsRefDto) {
-        return await this.service.removeDisperPaymentsRef(dto);
+    //Delete PROCEDURE ELIM_DISPER_PAGOREF
+    @MessagePattern({ cmd: 'removeDisperPaymentsRef' })
+    async removeDisperPaymentsRef(dto: RemoveDisperPaymentsRefDto) {
+        return this.service.removeDisperPaymentsRef(dto);
     }
 
-    @ApiOperation({ summary: 'PROCEDURE EJEC_DEDUCCIONES' })
-    @ApiBody({ type: ValidDepDto })
-    @ApiResponse({
-        status: 200,
-        description: 'Se ejecuto el procedimiento con exito!',
-        type: Object,
-    })
-    @Post('/validDep')
-    async validDep(@Body() dto: ValidDepDto) {
-        return await this.service.validDep(dto);
+    //Post PROCEDURE VALIDA_DEP
+    @MessagePattern({ cmd: 'validDep' })
+    async validDep(dto: ValidDepDto) {
+        return this.service.validDep(dto);
     }
 
-    @ApiOperation({ summary: 'PROCEDURE EJEC_DEDUCCIONES' })
-    @ApiBody({ type: PrepOIDto })
-    @ApiResponse({
-        status: 200,
-        description: 'Se ejecuto el procedimiento con exito!',
-        type: Object,
-    })
-    @Post('/prerpOI')
-    async prerpOI(@Body() dto: PrepOIDto) {
-        return await this.service.prerpOI(dto);
+    //Post PROCEDURE PREP_OI
+    @MessagePattern({ cmd: 'prepOI' })
+    async prepOI(dto: PrepOIDto) {
+        return this.service.prepOI(dto);
     }
 }
