@@ -1,7 +1,7 @@
 import { Controller, Get, HttpStatus } from "@nestjs/common";
 
 import { PaymentRefService } from "./payment-ref.service";
-import { ExecDeductionsDto, FillAccreditationsDto, GenericParamsDto, PrepOIDto, RemoveDisperPaymentsRefDto, ValidDepDto } from "./dto/param.dto";
+import { ExecDeductionsDto, FillAccreditationsDto, FullDepositDto, GenericParamsDto, PrepOIDto, RemoveDisperPaymentsRefDto, ValidDep, ValidDepDto } from "./dto/param.dto";
 import { MessagePattern } from "@nestjs/microservices";
 
 @Controller('payment-ref')
@@ -10,8 +10,8 @@ export class PaymentRefController {
 
     // POST PROCEDURE DISPERCION_ABONOS
     @MessagePattern({ cmd: 'dispersionAccreditations' })
-    async dispersionAccreditations(dto: GenericParamsDto) {
-        return this.service.dispersionAccreditations(dto);
+    async dispersionAccreditations(dto: {name:number,good:number}) {
+        return this.service.dispersionAccreditations(dto.name,dto.good);
     }
 
     //Get PROCEDURE DISP_DEDUCCIONES
@@ -34,7 +34,7 @@ export class PaymentRefController {
 
     //Post PROCEDURE LLENA_ABONOS
     @MessagePattern({ cmd: 'fillAccreditations' })
-    async fillAccreditations(dto: FillAccreditationsDto) {
+    async fillAccreditations(dto: FullDepositDto) {
         return this.service.fillAccreditations(dto);
     }
 
@@ -76,13 +76,22 @@ export class PaymentRefController {
 
     //Post PROCEDURE VALIDA_DEP
     @MessagePattern({ cmd: 'validDep' })
-    async validDep(dto: ValidDepDto) {
+    async validDep(dto: ValidDep) {
+        
         return this.service.validDep(dto);
     }
 
     //Post PROCEDURE PREP_OI
     @MessagePattern({ cmd: 'prepOI' })
     async prepOI(dto: PrepOIDto) {
+        
         return this.service.prepOI(dto);
+    }
+
+    //Post PROCEDURE PARAMETROS
+    @MessagePattern({ cmd: 'paramsDep' })
+    async paramsDep(dto: any) {
+        
+        return this.service.paramsDep(dto.name,dto.address);
     }
 }
