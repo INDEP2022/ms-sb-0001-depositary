@@ -33,6 +33,25 @@ export class FillPaymentsDto {
 
 }
 
+export class FullPaymentDto {
+    @Type(() => Number)
+    @IsNumber({}, { message: Message.NUMBER('$property') })
+    name: number;
+
+    @Type(() => Number)
+    @IsNumber({}, { message: Message.NUMBER('$property') })
+    person: number;
+
+    @Type(() => Number)
+    @IsNumber({}, { message: Message.NUMBER('$property') })
+    phase?: number;
+
+    @Type(() => Date)
+    @IsDate({ message: Message.IsDate('$property') })
+    date: Date;
+
+}
+
 export class ExecDeductionsDto {
 
     @Type(() => Number)
@@ -64,6 +83,22 @@ export class FillAccreditationsDto {
 
 }
 
+
+export class FullDepositDto{
+    @Type(() => Number)
+    @IsNumber({}, { message: Message.NUMBER('$property') })
+    name: number;
+
+    @Type(() => Number)
+    @IsNumber({}, { message: Message.NUMBER('$property') })
+    good: number;
+
+    @Type(() => Number)
+    @IsNumber({}, { message: Message.NUMBER('$property') })
+    process: number;
+}
+
+
 export class RemoveDisperPaymentsRefDto {
 
     @Type(() => Number)
@@ -87,15 +122,26 @@ export class ValidDepDto {
     pDate: Date;
 
 }
+export class ValidDep {
+
+    @Type(() => Number)
+    @IsNumber({}, { message: Message.NUMBER('$property') })
+    name: number;
+
+    @Type(() => String)
+    @IsDate({ message: Message.IsDate('$property') })
+    date: Date;
+
+}
 
 export class PrepOIDto {
 
     @Type(() => Number)
     @IsNumber({}, { message: Message.NUMBER('$property') })
-    pOne: number;
+    name: number;
 
     @Type(() => String)
     @IsString({ message: Message.IsDate('$property') })
-    pTwo: string;
+    description: string;
 
 }

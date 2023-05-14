@@ -6,6 +6,7 @@ import { ParametersmodDepositoryEntity } from "../../infrastructure/entities/par
 import { TmpPagosGensDepEntity } from '../../infrastructure/entities/tmp-pagosgens-dep.entity';
 import { refpayDepositoriesEntity } from "../../infrastructure/entities/refpay-depositories.entity";
 import { paymentsgensDepositaryEntity } from "../../infrastructure/entities/paymentsgens-depositary.entity";
+import { DepositaryAppointmentEntity } from '../depositary-appointment/entity/depositary-appointment.entity';
 
 @Module({
   imports: [
