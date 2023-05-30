@@ -21,5 +21,6 @@ async function bootstrap() {
   console.log(`Microservice listening INTERNAL${process.env.MS_NAME} name:`, process.env.MS_NAME);
   console.log(`Microservice listening INTERNAL${process.env.MS_NAME} on ports:`, app_port + ":" + ms_port_micro);
   console.log(`Microservice INTERNAL${process.env.MS_NAME} is running on: ${ms_port_micro}`);
+  console.log(`Host name: ${host_name}`);
 }
 bootstrap();

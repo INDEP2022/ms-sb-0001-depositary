@@ -1,0 +1,111 @@
+{
+	"info": {
+		"_postman_id": "94c1f320-924a-40e0-b389-a5eddab089fa",
+		"name": "ColeccionJorge(Depositary)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "MappervSSSTipoBien.cs (GetByParam(vSSSTipoBien item))",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://[::1]:3002/api/v1/depositary-queries?limit=10&page=1&filter.classifyGoodNumber=$in:56&filter.downloadsssubtype=$ilike:EMPR",
+					"protocol": "http",
+					"host": [
+						"[::1]"
+					],
+					"port": "3002",
+					"path": [
+						"api",
+						"v1",
+						"depositary-queries"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "filter.classifyGoodNumber",
+							"value": "$in:56"
+						},
+						{
+							"key": "filter.downloadsssubtype",
+							"value": "$ilike:EMPR"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetByParam(MENAJE item) -  GetClaves(MENAJE item)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"GoodNo\": \"68796\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://[::1]:3002/api/v1/depositary-queries/GetByParamMapperMenaje"
+			},
+			"response": []
+		},
+		{
+			"name": "QuerysOracle.txt -- CAT_ENTFED",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://[::1]:3002/api/v1/depositary-queries/querysOracleCatFed"
+			},
+			"response": []
+		},
+		{
+			"name": "MapperPA_BIENESDEPOSITARIA.cs primera consulta",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"GoodNo\": \"561181\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://[::1]:3002/api/v1/depositary-queries/mapperPadepositaryAssets1"
+			},
+			"response": []
+		},
+		{
+			"name": "MapperPA_BIENESDEPOSITARIA.cs Segunda Consulta",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"goodNo\": \"561181\",\r\n  \"goodType\": \"6\",\r\n  \"entFed\": \"9\",\r\n  \"pClasif\": \"831\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://[::1]:3002/api/v1/depositary-queries/mapperPadepositaryAssets2"
+			},
+			"response": []
+		}
+	]
+}

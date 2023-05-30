@@ -30,6 +30,7 @@ import { PersonsModDepositaryModule } from './modules/sera/persons-mod-depositar
 import { RequestsDepositaryModule } from './modules/sera/requests-depositary/requests-depositary.module';
 import { PaymentRefModule } from './modules/sera/payment-ref/payment-ref.module';
 import { ApplicationModule } from './modules/application/application.module';
+import { DepositaryQueriesModule } from './modules/depositary-queries/depositary-queries.module';
 
 @Module({
   imports: [
@@ -91,6 +92,7 @@ import { ApplicationModule } from './modules/application/application.module';
     RequestsDepositaryModule,
     PaymentRefModule,
     ApplicationModule,
+    DepositaryQueriesModule,
   ],
   controllers: [],
   providers: [],
