@@ -5,146 +5,236 @@ import { VTypeWellEntity } from '../infrastructure/entities/views/v-type-well.en
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 //import { PaginateQuery } from 'nestjs-paginate';
-import { FilterOperator, Paginate, PaginateQuery, paginate, Paginated } from 'nestjs-paginate'
+import {
+  FilterOperator,
+  Paginate,
+  PaginateQuery,
+  paginate,
+  Paginated,
+} from 'nestjs-paginate';
 import { GetByParamMapperMenajeDto } from './dto/get-by-param-mapper-menaje.dto';
 import { CatEntfedEntity } from '../infrastructure/entities/cat-entfed.entity';
 import { mapperPadepositaryAssets2Dto } from './dto/mapper-pa-depositary-assets2.dto';
 @Injectable()
 export class DepositaryQueriesService {
-    constructor(
-        private commonFilterService: CommonFiltersService,
-        @InjectRepository(VTypeWellEntity) private repository: Repository<VTypeWellEntity>,
-        @InjectRepository(CatEntfedEntity) private repositoryCatEntFed: Repository<CatEntfedEntity>,
-        private readonly entity: Connection
-    ) {}
+  constructor(
+    private commonFilterService: CommonFiltersService,
+    @InjectRepository(VTypeWellEntity)
+    private repository: Repository<VTypeWellEntity>,
+    @InjectRepository(CatEntfedEntity)
+    private repositoryCatEntFed: Repository<CatEntfedEntity>,
+    private readonly entity: Connection,
+  ) {}
 
-    //#region MappervSSSTipoBien.cs (GetByParam(vSSSTipoBien item))
-    async GetByParamMappervSSSTipoBien(query: PaginateQuery): Promise<Paginated<VTypeWellEntity>> {
+  //#region MappervSSSTipoBien.cs (GetByParam(vSSSTipoBien item))
+  async GetByParamMappervSSSTipoBien(
+    query: PaginateQuery,
+  ): Promise<Paginated<VTypeWellEntity>> {
+    return await paginate(query, this.repository, {
+      sortableColumns: ['classifyGoodNumber', 'Type', 'subtypeNumber'],
+      //nullSort: 'last',
+      defaultSortBy: [['downloadsubtype', 'ASC']],
+      searchableColumns: [
+        'classifyGoodNumber',
+        'Type',
+        'subtypeNumber',
+        'ssubtypeNumber',
+        'downloadSsubtype',
+        'sssubtypeNumber',
+        'downloadsssubtype',
+      ],
+      select: [
+        'classifyGoodNumber',
+        'subtypeNumber',
+        'ssubtypeNumber',
+        'downloadsssubtype',
+      ],
+      filterableColumns: {
+        classifyGoodNumber: [FilterOperator.EQ, FilterOperator.IN],
+        subtypeNumber: [FilterOperator.EQ, FilterOperator.IN],
+        ssubtypeNumber: [FilterOperator.EQ, FilterOperator.IN],
+        downloadsssubtype: [FilterOperator.ILIKE],
+        Type: [FilterOperator.EQ, FilterOperator.IN],
+      },
+    });
+  }
 
-        return await paginate(query, this.repository, {
-            sortableColumns: ['classifyGoodNumber', 'Type', 'subtypeNumber'],
-            //nullSort: 'last',
-            defaultSortBy: [['downloadsubtype', 'ASC']],
-            searchableColumns: ['classifyGoodNumber', 'Type', 'subtypeNumber', 'ssubtypeNumber', 'downloadSsubtype', 'sssubtypeNumber', 'downloadsssubtype'],
-            select: ['classifyGoodNumber', 'subtypeNumber', 'ssubtypeNumber', 'downloadsssubtype'],
-            filterableColumns: {
-                classifyGoodNumber: [FilterOperator.EQ, FilterOperator.IN], 
-                subtypeNumber: [FilterOperator.EQ, FilterOperator.IN],
-                ssubtypeNumber: [FilterOperator.EQ, FilterOperator.IN],
-                downloadsssubtype: [FilterOperator.ILIKE],
-                Type: [FilterOperator.EQ, FilterOperator.IN], 
-
-            },
-          })
-    }
-
-    //#region GetByParam(MENAJE item) -----  GetClaves(MENAJE item)
-    async GetByParamMapperMenaje(dto: GetByParamMapperMenajeDto) {
-        try {
-            let query = await this.entity.query(`
+  //#region GetByParam(MENAJE item) -----  GetClaves(MENAJE item)
+  async GetByParamMapperMenaje(dto: GetByParamMapperMenajeDto) {
+    try {
+      const query = await this.entity.query(`
                 SELECT MEN.NO_BIEN, MEN.NO_BIEN_MENAJE, MEN.NO_REGISTRO, BI.DESCRIPCION FROM SERA.MENAJE MEN 
                 LEFT JOIN SERA.BIEN BI ON BI.NO_BIEN = MEN.NO_BIEN_MENAJE 
                 WHERE MEN.NO_BIEN = ${dto.GoodNo};
             `);
-            return {
-                statusCode: HttpStatus.OK,
-                message: ['OK'],
-                data: query,
-            };            
-        } catch (error) {
-            return {
-                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: error.message,
-                data: [],
-              };
-        }
-
+      return {
+        statusCode: HttpStatus.OK,
+        message: ['OK'],
+        data: query,
+      };
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error.message,
+        data: [],
+      };
     }
-    //#endregion GetByParam(MENAJE item) -----  GetClaves(MENAJE item)
-    
-    //#region QuerysOracle.txt -- CAT_ENTFED
-    async querysOracleCatFed() {
-        const results = await this.repositoryCatEntFed.find({
-            select: ["otkey", "otvalor"]
-        });
-        return {
-            statusCode: HttpStatus.OK,
-            message: ['OK'],
-            data: results,
-        };    
-    }
-    //#endregion QuerysOracle.txt -- CAT_ENTFED
+  }
+  //#endregion GetByParam(MENAJE item) -----  GetClaves(MENAJE item)
 
-    //#region MapperPA_BIENESDEPOSITARIA.cs primera consulta
-    async mapperPadepositaryAssets1(dto: GetByParamMapperMenajeDto) {
-        try {
-            let query = await this.entity.query(`
+  //#region QuerysOracle.txt -- CAT_ENTFED
+  async querysOracleCatFed() {
+    const results = await this.repositoryCatEntFed.find({
+      select: ['otkey', 'otvalor'],
+    });
+    return {
+      statusCode: HttpStatus.OK,
+      message: ['OK'],
+      data: results,
+    };
+  }
+  //#endregion QuerysOracle.txt -- CAT_ENTFED
+
+  //#region MapperPA_BIENESDEPOSITARIA.cs primera consulta
+  async mapperPadepositaryAssets1(dto: GetByParamMapperMenajeDto) {
+    try {
+      const query = await this.entity.query(`
                 SELECT BIEN, ESTATUS_BIEN, PROCESO_EXT_DOM, DESCRIPCION_BIEN, DESTINO, SS_TIPO_BIEN, S_TIPO_BIEN, COORD_ADMIN, TIPO_BIEN, UBICACION_ALMACEN , 
                 (SELECT COUNT(1) FROM SERA.MENAJE MEN WHERE MEN.NO_BIEN = BIEN) AS MENAJE 
                 FROM SERA.Z_CENTRO_OPERACION_REGIONAL Z 
                 WHERE BIEN = ${dto.GoodNo};
             `);
-            return {
-                statusCode: HttpStatus.OK,
-                message: ['OK'],
-                data: query,
-            };            
-        } catch (error) {
-            return {
-                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: error.message,
-                data: [],
-              };
-        }
-
+      return {
+        statusCode: HttpStatus.OK,
+        message: ['OK'],
+        data: query,
+      };
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error.message,
+        data: [],
+      };
     }
+  }
 
-    //#region MapperPA_BIENESDEPOSITARIA.cs Segunda Consulta
-    async mapperPadepositaryAssets2(dto: mapperPadepositaryAssets2Dto) {
-        try {
-
-            let strlQuery = `SELECT BIEN, ESTATUS_BIEN, PROCESO_EXT_DOM, DESCRIPCION_BIEN, DESTINO, SS_TIPO_BIEN, S_TIPO_BIEN, COORD_ADMIN, TIPO_BIEN, UBICACION_ALMACEN , 
+  //#region MapperPA_BIENESDEPOSITARIA.cs Segunda Consulta
+  async mapperPadepositaryAssets2(dto: mapperPadepositaryAssets2Dto) {
+    try {
+      let strlQuery = `SELECT BIEN, ESTATUS_BIEN, PROCESO_EXT_DOM, DESCRIPCION_BIEN, DESTINO, SS_TIPO_BIEN, S_TIPO_BIEN, COORD_ADMIN, TIPO_BIEN, UBICACION_ALMACEN , 
             (SELECT COUNT(1) FROM SERA.MENAJE MEN WHERE MEN.NO_BIEN = BIEN) AS MENAJE , CLASIF, ALMACEN_ID_ENTFED, VAL4
             FROM SERA.Z_CENTRO_OPERACION_REGIONAL Z`;
-            
-            if(dto.goodNo > 0){
-                strlQuery += ` WHERE BIEN = '${dto.goodNo}' `;
-            }else{
-                strlQuery += ` WHERE ESTATUS_BIEN = 'ADM' `;
-                strlQuery += `AND CLASIF IN('${dto.pClasif}') `;
-                if (dto.entFed > 0 && dto.goodType != 6){
-                    strlQuery += `AND ALMACEN_ID_ENTFED = ${dto.entFed}` ;
-                }
 
-                if (dto.entFed > 0 && dto.goodType == 6)
-                {
-                    strlQuery += `AND EXISTS (SELECT 1 FROM SERA.BIEN
+      if (dto.goodNo > 0) {
+        strlQuery += ` WHERE BIEN = '${dto.goodNo}' `;
+      } else {
+        strlQuery += ` WHERE ESTATUS_BIEN = 'ADM' `;
+        strlQuery += `AND CLASIF IN('${dto.pClasif}') `;
+        if (dto.entFed > 0 && dto.goodType != 6) {
+          strlQuery += `AND ALMACEN_ID_ENTFED = ${dto.entFed}`;
+        }
+
+        if (dto.entFed > 0 && dto.goodType == 6) {
+          strlQuery += `AND EXISTS (SELECT 1 FROM SERA.BIEN
                         WHERE NO_BIEN = Z.BIEN
                           AND (CASE WHEN VAL4 = 'DISTRITO FEDERAL' THEN 'CIUDAD DE MEXICO' ELSE VAL4 END) IN (
                             SELECT OTVALOR
                             FROM SERA.CAT_ENTFED
                             WHERE OTCLAVE = '${dto.entFed}'
                         ));`;
-                }
-            }
-            
-            let query = await this.entity.query(strlQuery);
-            return {
-                statusCode: HttpStatus.OK,
-                message: ['OK'],
-                data: query,
-            };            
-        } catch (error) {
-            return {
-                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: error.message,
-                data: [],
-              };
         }
+      }
 
+      const query = await this.entity.query(strlQuery);
+      return {
+        statusCode: HttpStatus.OK,
+        message: ['OK'],
+        data: query,
+      };
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error.message,
+        data: [],
+      };
     }
+  }
 
-    //#region MapperPA_BIENESDEPOSITARIA.cs Segunda Consulta
+  //#region MapperPA_BIENESDEPOSITARIA.cs Segunda Consulta
 
+  async pagorefDepositariasRatificar({
+    importe,
+    aux_refe1,
+  }: {
+    importe: number;
+    aux_refe1: string;
+  }) {
+    try {
+      const c1 = await this.entity.query(`
+      SELECT	REF.ID_PAGO, REF.NO_MOVIMIENTO, REF.FECHA, REF.REFERENCIA, REF.MONTO, REF.SUCURSAL, REF.NO_BIEN
+      FROM		sera.PAGOREF_DEPOSITARIAS REF
+      WHERE		REF.VALIDO_SISTEMA IN ('A','S')
+      AND			REF.CODIGO = (SELECT	CPG.RELACIONA
+                                                  FROM		sera.CTRLPAGOS_DEPOSITARIAS CPG
+                                                  WHERE		CPG.CVE_BANCO = REF.CVE_BANCO 
+                                                  AND			CPG.RELACIONA IS NOT NULL) :: numeric
+      AND			REF.MONTO = ${importe};
+        `);
 
+      const c2 = await this.entity.query(`
+        SELECT REFERENCIA, NO_BIEN, NO_NOMBRAMIENTO
+        FROM sera.NOMBRAMIENTOS_DEPOSITARIA ND
+       WHERE REFERENCIA LIKE '${aux_refe1}'
+         AND NOT EXISTS (SELECT 1
+                           FROM sera.TVALTABLA1
+                          WHERE NMTABLA = 7
+                            AND cast(OTCLAVE as int) IN (2,4,6,8)
+                            AND OTCLAVE = ND.TIPO_DEPOSITARIA);
+        `);
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: ['OK'],
+        data: {
+          c1: c1,
+          c2: c2,
+        },
+      };
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error.message,
+        data: [],
+      };
+    }
+  }
+
+  async pagorefDepositariasAuxRefe({ aux_refe1 }: { aux_refe1: string }) {
+    try {
+      const c2 = await this.entity.query(`
+        SELECT REFERENCIA, NO_BIEN, NO_NOMBRAMIENTO
+        FROM sera.NOMBRAMIENTOS_DEPOSITARIA ND
+       WHERE REFERENCIA LIKE '${aux_refe1}'
+         AND NOT EXISTS (SELECT 1
+                           FROM sera.TVALTABLA1
+                          WHERE NMTABLA = 7
+                            AND cast(OTCLAVE as int) IN (2,4,6,8)
+                            AND OTCLAVE = ND.TIPO_DEPOSITARIA);
+        `);
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: ['OK'],
+        data: {
+          c2: c2,
+        },
+      };
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error.message,
+        data: [],
+      };
+    }
+  }
 }
