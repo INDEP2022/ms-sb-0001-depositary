@@ -35,6 +35,7 @@ import { SaeInvVentasTModule } from './modules/sae-inv-ventas-t/sae-inv-ventas-t
 import { SaeItemsDestTmpVModule } from './modules/sae-items-dest-tmp-v/sae-items-dest-tmp-v.module';
 import { SaeItemsDonacTmpVModule } from './modules/sae-items-donac-tmp-v/sae-items-donac-tmp-v.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { FcondepoconcilpagModule } from './modules/fcondepoconcilpag/fcondepoconcilpag.module';
 
 @Module({
   imports: [
@@ -100,6 +101,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     SaeInvVentasTModule,
     SaeItemsDestTmpVModule,
     SaeItemsDonacTmpVModule,
+    FcondepoconcilpagModule,
   ],
   controllers: [],
   providers: [],
