@@ -31,14 +31,17 @@ import { RequestsDepositaryModule } from './modules/sera/requests-depositary/req
 import { PaymentRefModule } from './modules/sera/payment-ref/payment-ref.module';
 import { ApplicationModule } from './modules/application/application.module';
 import { DepositaryQueriesModule } from './modules/depositary-queries/depositary-queries.module';
+import { SaeInvVentasTModule } from './modules/sae-inv-ventas-t/sae-inv-ventas-t.module';
+import { SaeItemsDestTmpVModule } from './modules/sae-items-dest-tmp-v/sae-items-dest-tmp-v.module';
+import { SaeItemsDonacTmpVModule } from './modules/sae-items-donac-tmp-v/sae-items-donac-tmp-v.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot(
-      configService.getTypeOrmConfig(),),
+    TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
     WinstonModule.forRoot({
       level: 'debug',
       format: winston.format.combine(
@@ -68,6 +71,7 @@ import { DepositaryQueriesModule } from './modules/depositary-queries/depositary
         new winston.transports.Console({ level: 'debug' }),
       ],
     }),
+    ScheduleModule.forRoot(),
     DepositaryPaymentDetModule,
     DepositaryDetRepoModule,
     DepositaryAppointmentModule,
@@ -93,8 +97,11 @@ import { DepositaryQueriesModule } from './modules/depositary-queries/depositary
     PaymentRefModule,
     ApplicationModule,
     DepositaryQueriesModule,
+    SaeInvVentasTModule,
+    SaeItemsDestTmpVModule,
+    SaeItemsDonacTmpVModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}
