@@ -15,6 +15,7 @@ import { RealStateSale, RealStateSaleCurrent } from './dto/real-state-sale.dto';
 import { ComerEventEntity } from './entity/comer-event.entity';
 import { ComerLotsEntity } from './entity/comer-lots.entity';
 import { ComerParameterModEntity } from './entity/comer-parameter-mod.entity';
+import { LocalDate } from 'src/shared/utils/local-date';
 
 @Injectable()
 export class ValidatePaymentsRefService {
@@ -573,6 +574,8 @@ export class ValidatePaymentsRefService {
                 var TMP_PAGOACT = 0
                 var TMP_PAGOACT1 = 0
 
+                const dateNow = LocalDate.getNow();
+
                 this.G_EVENTO = params.eventId
 
                 const SPBM_CLIENTE: any[] = await this.entity.query(`SELECT  DISTINCT(LOT_1.ID_CLIENTE) 
@@ -702,7 +705,7 @@ export class ValidatePaymentsRefService {
                                                                 )
                                                                 VALUES
                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                 ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                 ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                 )`)
                                                         }
                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -756,7 +759,7 @@ export class ValidatePaymentsRefService {
                                                                         )
                                                                         VALUES
                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                         ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date)`)
+                                                                         ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE))`)
                                                                 }
                                                                 if (NEW_ABONO == TMP_MONTO) {
                                                                         await this.entity.query(`UPDATE sera.TMP_PAGOSGENS_DEP
@@ -806,7 +809,7 @@ export class ValidatePaymentsRefService {
                                                                                 )
                                                                                 VALUES
                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                 ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                 ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                 )`)
                                                                         }
 
@@ -856,7 +859,7 @@ export class ValidatePaymentsRefService {
                                                                                         )
                                                                                         VALUES
                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                         ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                         ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                         )`)
                                                                                 }
                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -907,7 +910,7 @@ export class ValidatePaymentsRefService {
                                                                                                 )
                                                                                                 VALUES
                                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                                 ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                 ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                 )`)
                                                                                         }
                                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -957,7 +960,7 @@ export class ValidatePaymentsRefService {
                                                                                                         )
                                                                                                         VALUES
                                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                                         ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                         ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                         )`)
                                                                                                 }
                                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -1008,7 +1011,7 @@ export class ValidatePaymentsRefService {
                                                                                                                )
                                                                                                                VALUES
                                                                                                                (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                )`)
                                                                                                         }
                                                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -1057,7 +1060,7 @@ export class ValidatePaymentsRefService {
                                                                                                                         )
                                                                                                                         VALUES
                                                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                         )`)
                                                                                                                 }
                                                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -1106,7 +1109,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                 )
                                                                                                                                 VALUES
                                                                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                 )`)
                                                                                                                         }
                                                                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -1154,7 +1157,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                         )
                                                                                                                                         VALUES
                                                                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                         )`)
                                                                                                                                 }
                                                                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -1202,7 +1205,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                 )
                                                                                                                                                 VALUES
                                                                                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                 )`)
                                                                                                                                         }
                                                                                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -1251,7 +1254,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                         )
                                                                                                                                                         VALUES
                                                                                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                         )`)
                                                                                                                                                 }
                                                                                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -1300,7 +1303,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                                 )
                                                                                                                                                                 VALUES
                                                                                                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                                 )`)
                                                                                                                                                         }
                                                                                                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -1348,7 +1351,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                                         )
                                                                                                                                                                         VALUES
                                                                                                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                                         )`)
                                                                                                                                                                 }
                                                                                                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -1397,7 +1400,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                                                 )
                                                                                                                                                                                 VALUES
                                                                                                                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                                                 )`)
                                                                                                                                                                         }
                                                                                                                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -1446,7 +1449,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                                                         )
                                                                                                                                                                                         VALUES
                                                                                                                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                                                         )`)
                                                                                                                                                                                 }
                                                                                                                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -1494,7 +1497,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                                                                 )
                                                                                                                                                                                                 VALUES
                                                                                                                                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                                                                 )`)
                                                                                                                                                                                         }
                                                                                                                                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -1543,7 +1546,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                                                                         )
                                                                                                                                                                                                         VALUES
                                                                                                                                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                                                                         )`)
                                                                                                                                                                                                 }
                                                                                                                                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -1591,7 +1594,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                                                                                 )
                                                                                                                                                                                                                 VALUES
                                                                                                                                                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                                                                                 )`)
                                                                                                                                                                                                         }
                                                                                                                                                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -1640,7 +1643,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                                                                                         )
                                                                                                                                                                                                                         VALUES
                                                                                                                                                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                                                                                         )`)
                                                                                                                                                                                                                 }
                                                                                                                                                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -1689,7 +1692,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                                                                                         )
                                                                                                                                                                                                                         VALUES
                                                                                                                                                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                                                                                                                                                         ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                                                                                         ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                                                                                         )`)
                                                                                                                                                                                                                 }
                                                                                                                                                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -1725,7 +1728,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                                                                                 )
                                                                                                                                                                                                                 VALUES
                                                                                                                                                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                                                                                                                                                 ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                                                                                 ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                                                                                 )`)
                                                                                                                                                                                                         }
                                                                                                                                                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -1762,7 +1765,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                                                                         )
                                                                                                                                                                                                         VALUES
                                                                                                                                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                                                                         )`)
                                                                                                                                                                                                 }
                                                                                                                                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -1798,7 +1801,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                                                                 )
                                                                                                                                                                                                 VALUES
                                                                                                                                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                                                                 )`)
                                                                                                                                                                                         }
                                                                                                                                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -1834,7 +1837,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                                                         )
                                                                                                                                                                                         VALUES
                                                                                                                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                                                         )`)
                                                                                                                                                                                 }
                                                                                                                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -1870,7 +1873,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                                                 )
                                                                                                                                                                                 VALUES
                                                                                                                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                                                 )`)
                                                                                                                                                                         }
                                                                                                                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -1906,7 +1909,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                                         )
                                                                                                                                                                         VALUES
                                                                                                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                                         )`)
                                                                                                                                                                 }
                                                                                                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -1942,7 +1945,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                                 )
                                                                                                                                                                 VALUES
                                                                                                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                                 )`)
                                                                                                                                                         }
                                                                                                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -1978,7 +1981,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                         )
                                                                                                                                                         VALUES
                                                                                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                         )`)
                                                                                                                                                 }
                                                                                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -2014,7 +2017,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                                 )
                                                                                                                                                 VALUES
                                                                                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                                 )`)
                                                                                                                                         }
                                                                                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -2050,7 +2053,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                         )
                                                                                                                                         VALUES
                                                                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                         )`)
                                                                                                                                 }
                                                                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -2086,7 +2089,7 @@ export class ValidatePaymentsRefService {
                                                                                                                                 )
                                                                                                                                 VALUES
                                                                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                                 )`)
                                                                                                                         }
                                                                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -2122,7 +2125,7 @@ export class ValidatePaymentsRefService {
                                                                                                                         )
                                                                                                                         VALUES
                                                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                         )`)
                                                                                                                 }
                                                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -2158,7 +2161,7 @@ export class ValidatePaymentsRefService {
                                                                                                                 )
                                                                                                                 VALUES
                                                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                                 )`)
                                                                                                         }
                                                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -2194,7 +2197,7 @@ export class ValidatePaymentsRefService {
                                                                                                         )
                                                                                                         VALUES
                                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                         )`)
                                                                                                 }
                                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -2230,7 +2233,7 @@ export class ValidatePaymentsRefService {
                                                                                                 )
                                                                                                 VALUES
                                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                                 )`)
                                                                                         }
                                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -2266,7 +2269,7 @@ export class ValidatePaymentsRefService {
                                                                                         )
                                                                                         VALUES
                                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                         )`)
                                                                                 }
                                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -2302,7 +2305,7 @@ export class ValidatePaymentsRefService {
                                                                                 )
                                                                                 VALUES
                                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                                 )`)
                                                                         }
                                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -2338,7 +2341,7 @@ export class ValidatePaymentsRefService {
                                                                         )
                                                                         VALUES
                                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                         )`)
                                                                 }
                                                                 if (NEW_ABONO == TMP_MONTO) {
@@ -2374,7 +2377,7 @@ export class ValidatePaymentsRefService {
                                                                 )
                                                                 VALUES
                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO_FIN},    ${V3_MANDA},
-                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, current_date
+                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'N', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                 )`)
                                                         }
                                                         if (NEW_ABONO == TMP_MONTO) {
@@ -2433,7 +2436,7 @@ export class ValidatePaymentsRefService {
                                                         )
                                                         VALUES
                                                         (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${MONTO_DEV},    ${V3_MANDA},
-                                                         ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'D', ${params.eventId}, current_date
+                                                         ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'D', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                         )`)
                                                 }
                                                 NEW_ABONO = MONTO_DEV;
@@ -2480,7 +2483,7 @@ export class ValidatePaymentsRefService {
                                                                 )
                                                                 VALUES
                                                                 (${this.G_PKREFGEN},        ${TMP_IDPAGO},        ${V3_ID_LOTE},        ${TMP_MONTO},    ${V3_MANDA},
-                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'D', ${params.eventId}, current_date
+                                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${TMP_REFE},        'D', ${params.eventId}, CAST('${dateNow}' AS DATE)
                                                                 );`)
                                                         await this.entity.query(`
                                                                 UPDATE  sera.TMP_PAGOSGENS_DEP
@@ -3370,6 +3373,8 @@ export class ValidatePaymentsRefService {
         }
 
         async insDispBm(client: number, quien: number, event: number) {
+                const dateNow = LocalDate.getNow();
+
                 var I_SUMA = 0;
 
                 if (quien == 6) {
@@ -3386,7 +3391,7 @@ export class ValidatePaymentsRefService {
                                         VALUES
                                         (    ${event},                ${this.G_PKREFGEN},              ${dispersion.ID_PAGO},    ${dispersion.LOTE}, ${I_SUMA},
                                                 ${dispersion.MANDATO},    ${dispersion.MONSIVA},   ${dispersion.ABONADO},    ${dispersion.IVA}, ${dispersion.TIPO},
-                                                ${dispersion.MONCHATA},    current_date
+                                                ${dispersion.MONCHATA},    CAST('${dateNow}' AS DATE)
                                         );`)
                                 }
                         };
@@ -3754,7 +3759,7 @@ export class ValidatePaymentsRefService {
                 var C_MONTOIVA = 0.0
                 var C_IVA = 0.0
                 var C_NOMONIVA = 0.0
-
+                const dateNow = LocalDate.getNow();
 
 
 
@@ -3786,7 +3791,7 @@ export class ValidatePaymentsRefService {
                                 )
                                 VALUES
                                 (${this.G_PKREFGEN},        ${element.id_pago},        ${element.id_lote},        ${element.monto},    ${element.no_transferente},
-                                 ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${element.referencia},        'N', ${event}, current_date
+                                 ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${element.referencia},        'N', ${event}, CAST('${dateNow}' AS DATE)
                                 )`)
                                 await this.regularPay(element.id_lote, V_DIRECCION, phase, element.monto, element.id_pago)
                         });
@@ -3820,7 +3825,7 @@ export class ValidatePaymentsRefService {
                                 )
                                 VALUES
                                 (${this.G_PKREFGEN},        ${element.id_pago},        ${element.id_lote},        ${element.monto},    ${element.no_transferente},
-                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${element.referencia},        'N', ${event}, current_date
+                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${element.referencia},        'N', ${event}, CAST('${dateNow}' AS DATE)
                                 )`)
                                 await this.regularPay(element.id_lote, V_DIRECCION, phase, element.monto, element.id_pago)
                         });
@@ -3852,7 +3857,7 @@ export class ValidatePaymentsRefService {
                                 )
                                 VALUES
                                 (${this.G_PKREFGEN},        ${element.id_pago},        ${element.id_lote},        ${element.monto},    ${element.no_transferente},
-                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${element.referencia},        'N', ${event}, current_date
+                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${element.referencia},        'N', ${event}, CAST('${dateNow}' AS DATE)
                                 )`)
                                 await this.regularPay(element.id_lote, V_DIRECCION, phase, element.monto, element.id_pago)
                         });
@@ -3884,7 +3889,7 @@ export class ValidatePaymentsRefService {
                                 )
                                 VALUES
                                 (${this.G_PKREFGEN},        ${element.id_pago},        ${element.id_lote},        ${element.monto},    ${element.no_transferente},
-                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${element.referencia},        'N', ${event}, current_date
+                                        ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${element.referencia},        'N', ${event}, CAST('${dateNow}' AS DATE)
                                 )`)
                                 await this.regularPay(element.id_lote, V_DIRECCION, phase, element.monto, element.id_pago)
                         });
@@ -3908,7 +3913,7 @@ export class ValidatePaymentsRefService {
                                         )
                                         VALUES
                                         (${this.G_PKREFGEN},        ${element.id_pago},        ${element.id_lote},        ${element.monto},    ${element.no_transferente},
-                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${element.referencia},        'N', ${event}, current_date
+                                                ${C_NOMONIVA},        ${C_MONTOIVA},        ${C_IVA},        ${element.referencia},        'N', ${event}, CAST('${dateNow}' AS DATE)
                                         )`)
                                 await this.regularPay(element.id_lote, V_DIRECCION, phase, element.monto, element.id_pago)
                         });
@@ -3925,6 +3930,8 @@ export class ValidatePaymentsRefService {
                 var C_MONTOIVA = 0.0
                 var C_IVA = 0.0
                 var C_NOMONIVA = 0.0
+                const dateNow = LocalDate.getNow();
+
                 await this.iniDGenRef(event);
 
                 var I1: any[] = await this.entity.query(`SELECT    PAG.ID_LOTE, PAG.ID_PAGO, PAG.MONTO, PAG.REFERENCIA, LOT.NO_TRANSFERENTE as manda, LOT.PORC_APP_IVA as pciva, LOT.PORC_NOAPP_IVA
@@ -3948,15 +3955,16 @@ export class ValidatePaymentsRefService {
                                 )
                                 VALUES
                                 (${this.G_PKREFGEN},        ${element.idpago},        ${element.id_lote},        ${element.monto},    ${V_MANDA},
-                                ${C_NOMONIVA},        ${C_NOMONIVA},        ${C_IVA},        ${element.referencia},        'N', ${event},current_date
+                                ${C_NOMONIVA},        ${C_NOMONIVA},        ${C_IVA},        ${element.referencia},        'N', ${event},CAST('${dateNow}' AS DATE)
                         )`)
                 });
 
         }
 
         async actClienteProc(client: number, event: number) {
+                const dateNow = LocalDate.getNow();
                 return await this.entity.query(` UPDATE    sera.COMER_CLIENTESXEVENTO
-                        SET    PROCESADO = 'S', FECHA_EJECUCION = current_date
+                        SET    PROCESADO = 'S', FECHA_EJECUCION = CAST('${dateNow}' AS DATE)
                         WHERE    ID_EVENTO = ${event}
                         AND    ID_CLIENTE = ${client}
                 `)
@@ -4610,6 +4618,7 @@ export class ValidatePaymentsRefService {
                 var BR_ACUMULADO = 0
                 var V_ID_LOTE = 0
                 var V_ID_TPEVENTO = 0
+                const dateNow = LocalDate.getNow();
 
 
                 const result: any[] = await this.entity.query(`SELECT ID_TPEVENTO FROM sera.COMER_EVENTOS WHERE ID_EVENTO = ${params.event}`)
@@ -4658,7 +4667,7 @@ export class ValidatePaymentsRefService {
                                         AND VALIDO_SISTEMA = 'S'
                                         AND IDORDENINGRESO IS  NULL`)
                                 await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
-                                        SELECT NO_BIEN, ESTATUS, current_date+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
+                                        SELECT NO_BIEN, ESTATUS, CAST('${dateNow}' AS DATE)+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
                                         FROM sera.bien BIE
                                         WHERE ESTATUS IN ('VPP','VPT')
                                         AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
@@ -4853,7 +4862,7 @@ export class ValidatePaymentsRefService {
                                         AND VALIDO_SISTEMA = 'S'
                                         AND IDORDENINGRESO IS  NULL`)
                                 await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
-                                        SELECT NO_BIEN, ESTATUS, current_date+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
+                                        SELECT NO_BIEN, ESTATUS, CAST('${dateNow}' AS DATE)+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
                                         FROM sera.bien BIE
                                         WHERE ESTATUS IN ('VPP','VPT')
                                         AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
@@ -5033,6 +5042,7 @@ export class ValidatePaymentsRefService {
                 var BR_ACUMULADO = 0
                 var V_ID_LOTE = 0
                 var V_ID_TPEVENTO = 0
+                const dateNow = LocalDate.getNow();
 
 
                 const result: any[] = await this.entity.query(`SELECT ID_TPEVENTO FROM sera.COMER_EVENTOS WHERE ID_EVENTO = ${params.event}`)
@@ -5080,7 +5090,7 @@ export class ValidatePaymentsRefService {
                                         AND VALIDO_SISTEMA = 'S'
                                         AND IDORDENINGRESO IS  NULL`)
                         await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
-                                        SELECT NO_BIEN, ESTATUS, current_date+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
+                                        SELECT NO_BIEN, ESTATUS, CAST('${dateNow}' AS DATE)+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
                                         FROM sera.bien BIE
                                         WHERE ESTATUS IN ('VPP','VPT')
                                         AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
@@ -7675,6 +7685,7 @@ export class ValidatePaymentsRefService {
                 var D: number
                 var APLICAPEN: number
                 var P_PAGO = 0;
+                const dateNow = LocalDate.getNow();
 
                 this.DISPERSIONPEN = []
                 D = 0
@@ -7841,7 +7852,7 @@ export class ValidatePaymentsRefService {
                                         VALUES
                                         (  ${element.ID_EVENTO},${element.ID_PAGOREFGENS}, ${element.ID_PAGO},        ${element.ID_LOTE},
                                            ${element.MONTO},    ${element.NO_TRANSFERENTE},${element.MONTO_NOAPP_IVA},${element.MONTO_APP_IVA},
-                                           ${element.IVA},      '${element.TIPO}',           ${element.MONTO_CHATARRA},  current_date
+                                           ${element.IVA},      '${element.TIPO}',           ${element.MONTO_CHATARRA},  CAST('${dateNow}' AS DATE)
                                         )`)
                                         await this.entity.query(` UPDATE sera.COMER_LOTES
                                                 SET VALIDO_SISTEMA = 'S',

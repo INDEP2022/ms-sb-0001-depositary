@@ -813,6 +813,7 @@ export class PaymentRefService {
         lMontoSinIva = 0.0;
         lXcentIva = 0.0;
         lXCubrir = 0.0;
+        const dateNow = LocalDate.getNow();
 
         this.gSumaTot = await this.fillPayments({ name: dto.pOne, person: dto.pTwo, date: dto.pDate, phase: 1 }).then((res) => {
             return res.data.lDepTot;
@@ -847,7 +848,7 @@ export class PaymentRefService {
                     iva: this.round(this.gIva),
                     amountIva: this.round(lXcentIva),
                     noAppointment: this.gNombramiento,
-                    dateProcess: new Date(),
+                    dateProcess: new Date(dateNow),
                     type: 'I',
                     insert: 'NW',
                     payCoverId: deposito.payId,
@@ -879,7 +880,7 @@ export class PaymentRefService {
                         iva: this.round(this.gIva),
                         amountIva: this.round(lXcentIva),
                         noAppointment: this.gNombramiento,
-                        dateProcess: new Date(),
+                        dateProcess: new Date(dateNow),
                         type: 'I',
                         insert: 'NW',
                         payCoverId: deposito.payId,
@@ -907,7 +908,7 @@ export class PaymentRefService {
                         iva: this.round(this.gIva),
                         amountIva: this.round(lXcentIva),
                         noAppointment: this.gNombramiento,
-                        dateProcess: new Date(),
+                        dateProcess: new Date(dateNow),
                         type: 'I',
                         insert: 'NW',
                         payCoverId: deposito.payId,
@@ -937,7 +938,7 @@ export class PaymentRefService {
                     iva: this.round(this.gIva),
                     amountIva: this.round(lXcentIva),
                     noAppointment: this.gNombramiento,
-                    dateProcess: new Date(),
+                    dateProcess: new Date(dateNow),
                     type: 'I',
                     insert: 'NW',
                     payCoverId: deposito.payId,
@@ -1220,6 +1221,7 @@ export class PaymentRefService {
         const gDepositos = this.gDepositos;
         const gDispercion = this.gDispersion;
         let lDispercion: any ={};
+        const dateNow = LocalDate.getNow();
 
         for (const depos of gDepositos) {
             for (const dispersion of gDispercion) {
@@ -1248,7 +1250,7 @@ export class PaymentRefService {
                                 deduxcent: dispersion.deduxcent,
                                 deduValue: this.round(dispersion.deduValue),
                                 noAppointment: dispersion.noAppointment,
-                                dateProcess: new Date(),
+                                dateProcess: new Date(dateNow),
                                 type: 'I',
                                 insert: 'NW',
                                 payCoverId: depos.payId,
@@ -1284,7 +1286,7 @@ export class PaymentRefService {
                                 deduxcent: dispersion.deduxcent,
                                 deduValue: this.round(dispersion.deduValue),
                                 noAppointment: dispersion.noAppointment,
-                                dateProcess: new Date(),
+                                dateProcess: new Date(dateNow),
                                 type: 'I',
                                 insert: 'NW',
                                 payCoverId: depos.payId,
@@ -1314,7 +1316,7 @@ export class PaymentRefService {
                                 deduxcent: dispersion.deduxcent,
                                 deduValue: this.round(dispersion.deduValue),
                                 noAppointment: dispersion.noAppointment,
-                                dateProcess: new Date(),
+                                dateProcess: new Date(dateNow),
                                 type: 'I',
                                 insert: 'NW',
                                 payCoverId: depos.payId,
