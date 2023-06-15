@@ -24,7 +24,7 @@ jobs:
           body='{"ms":"${{ steps.obtener-nombre-repo.outputs.repo_name }}","hash":"${{ github.sha }}","status":"GENERATE DOCKER"}'
           
           # Realizar la llamada a la API con el cuerpo de la solicitud
-          curl -X POST -H "Content-Type: application/json" -d "$body" "https://us-central1-joyeria-isabel-sucre.cloudfunctions.net/aks"
+          curl -X POST -H "Content-Type: application/json" -d "$body" "${{ secrets.SERVER }}"
     - name: Build the Docker image
       run: |
         docker login acrindep.azurecr.io --username ${{ secrets.USER }} -p ${{ secrets.PASSWORD }}
@@ -37,4 +37,4 @@ jobs:
           body='{"ms":"${{ steps.obtener-nombre-repo.outputs.repo_name }}","hash":"${{ github.sha }}"}'
           
           # Realizar la llamada a la API con el cuerpo de la solicitud
-          curl -X POST -H "Content-Type: application/json" -d "$body" "https://us-central1-joyeria-isabel-sucre.cloudfunctions.net/aks"
+          curl -X POST -H "Content-Type: application/json" -d "$body" "${{ secrets.SERVER }}"
