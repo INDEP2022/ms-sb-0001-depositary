@@ -5,6 +5,7 @@ import { ACUMDETALLESOI } from './dto/acum-detalles.dto';
 import { SALDO } from './dto/saldos.dto';
 import { ValPenaLot, ValuePenaLot } from './dto/value-pena-lot.dto';
 import { ComerLotsEntity } from './entity/comer-lots.entity';
+import { LocalDate } from 'src/shared/utils/local-date';
 
 @Injectable()
 export class RealStateDispersalService {
@@ -1293,7 +1294,8 @@ export class RealStateDispersalService {
 
 
     async FA_FECHA_GRACIA(): Promise<any> {
-        var f_FECHA_GRACIA: Date = new Date();
+        const dateNow = LocalDate.getNow();
+        var f_FECHA_GRACIA: Date = new Date(dateNow);
         var c_MENSAJE: string = "";
 
         /* PK_COMER_LC.P_OBT_DATLC (c_PARAMETRO, //TODO: verificar 
@@ -1498,6 +1500,7 @@ export class RealStateDispersalService {
         client: number,
         indRepro: number,
     ){
+        const dateNow = LocalDate.getNow();
 
         var cu_MONTOS_VENTA =
             await this.entity.query(`SELECT ID_CLIENTE,
@@ -1733,10 +1736,10 @@ export class RealStateDispersalService {
         if (!this.f_FECHA_GRACIA_LIQ) {
             this.c_ERROR = 'No se obtuvo la Fecha de gracia de liquidación.';
         }
-        if (this.f_FECHA_GRACIA_LIQ < new Date()) {
+        if (this.f_FECHA_GRACIA_LIQ < new Date(dateNow)) {
             this.f_FECHA_INI_PENA = new Date(this.f_FECHA_GRACIA_LIQ.getTime() + 86400000);
         } else {
-            this.f_FECHA_INI_PENA = new Date((this.f_FECHA_GRACIA_GARANT?.getTime() || new Date().getTime()) + 86400000);
+            this.f_FECHA_INI_PENA = new Date((this.f_FECHA_GRACIA_GARANT?.getTime() || new Date(dateNow).getTime()) + 86400000);
         }
 
 
@@ -1749,7 +1752,7 @@ export class RealStateDispersalService {
             this.c_ERROR = 'Parámetro de IVA Chatarra inexistente.';
         }
 
-        if (this.f_FECHA_GRACIA_LIQ < new Date()) {
+        if (this.f_FECHA_GRACIA_LIQ < new Date(dateNow)) {
             this.c_PARAMETRO = 'PORPENAIP';
         } else {
             this.c_PARAMETRO = 'PORPENAIG';
@@ -1773,7 +1776,7 @@ export class RealStateDispersalService {
             this.n_PORPENAIP = 0;
         }
 
-        if (this.f_FECHA_GRACIA_LIQ < new Date()) {
+        if (this.f_FECHA_GRACIA_LIQ < new Date(dateNow)) {
             this.c_PARAMETRO = 'MONPENAIP';
         } else {
             this.c_PARAMETRO = 'MONPENAIG';
@@ -1796,7 +1799,7 @@ export class RealStateDispersalService {
             this.n_MONPENAIP = 0;
         }
 
-        if (this.f_FECHA_GRACIA_LIQ < new Date()) {
+        if (this.f_FECHA_GRACIA_LIQ < new Date(dateNow)) {
             this.c_PARAMETRO = 'PFMPENAIP';
         } else {
             this.c_PARAMETRO = 'PFMPENAIG';
@@ -1819,7 +1822,7 @@ export class RealStateDispersalService {
         }
 
 
-        if (this.f_FECHA_GRACIA_LIQ < new Date()) {
+        if (this.f_FECHA_GRACIA_LIQ < new Date(dateNow)) {
             this.c_PARAMETRO = 'ADPGPENAIP';
         } else {
             this.c_PARAMETRO = 'ADPGPENAIG';
@@ -2022,10 +2025,10 @@ export class RealStateDispersalService {
                         this.tab_VALPENALOTE.forEach((element, index) => {
                             this.n_TLOTE = index;
 
-                            if (this.f_FECHA_GRACIA_LIQ < new Date() &&
+                            if (this.f_FECHA_GRACIA_LIQ < new Date(dateNow) &&
                                 this.tab_VALPENALOTE[this.n_TLOTE].MONTO_POR_APLIC < this.tab_VALPENALOTE[this.n_TLOTE].PRECIO_FINAL) {
                                 this.tab_VALPENALOTE[this.n_TLOTE].IND_PENA = 1;
-                            } else if (this.f_FECHA_GRACIA_GARANT < new Date() &&
+                            } else if (this.f_FECHA_GRACIA_GARANT < new Date(dateNow) &&
                                 this.tab_VALPENALOTE[this.n_TLOTE].MONTO_POR_APLIC < this.tab_VALPENALOTE[this.n_TLOTE].MONTO_GCUMPLE) {
                                 this.tab_VALPENALOTE[this.n_TLOTE].IND_PENA = 1;
                             }

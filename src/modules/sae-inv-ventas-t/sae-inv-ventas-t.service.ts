@@ -41,6 +41,7 @@ export class SaeInvVentasTService {
       let V_DESC_UNIDAD: string;
       let V_UNIDAD: string;
       let VN_STATUS: number;
+      const dateNow = LocalDate.getNow();
 
       const q = `
         SELECT CVE_INVENTARIO, ITEM, NUMERO_INVENTARIO, NO_BIEN_SIAB, CANTIDAD, UOM_CODE, SUBINVENTARIO, LOCALIZADOR, FECHA_EFECTIVA_TRANSACCION,
@@ -574,7 +575,7 @@ export class SaeInvVentasTService {
         await this.entity.query(`
             UPDATE nsbddb.SAE_INV_VENTAS_T 
             SET STATUS = ${VN_STATUS},
-                LAST_UPDATE_DATE= CURRENT_DATE
+                LAST_UPDATE_DATE= CAST('${dateNow}' AS DATE)
             WHERE NUMERO_INVENTARIO    ='${VAL_VEN.numero_inventario}'
             AND SUBINVENTARIO        ='${VAL_VEN.subinventario}'
             AND CANTIDAD             = ${VAL_VEN.cantidad}

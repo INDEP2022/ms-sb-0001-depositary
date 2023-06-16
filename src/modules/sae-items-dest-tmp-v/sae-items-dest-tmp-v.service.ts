@@ -23,6 +23,8 @@ export class SaeItemsDestTmpVService {
       let V_DESC_UNIDAD: string;
       let V_UNIDAD: string;
       let VN_STATUS: number;
+      const dateNow = LocalDate.getNow();
+
       const q = `
         SELECT CVE_INVENTARIO, ITEM, NUMERO_INVENTARIO, NO_BIEN_SIAB, CANTIDAD, UOM_CODE, SUBINVENTARIO, LOCALIZADOR, FECHA_EFECTIVA_TRANSACCION,
         NUMERO_GESTION, BIEN_RELACIONADO, SOLICITUD_TRANSFERENCIA, FECHA_SOLICITUD, NUMERO_EXPEDIENTE, FECHA_EXPEDIENTE, VIA_RECEPCION_SOLICITUD,
@@ -556,7 +558,7 @@ export class SaeItemsDestTmpVService {
         await this.entity.query(`
         UPDATE nsbddb.SAE_ITEMS_DEST_TMP_V 
         SET STATUS = ${VN_STATUS},
-            LAST_UPDATE_DATE= CURRENT_DATE
+            LAST_UPDATE_DATE= CAST('${dateNow}' AS DATE)
         WHERE NUMERO_INVENTARIO    ='${VAL_DES.numero_inventario}'
         AND SUBINVENTARIO        ='${VAL_DES.subinventario}'
         AND CANTIDAD             = ${VAL_DES.cantidad}

@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { SearchPayment } from './dto/search-payment.dto';
 import { ValidPayment } from './dto/valid-payment.dto';
 import { ComerLotsEntity } from './entity/comer-lots.entity';
+import { LocalDate } from 'src/shared/utils/local-date';
 
 @Injectable()
 export class ComerPaymentService {
@@ -20,12 +21,13 @@ export class ComerPaymentService {
     }
 
     async paymentProcess(){
+        const dateNow = LocalDate.getNow();
         var  LV_LOTE_PUBLICO  = 0 
         var LV_DES_INCONS = ""
         var LV_TIPO_INCON = 0
         var LV_VALREFER = 0
         var LV_VALMVTO = 0
-        var LV_FECHA = new Date()
+        var LV_FECHA = new Date(dateNow)
         var LV_TIPO_FECHA  = 0;
         var LV_VAL_SISTEMA = "";
         var LV_ID_TIPO_SAT = 0
@@ -238,7 +240,7 @@ export class ComerPaymentService {
              values(
                     ${LV_ID_PAGO}    ,'${LV_REFERENCIA}' ,'${LV_REFERENCIA}'     ,'${element.nummov}'        ,'${LV_FECHA}'    ,${LV_IFDSC}      ,
                     '${element.importedep}','${LV_DESCRIPCION}',${LV_CODIGO}         ,'${element.IDORDENINGRESO}','${element.cbctabn}' ,${LV_ID_TIPO_SAT},
-                    ${LV_TIPO}       ,'${LV_VAL_SISTEMA}',${LV_ID_LOTE}        ,'${LV_RESULTADO}'      ,'${new Date()}','${LV_SUCURSAL}'   ,
+                    ${LV_TIPO}       ,'${LV_VAL_SISTEMA}',${LV_ID_LOTE}        ,'${LV_RESULTADO}'      ,CAST('${dateNow}' AS DATE),'${LV_SUCURSAL}'   ,
                     '${LV_REGISTRO}'        
                     )`)
 
@@ -808,12 +810,13 @@ export class ComerPaymentService {
     }
 
     async filesPayment(typeInconci:number,typeAction:number){
+        const dateNow = LocalDate.getNow();
         var LV_TOTREGIS    :number;
         var LV_TIPO_PAGO   :string;
         var LV_PAGO        :number
         var LV_MSJSALID    :string;
         var LV_REGISTRO    :number
-        var LV_FREGISTRO   = new Date();
+        var LV_FREGISTRO   = new Date(dateNow);
         var lv_RESULTADO   = 'Referencia Valida';
         var P_MSG_PROCESO   :string
         var P_EST_PROCESO   :number

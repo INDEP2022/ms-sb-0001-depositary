@@ -22,6 +22,7 @@ export class SaeItemsDonacTmpVService {
       let V_DESC_UNIDAD: string;
       let V_UNIDAD: string;
       let VN_STATUS: number;
+      const dateNow = LocalDate.getNow();
 
       const q = `
         SELECT CVE_INVENTARIO, ITEM, NUMERO_INVENTARIO, NO_BIEN_SIAB, CANTIDAD, UOM_CODE, SUBINVENTARIO, LOCALIZADOR, FECHA_EFECTIVA_TRANSACCION,
@@ -264,7 +265,7 @@ export class SaeItemsDonacTmpVService {
                     '${VAL_DON.instancebpel}', ${VAL_DON.siab_no_bien_ref}, '${VAL_DON.siab_status_bien}', '${VAL_DON.desc_bien}', ${VAL_DON.transaction_type_id},
                     '${VAL_DON.origen}', '${VAL_DON.status_nsbdb}', '${VAL_DON.sat_tipo_expediente}', '${VAL_DON.sat_expediente}', ${VAL_DON.transaction_id},
                     ${VAL_DON.reservation_id}, ${VAL_DON.tipo}, ${VAL_DON.sub_tipo}, ${VAL_DON.ssub_tipo}, ${VAL_DON.sssub_tipo}, ${VAL_DON.locator_id}, ${VAL_DON.organization_id}, ${VAL_DON.inventory_item_id},
-                    'INSERT', '${usuario}', CURRENT_DATE);
+                    'INSERT', '${usuario}', CAST('${dateNow}' AS DATE));
                 `);
 
         const selectCve = await this.entity.query(`
@@ -388,14 +389,14 @@ export class SaeItemsDonacTmpVService {
                     '${VAL_DON.instancebpel}', ${VAL_DON.siab_no_bien_ref}, '${VAL_DON.siab_status_bien}', '${VAL_DON.desc_bien}', ${VAL_DON.transaction_type_id},
                     '${VAL_DON.origen}', '${VAL_DON.status_nsbdb}', '${VAL_DON.sat_tipo_expediente}', '${VAL_DON.sat_expediente}', ${VAL_DON.transaction_id},
                     ${VAL_DON.reservation_id}, ${VAL_DON.tipo}, ${VAL_DON.sub_tipo}, ${VAL_DON.ssub_tipo}, ${VAL_DON.sssub_tipo}, ${VAL_DON.locator_id}, ${VAL_DON.organization_id}, ${VAL_DON.inventory_item_id},
-                    'INSERT', '${usuario}', CURRENT_DATE);
+                    'INSERT', '${usuario}', CAST('${dateNow}' AS DATE));
                 `);
         }
 
         await this.entity.query(`
             UPDATE nsbddb.SAE_ITEMS_DONAC_TMP_V 
             SET STATUS = ${VN_STATUS},
-                LAST_UPDATE_DATE= CURRENT_DATE
+                LAST_UPDATE_DATE= CAST('${dateNow}' AS DATE)
             WHERE NUMERO_INVENTARIO    ='${VAL_DON.numero_inventario}'
             AND SUBINVENTARIO        ='${VAL_DON.subinventario}'
             AND CANTIDAD             = ${VAL_DON.cantidad}
