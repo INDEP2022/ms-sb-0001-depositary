@@ -92,9 +92,44 @@ export class ApplicationService {
 
       await this.entity.query(q);
 
+      
+
       return {
         statusCode: HttpStatus.OK,
         message: [CRUDMessages.DeleteSuccess],
+      };
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.OK,
+        message: [error.message],
+      };
+    }
+  }
+
+  async responsable(no_bien: number) {
+    try {
+      console.log(no_bien);
+      const q = `
+                  select distinct b.no_persona, b.nombre, a.no_nombramiento
+                  from   sera.nombramientos_depositaria a, sera.cat_personas b
+                  where  a.responsable = b.nom_persona
+                  and    a.no_bien = ${no_bien}
+                  order by b.no_persona
+                `;
+
+      const qr = await this.entity.query(q);
+
+      if (qr.length == 0) {
+        return {
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: ['Registro no encontrados'],
+        };
+      }
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: [CRUDMessages.GetSuccess],
+        data: qr,
       };
     } catch (error) {
       return {

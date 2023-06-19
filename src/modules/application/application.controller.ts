@@ -19,4 +19,8 @@ export class ApplicationController {
   async cargaCliente2(no_nombramiento: number) {
     return await this.service.cargaCliente2(no_nombramiento);
   }
+  @MessagePattern({ cmd: 'responsable' })
+  async responsable(no_bien: number) {
+    return await this.service.responsable(no_bien);
+  }
 }
