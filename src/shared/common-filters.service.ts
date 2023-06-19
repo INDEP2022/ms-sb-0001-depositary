@@ -1,7 +1,8 @@
 import {HttpStatus, Injectable} from '@nestjs/common';
 import {FilterOperator, paginate, Paginated, PaginateQuery} from "nestjs-paginate";
 import {PaginateConfig} from "nestjs-paginate/lib/paginate";
-import {CRUDMessages, ResponseDataDTO} from "sigebi-lib-common";
+import { CRUDMessages } from 'src/core/interfaces/messages.enum';
+import { ResponseDataDTO } from 'src/core/interfaces/response.data.dto';
 import {Repository} from "typeorm";
 
 @Injectable()

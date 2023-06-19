@@ -2,12 +2,13 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginateQuery } from 'nestjs-paginate';
-import { ResponseDataDTO } from 'sigebi-lib-common';
+
 import { CommonFiltersService } from 'src/shared/common-filters.service';
 import { Repository } from 'typeorm';
 import { dedPayDepositaryIdDto } from './dto/ded-pay-depositary-id.dto';
 import { dedPayDepositaryDto } from './dto/ded-pay-depositary.dto';
 import { dedPayDepositaryEntity } from './entities/ded-pay-depositary.entity';
+import { ResponseDataDTO } from 'src/core/interfaces/response.data.dto';
 
 @Injectable()
 export class DedPayDepositaryService {

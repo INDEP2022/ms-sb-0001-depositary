@@ -1,7 +1,7 @@
 import { Injectable, HttpStatus, Logger } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CRUDMessages } from 'sigebi-lib-common';
+import { CRUDMessages } from 'src/shared/utils/message.enum';
 import { LocalDate } from 'src/shared/config/text';
 import { Connection, Repository } from 'typeorm';
 import { SaeInvSalesTBEntity } from './entities/sae-inv-sales-t-b.dto';

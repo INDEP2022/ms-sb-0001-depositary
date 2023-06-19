@@ -2,11 +2,12 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { PaginateQuery } from 'nestjs-paginate';
-import { ResponseDataDTO } from 'sigebi-lib-common';
+
 import { dedPayDepositaryIdDto } from './dto/ded-pay-depositary-id.dto';
 import { dedPayDepositaryDto } from './dto/ded-pay-depositary.dto';
 import { dedPayDepositaryEntity } from './entities/ded-pay-depositary.entity';
 import { DedPayDepositaryService } from './ded-pay-depositary.service';
+import { ResponseDataDTO } from 'src/shared/dto/response.data.dto';
 
 @Controller('ded-pay-depositary')
 export class DedPayDepositaryController {

@@ -2,7 +2,7 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { PaginateQuery } from 'nestjs-paginate';
-import { ResponseDataDTO } from 'sigebi-lib-common';
+import { ResponseDataDTO } from 'src/core/interfaces/response.data.dto';
 import { parametersModDepositaryIdDto } from './dto/parameters-mod-depositary-id.dto';
 import { parametersModDepositaryDto } from './dto/parameters-mod-depositary.dto';
 import { parametersModDepositaryEntity } from './entities/parameters-mod-depositary.entity';

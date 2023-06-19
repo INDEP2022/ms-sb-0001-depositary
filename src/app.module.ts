@@ -17,7 +17,6 @@ import { RefPagoModule } from './modules/sera/ref-pago/ref-pago.module';
 import { ValidatePaymentsRefModule } from './modules/sera/validate-payments-ref/validate-payments-ref.module';
 import { ComerPaymentModule } from './modules/sera/comer-payment/comer-payment.module';
 import { RealStateDispersalModule } from './modules/sera/real-state-dispersal/real-state-dispersal.module';
-import { configService } from 'sigebi-lib-common';
 import { ConfigModule } from '@nestjs/config';
 import { DestinyLegalByGoodModule } from './modules/sera/destiny-legal-by-good/destiny-legal-by-good.module';
 import { DedPayDepositaryModule } from './modules/sera/ded-pay-depositary/ded-pay-depositary.module';
@@ -36,6 +35,7 @@ import { SaeItemsDestTmpVModule } from './modules/sae-items-dest-tmp-v/sae-items
 import { SaeItemsDonacTmpVModule } from './modules/sae-items-donac-tmp-v/sae-items-donac-tmp-v.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { FcondepoconcilpagModule } from './modules/fcondepoconcilpag/fcondepoconcilpag.module';
+import { configService } from './shared/config/config.service';
 
 @Module({
   imports: [

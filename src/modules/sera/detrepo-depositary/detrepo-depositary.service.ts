@@ -2,7 +2,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginateQuery } from 'nestjs-paginate';
-import { ResponseDataDTO } from 'sigebi-lib-common';
+import { ResponseDataDTO } from 'src/core/interfaces/response.data.dto';
 import { CommonFiltersService } from 'src/shared/common-filters.service';
 import { Repository } from 'typeorm';
 import { detrepoDepositaryIdDto } from './dto/detrepo-depositary-id.dto';

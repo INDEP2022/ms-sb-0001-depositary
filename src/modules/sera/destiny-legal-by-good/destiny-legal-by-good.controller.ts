@@ -2,7 +2,7 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { PaginateQuery } from 'nestjs-paginate';
-import { ResponseDataDTO } from 'sigebi-lib-common';
+import { ResponseDataDTO } from 'src/core/interfaces/response.data.dto';
 import { destinyLegalByGoodIdDto } from './dto/destiny-legal-by-good-id.dto';
 import { destinyLegalByGoodDto } from './dto/destiny-legal-by-good.dto';
 import { destinyLegalByGoodEntity } from './entities/destiny-legal-by-good.entity';
