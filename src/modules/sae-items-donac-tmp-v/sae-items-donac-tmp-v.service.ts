@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { CRUDMessages } from 'sigebi-lib-common';
+import { CRUDMessages } from 'src/shared/utils/message.enum';
 import { LocalDate } from 'src/shared/config/text';
 import { Connection, Repository } from 'typeorm';
 import { Interval } from '@nestjs/schedule';

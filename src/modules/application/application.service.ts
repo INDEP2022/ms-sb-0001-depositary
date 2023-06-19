@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { CRUDMessages } from 'sigebi-lib-common';
+import { CRUDMessages } from 'src/shared/utils/message.enum';
 import { Connection } from 'typeorm';
 
 @Injectable()
