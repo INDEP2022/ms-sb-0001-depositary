@@ -35,7 +35,7 @@ export class DepositaryPaymentDetService {
 
     async getAllDepositaryPaymentDet({ page = 1, limit = 10, text }: PaginationDto) {
         const queryBuilder = await this.entity.createQueryBuilder('table');
-        queryBuilder.innerJoinAndMapOne('table.appointmentNumber', DepositaryAppointmentEntity, 'fk', 'table.no_nombramiento=fk.no_nombramiento')
+        queryBuilder.leftJoinAndMapOne('table.appointmentNumber', DepositaryAppointmentEntity, 'fk', 'table.no_nombramiento=fk.no_nombramiento')
 
         if (text) {
             queryBuilder.where(`${Text.formatTextDb('table.observacion')} LIKE '%${Text.formatText(text)}%'`)

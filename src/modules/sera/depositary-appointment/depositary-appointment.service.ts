@@ -73,9 +73,9 @@ export class DepositaryAppointmentService {
 
     async getAllDepositaryAppointment(query: PaginateQuery) {
         const queryBuilder = this.entity.createQueryBuilder('table');
-            queryBuilder.innerJoinAndMapOne('table.personNumber', PersonEntity, 'p', 'table.no_persona = p.no_persona')
-            queryBuilder.innerJoinAndMapOne('table.good', GoodEntity, 'tg', 'table.no_bien = tg.no_bien')
-            queryBuilder.innerJoinAndMapOne('table.user', SegUsersEntity, 'tsu', 'table.representante_sera = tsu.usuario')
+            queryBuilder.leftJoinAndMapOne('table.personNumber', PersonEntity, 'p', 'table.no_persona = p.no_persona')
+            queryBuilder.leftJoinAndMapOne('table.good', GoodEntity, 'tg', 'table.no_bien = tg.no_bien')
+            queryBuilder.leftJoinAndMapOne('table.user', SegUsersEntity, 'tsu', 'table.representante_sera = tsu.usuario')
         const res = await paginate<DepositaryAppointmentEntity>(query, queryBuilder, {
             sortableColumns: [
                 "appointmentNumber","appointmentNumber","nameProvDate","revocationDate","revocation",

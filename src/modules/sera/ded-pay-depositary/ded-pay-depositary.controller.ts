@@ -16,7 +16,7 @@ export class DedPayDepositaryController {
     }
 
     @MessagePattern({cmd:'dedPayDepositary'})
-    async dedPayDepositary(query: PaginateQuery): Promise<ResponseDataDTO<dedPayDepositaryEntity>> {
+    async dedPayDepositary(query: PaginateQuery) {
         return this.service.dedPayDepositary(query);
     }
 
