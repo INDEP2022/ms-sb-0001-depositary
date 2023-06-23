@@ -9,10 +9,12 @@ import { FilterOperator, Paginate, PaginateQuery, paginate, Paginated } from 'ne
 import { GetByParamMapperMenajeDto } from './dto/get-by-param-mapper-menaje.dto';
 import { CatEntfedEntity } from '../infrastructure/entities/cat-entfed.entity';
 import { mapperPadepositaryAssets2Dto } from './dto/mapper-pa-depositary-assets2.dto';
+import { CommonFilterQueryService } from 'src/shared/service/common-filter-query.service';
 @Injectable()
 export class DepositaryQueriesService {
     constructor(
         private commonFilterService: CommonFiltersService,
+        private commonFilterQueryService: CommonFilterQueryService,
         @InjectRepository(VTypeWellEntity) private repository: Repository<VTypeWellEntity>,
         @InjectRepository(CatEntfedEntity) private repositoryCatEntFed: Repository<CatEntfedEntity>,
         private readonly entity: Connection
@@ -146,5 +148,52 @@ export class DepositaryQueriesService {
 
     //#region MapperPA_BIENESDEPOSITARIA.cs Segunda Consulta
 
+    
+    //#region getFactJurRegDestLeg
+    async getFactJurRegDestLeg({page, limit}:{page: number, limit: number}) {
+        let count = 0;
+        try {
+            let queryString = `
+                    select * from
+                    sera.NOMBRAMIENTOS_DEPOSITARIA
+                    where no_bien in(SELECT b.no_bien
+                                    FROM   sera.expedientes e, sera.bien b
+                                    WHERE  e.no_expediente =b.no_expediente
+                                    )
+                    order by FEC_INI_CONTRATO DESC
+            `;
+            let queryString2 = `
+                select count(*) from
+                sera.NOMBRAMIENTOS_DEPOSITARIA
+                where no_bien in(SELECT b.no_bien
+                                FROM   sera.expedientes e, sera.bien b
+                                WHERE  e.no_expediente =b.no_expediente
+                                )
+                
+            `;
+
+            const returnVariable = await this.entity.query(`${queryString} limit ${limit || 10} offset ${(page - 1) * limit || 0}`)
+            const returnVariable2 = await this.entity.query(`${queryString2}`)
+
+            if(returnVariable2.length >0){
+                count = returnVariable2[0].count
+            }
+            return {
+                statusCode: HttpStatus.OK,
+                message: ['OK'],
+                data: returnVariable,
+                count: count
+            }
+        } catch (error) {
+            console.log(error)
+            return {
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: error.message,
+                data: [],
+            };
+        }
+
+    }
+    //#endregion getFactJurRegDestLeg
 
 }

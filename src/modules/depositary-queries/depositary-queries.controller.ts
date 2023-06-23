@@ -64,5 +64,8 @@ export class DepositaryQueriesController {
       return await this.service.mapperPadepositaryAssets2(dto);
     }
 
-    
+    @MessagePattern({cmd:'getFactJurRegDestLeg'})
+    async getFactJurRegDestLeg({page,limit}:{page:number,limit:number}){
+      return await this.service.getFactJurRegDestLeg({page,limit})
+    }
 }
