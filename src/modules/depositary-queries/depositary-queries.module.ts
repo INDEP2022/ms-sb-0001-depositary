@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { VTypeWellEntity } from '../infrastructure/entities/views/v-type-well.entity';
 import { CommonFiltersService } from 'src/shared/common-filters.service';
+import { CommonFilterQueryService } from 'src/shared/service/common-filter-query.service';
 import { CatEntfedEntity } from '../infrastructure/entities/cat-entfed.entity';
 
 @Module({
@@ -19,7 +20,7 @@ import { CatEntfedEntity } from '../infrastructure/entities/cat-entfed.entity';
       ]
     )
   ],
-  providers: [DepositaryQueriesService, CommonFiltersService],
+  providers: [DepositaryQueriesService, CommonFiltersService,CommonFilterQueryService],
   controllers: [DepositaryQueriesController]
 })
 export class DepositaryQueriesModule {}
