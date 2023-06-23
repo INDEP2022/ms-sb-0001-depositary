@@ -1,6 +1,8 @@
+import { AppointmentDepositoryEntity } from "src/modules/infrastructure/entities/appointment-depository.entity";
 import { 
     Column, 
     Entity, 
+    OneToOne, 
     PrimaryGeneratedColumn, 
   } from "typeorm"; 
    
@@ -108,6 +110,7 @@ import {
 
   
 
-    
+    @OneToOne(() => AppointmentDepositoryEntity, (e) => e.personNumber) // specify inverse side as a second parameter 
+    personNumber: AppointmentDepositoryEntity
 
   }

@@ -1,4 +1,7 @@
-import {Column, Entity, PrimaryColumn} from "typeorm";
+import { PersonEntity } from "src/modules/sera/exp-exel-1/entity/person.entity";
+import {Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import { GoodEntity } from "./good.entity";
+import { SegUsersEntity } from "src/modules/sera/depositary-appointment/entity/seg-users.entity";
     @Entity("nombramientos_depositaria", { schema: "sera" })
     export class AppointmentDepositoryEntity {
         
@@ -362,4 +365,15 @@ import {Column, Entity, PrimaryColumn} from "typeorm";
       })
       nbOrigin: string;
       
+        @OneToOne(() => PersonEntity)
+        @JoinColumn([{ name: "no_persona", referencedColumnName: "id" }])
+        personNumber: PersonEntity
+
+        @OneToOne(() => GoodEntity)
+        @JoinColumn([{ name: "no_bien", referencedColumnName: "id" }])
+        good: GoodEntity
+
+        @OneToOne(() => SegUsersEntity)
+        @JoinColumn([{ name: "representante_sera", referencedColumnName: "users" }])
+        user: SegUsersEntity
     }

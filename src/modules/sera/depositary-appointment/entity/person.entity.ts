@@ -1,5 +1,6 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { StateOfRepublicEntity } from './state.entity';
+import { AppointmentDepositoryEntity } from 'src/modules/infrastructure/entities/appointment-depository.entity';
 
 @Entity('cat_personas', { schema: 'sera' })
 export class PersonEntity {
@@ -155,4 +156,7 @@ export class PersonEntity {
 
   @JoinColumn()
   state: StateOfRepublicEntity
+
+  @OneToOne(() => AppointmentDepositoryEntity, (e) => e.personNumber) // specify inverse side as a second parameter 
+  personNumber: AppointmentDepositoryEntity
 }
