@@ -14,6 +14,7 @@ import { AppointmentDepositoryEntity } from '../infrastructure/entities/appointm
 import { GoodEntity } from '../infrastructure/entities/good.entity';
 import { PersonEntity } from '../sera/depositary-appointment/entity/person.entity';
 import { SegUsersEntity } from '../sera/depositary-appointment/entity/seg-users.entity';
+import { PaginationDto } from 'src/shared/dto/pagination';
 @Injectable()
 export class DepositaryQueriesService {
     constructor(
@@ -155,7 +156,7 @@ export class DepositaryQueriesService {
 
 
     //#region getFactJurRegDestLeg
-    async getFactJurRegDestLeg({ page, limit }: { page: number, limit: number }) {
+    async getFactJurRegDestLeg({ limit, page }: PaginationDto) {
         let count = 0;
         try {
             const subquery = this.goodEntity

@@ -13,6 +13,7 @@ import { DepositaryQueriesService } from './depositary-queries.service';
 import { MessagePattern } from '@nestjs/microservices';
 import { GetByParamMapperMenajeDto } from './dto/get-by-param-mapper-menaje.dto';
 import { mapperPadepositaryAssets2Dto } from './dto/mapper-pa-depositary-assets2.dto';
+import { PaginationDto } from 'src/shared/dto/pagination.dto';
 @Controller('depositary-queries')
 export class DepositaryQueriesController {
     constructor(private readonly service: DepositaryQueriesService) {}
@@ -65,7 +66,7 @@ export class DepositaryQueriesController {
     }
 
     @MessagePattern({cmd:'getFactJurRegDestLeg'})
-    async getFactJurRegDestLeg({page,limit}:{page:number,limit:number}){
-      return await this.service.getFactJurRegDestLeg({page,limit})
+    async getFactJurRegDestLeg(pagination: PaginationDto){
+      return await this.service.getFactJurRegDestLeg(pagination)
     }
 }
