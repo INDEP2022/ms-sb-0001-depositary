@@ -8,6 +8,7 @@ import { PersonEntity } from './entity/person.entity';
 import { SegUsersEntity } from './entity/seg-users.entity';
 import { FilterOperator, paginate, Paginate, PaginateQuery } from 'nestjs-paginate';
 import { GoodEntity } from './entity/good.entity';
+import { StateOfRepublicEntity } from './entity/state.entity';
 
 @Injectable()
 export class DepositaryAppointmentService {
@@ -76,6 +77,7 @@ export class DepositaryAppointmentService {
             queryBuilder.leftJoinAndMapOne('table.personNumber', PersonEntity, 'p', 'table.no_persona = p.no_persona')
             queryBuilder.leftJoinAndMapOne('table.good', GoodEntity, 'tg', 'table.no_bien = tg.no_bien')
             queryBuilder.leftJoinAndMapOne('table.user', SegUsersEntity, 'tsu', 'table.representante_sera = tsu.usuario')
+            queryBuilder.leftJoinAndMapOne('p.state', StateOfRepublicEntity, 'state', 'p.keyEntFed = state.id')
         const res = await paginate<DepositaryAppointmentEntity>(query, queryBuilder, {
             sortableColumns: [
                 "appointmentNumber","appointmentNumber","nameProvDate","revocationDate","revocation",
