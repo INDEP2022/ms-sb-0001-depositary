@@ -7,6 +7,10 @@ import { VTypeWellEntity } from '../infrastructure/entities/views/v-type-well.en
 import { CommonFiltersService } from 'src/shared/common-filters.service';
 import { CommonFilterQueryService } from 'src/shared/service/common-filter-query.service';
 import { CatEntfedEntity } from '../infrastructure/entities/cat-entfed.entity';
+import { AppointmentDepositoryEntity } from '../infrastructure/entities/appointment-depository.entity';
+import { GoodEntity } from '../infrastructure/entities/good.entity';
+import { PersonEntity } from '../sera/depositary-appointment/entity/person.entity';
+import { SegUsersEntity } from '../sera/depositary-appointment/entity/seg-users.entity';
 
 @Module({
   imports: [
@@ -16,7 +20,11 @@ import { CatEntfedEntity } from '../infrastructure/entities/cat-entfed.entity';
     TypeOrmModule.forFeature(
       [
         VTypeWellEntity,
-        CatEntfedEntity
+        CatEntfedEntity,
+        AppointmentDepositoryEntity,
+        GoodEntity,
+        PersonEntity,
+        SegUsersEntity
       ]
     )
   ],
