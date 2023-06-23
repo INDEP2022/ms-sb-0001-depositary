@@ -24,7 +24,7 @@ export class PersonEntity {
   suburb: string;
 
   @Column('character varying', { name: 'deleg_munic', length: 60 })
-  municipalDelegation: string;
+  delegation: string;
 
   @Column('integer', { name: 'codigo_postal' })
   zipCode: number;
