@@ -65,8 +65,8 @@ export class DepositaryQueriesController {
       return await this.service.mapperPadepositaryAssets2(dto);
     }
 
-    @MessagePattern({cmd:'getFactJurRegDestLeg'})
-    async getFactJurRegDestLeg(pagination: PaginationDto){
-      return await this.service.getFactJurRegDestLeg(pagination)
+    @MessagePattern({cmd:'getFactJurRegDestLegCustom'})
+    async getFactJurRegDestLegCustom(pagination: PaginateQuery){
+      return await this.service.getFactJurRegDestLegCustom(pagination)
     }
 }
