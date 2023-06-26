@@ -1,116 +1,162 @@
-import { AppointmentDepositoryEntity } from "src/modules/infrastructure/entities/appointment-depository.entity";
-import { 
-    Column, 
-    Entity, 
-    OneToOne, 
-    PrimaryGeneratedColumn, 
-  } from "typeorm"; 
-   
-  @Entity("cat_personas", { schema: "sera" }) 
-  export class PersonEntity { 
-   
-    @PrimaryGeneratedColumn({type:'integer',name:'no_persona'})
-    id?: number;
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { AppointmentDepositoryEntity } from 'src/modules/infrastructure/entities/appointment-depository.entity';
+import { StateOfRepublicEntity } from '../../depositary-appointment/entity/state.entity';
 
-    @Column("character varying",{name:'nom_persona',length:30})
-    nom_persona:string; 
+@Entity('cat_personas', { schema: 'sera' })
+export class PersonEntity {
+  @Column('character varying', { name: 'nom_persona', length: 30 })
+  personName: string;
 
-    @Column("character varying",{name:'nombre',length:200})
-    nombre:string;
+  @Column('character varying', { name: 'nombre', length: 200 })
+  name: string | null;
 
-    
+  @Column('character varying', { name: 'calle', length: 200, nullable: true })
+  street: string | null;
 
-    @Column("character varying",{name:'calle',length:200})
-    calle:string;
-    
+  @Column('character varying', {
+    name: 'no_exterior',
+    length: 10,
+    nullable: true,
+  })
+  streetNumber: string | null;
 
-    @Column("character varying",{name:'no_exterior',length:10})
-    no_exterior: string;
+  @Column('character varying', {
+    name: 'no_interior',
+    length: 10,
+    nullable: true,
+  })
+  apartmentNumber: string | null;
 
-    @Column("character varying",{name:'no_interior',length:10})
-    no_interior: string;
-    
-    
-    @Column("character varying",{name:'colonia',length:100})
-    colonia: string;
+  @Column('character varying', { name: 'colonia', length: 100, nullable: true })
+  suburb: string | null;
 
-    @Column("character varying",{name:'deleg_munic',length:60})
-    deleg_munic: string;
+  @Column('character varying', {
+    name: 'deleg_munic',
+    length: 60,
+    nullable: true,
+  })
+  delegation: string | null;
 
-    @Column("integer", { name: "codigo_postal"}) 
-    codigo_postal : number;
+  @Column('numeric', { name: 'codigo_postal', precision: 5, nullable: true })
+  zipCode: number | null;
 
-    @Column("character varying",{name:'rfc',length:20})
-    rfc: string;
+  @Column('character varying', { name: 'rfc', length: 20, nullable: true })
+  rfc: string | null;
 
-    @Column("character varying",{name:'curp',length:20})
-    curp: string;
+  @Column('character varying', { name: 'curp', length: 20, nullable: true })
+  curp: string | null;
 
-    @Column("character varying",{name:'telefono',length:20})
-    telefono: string;
+  @Column('character varying', { name: 'telefono', length: 20, nullable: true })
+  phone: string | null;
 
+  @Column('character varying', { name: 'tipo_persona', length: 1 })
+  typePerson: string;
 
-    @Column("character varying",{name:'tipo_persona',length:1})
-    tipo_persona: string;
+  @Column('character varying', { name: 'tipo_responsable', length: 1 })
+  typeResponsible: string;
 
-    @Column("character varying",{name:'tipo_responsable',length:1})
-    tipo_responsable: string;
+  @Column('character varying', {
+    name: 'representante',
+    length: 60,
+    nullable: true,
+  })
+  manager: string | null;
 
-    @Column("character varying",{name:'representante',length:60})
-    representante: string;
+  @Column('character varying', {
+    name: 'no_escritura',
+    length: 20,
+    nullable: true,
+  })
+  numberDeep: string | null;
 
-    @Column("character varying",{name:'no_escritura',length:20})
-    no_escritura: string;
+  @Column('character varying', {
+    name: 'profesion',
+    length: 60,
+    nullable: true,
+  })
+  profesion: string | null;
 
-    @Column("character varying",{name:'profesion',length:60})
-    profesion: string;
+  @Column('character varying', {
+    name: 'curriculum',
+    length: 1,
+    nullable: true,
+  })
+  curriculum: string | null;
 
+  @Column('character varying', {
+    name: 'cve_entfed',
+    length: 15,
+    nullable: true,
+  })
+  keyEntFed: string | null;
 
-    @Column("character varying",{name:'curriculum',length:1})
-    curriculum: string;
+  @Column('character varying', { name: 'cve_giro', length: 15, nullable: true })
+  keyOperation: string | null;
 
-    @Column("character varying",{name:'cve_entfed',length:15})
-    cve_entfed: string;
+  @Column('character varying', {
+    name: 'observaciones',
+    length: 100,
+    nullable: true,
+  })
+  observations: string | null;
 
-    @Column("character varying",{name:'cve_giro',length:15})
-    cve_giro: string;
+  @Column('character varying', { name: 'perfil', length: 500, nullable: true })
+  profile: string | null;
 
+  @Column('character varying', {
+    name: 'antecedentes_secodam',
+    length: 500,
+    nullable: true,
+  })
+  precedentSecodam: string | null;
 
-    
-    @Column("character varying",{name:'observaciones',length:100})
-    observaciones: string;
-    
-    @Column("character varying",{name:'perfil',length:500})
-    perfil: string;
-    
-    @Column("character varying",{name:'antecedentes_secodam',length:500})
-    antecedentes_secodam: string;
-    
-    @Column("character varying",{name:'antecedentes_pgr',length:500})
-    antecedentes_pgr: string;
-    
-    @Column("character varying",{name:'antecedentes_pff',length:500})
-    antecedentes_pff: string;
-    
-    @Column("character varying",{name:'antecedentes_sera',length:500})
-    antecedentes_sera: string;
-    
-    @Column("character varying",{name:'antecedentes_otros',length:500})
-    antecedentes_otros: string;
-  
+  @Column('character varying', {
+    name: 'antecedentes_pgr',
+    length: 500,
+    nullable: true,
+  })
+  precedentPgr: string | null;
 
-    @Column("integer", { name: "no_registro"}) 
-    no_registro : number;
+  @Column('character varying', {
+    name: 'antecedentes_pff',
+    length: 500,
+    nullable: true,
+  })
+  precedentPff: string | null;
 
-    @Column("character varying",{name:'email',length:60})
-    email: string;
+  @Column('character varying', {
+    name: 'antecedentes_sera',
+    length: 500,
+    nullable: true,
+  })
+  precedentSera: string | null;
 
-    @Column("character varying", { name: "lista_negra", length: 2 }) 
-    lista_negra : string
+  @Column('character varying', {
+    name: 'antecedentes_otros',
+    length: 500,
+    nullable: true,
+  })
+  precedent0ther: string | null;
 
-  
+  @Column('integer', { name: 'no_registro', nullable: true })
+  registryNumber: number | null;
 
-    @OneToOne(() => AppointmentDepositoryEntity, (e) => e.personNumber) // specify inverse side as a second parameter 
-    personNumber: AppointmentDepositoryEntity
+  @PrimaryGeneratedColumn({ type: 'numeric', name: 'no_persona' })
+  id?: number;
 
-  }
+  @Column('character varying', { name: 'email', length: 60, nullable: true })
+  email: string | null;
+
+  @Column('character varying', {
+    name: 'lista_negra',
+    length: 2,
+    nullable: true,
+  })
+  blackList: string | null;
+
+  @JoinColumn()
+  state: StateOfRepublicEntity
+
+  @OneToOne(() => AppointmentDepositoryEntity, (e) => e.personNumber) // specify inverse side as a second parameter 
+  personNumber: AppointmentDepositoryEntity
+}
