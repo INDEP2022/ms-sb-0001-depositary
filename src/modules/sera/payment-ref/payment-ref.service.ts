@@ -8,7 +8,7 @@ import { paymentsgensDepositaryEntity } from "../../infrastructure/entities/paym
 import { ExecDeductionsDto, FillAccreditationsDto, FillPaymentsDto, FullDepositDto, FullPaymentDto, GenericParamsDto, PrepOIDto, RemoveDisperPaymentsRefDto, ValidDep, ValidDepDto, } from "./dto/param.dto";
 import { LocalDate } from "src/shared/config/text";
 import { Deposito, DispercionAbonos, Dispersion } from "./dto/objects-procedure.dto";
-
+import * as moment from 'moment';
 @Injectable()
 export class PaymentRefService {
     // TODO: cambiar variables y nombre de funciones a ingles
@@ -1687,7 +1687,10 @@ export class PaymentRefService {
      * @memberof PACKAGE BODY SERA.PAGOSREF_DEPOSITARIA lineas 1620-1653
      */
     async removeDisperPaymentsRef(dto: RemoveDisperPaymentsRefDto): Promise<object> {
-        var date = LocalDate.getCustom(dto.pDate, "MM/DD/YYYY")
+
+        const fechaOriginal = dto.pDate
+        const fecha = moment.utc(fechaOriginal).tz('UTC');
+        const date = fecha.format('MM/DD/YYYY')
 
         try {
             await this.RefpayDepositoriesRepository.query(
@@ -1713,6 +1716,7 @@ export class PaymentRefService {
                 AND VALIDO_SISTEMA = 'S'
                 AND FECHA_VAL_SISTEMA = date('${date}')`
             )
+
             await this.RefpayDepositoriesRepository.query(
                 `DELETE FROM SERA.PAGOSGENS_DEPOSITARIAS
                 WHERE DATE(FECHA_PROCESO) = DATE('${date}')
