@@ -43,7 +43,7 @@ export class PaymentRefService {
     ) {
         // this.prepOI({name:372,description:''})
         //2679
-       // this.validDep({ name: 11, date: new Date('02/05/2023') }) 
+        // this.validDep({ name: 11, date: new Date('02/05/2023') }) 
     }
 
     //#region **PACKAGE BODY SERA.PAGOSREF_DEPOSITARIA**
@@ -83,7 +83,7 @@ export class PaymentRefService {
 
             const reducedResponse = parameters.reduce((acc, cur) => {
                 const matchingParam = lParameters.find(p => p.param == cur.parametro && p.address == cur.direccion);
-                
+
                 this[matchingParam.globalName] = cur.valor
 
                 if (matchingParam) {
@@ -107,10 +107,10 @@ export class PaymentRefService {
             };
 
         } catch (e) {
-            
+
             return {
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: "No existen valores con la direccion "+pDirec,
+                message: "No existen valores con la direccion " + pDirec,
             };
         }
     }
@@ -140,8 +140,8 @@ export class PaymentRefService {
 
         this.gDepositos = []
         try {
-        var date = LocalDate.getCustom(dto.date, "MM/DD/YYYY")
-           
+            var date = LocalDate.getCustom(dto.date, "MM/DD/YYYY")
+
             let sql = `
             SELECT RFD.ID_PAGO , RFD.MONTO,
                 (SELECT NO_TRANSFERENTE FROM SERA.EXPEDIENTES
@@ -160,7 +160,7 @@ export class PaymentRefService {
             ORDER BY RFD.ID_PAGO, RFD.MONTO DESC
         `
             const l8 = await this.ParametersmodDepositoryRepository.query(sql);
-            
+
             for (const row of l8) {
                 lIdPago = row.id_pago;
                 lMonto = row.monto;
@@ -169,7 +169,7 @@ export class PaymentRefService {
                 lContra = row.importe_contraprestacion;
                 lIva = row.iva;
                 i++;
-                this.gDepositos.push( {
+                this.gDepositos.push({
                     paid: Number(Number(row.monto).toFixed(2)),
                     payId: lIdPago,
                     remainder: lMonto,
@@ -184,7 +184,7 @@ export class PaymentRefService {
                 this.gIvaTotal = this.round(await this.xCentIva(this.gContra, this.gIva)); // VALOR DEL % DEL IVA
                 this.gIvaContra = this.round((this.gContra + this.gIvaTotal)); // CONTRAPRESTACIÓN CON EL VALOR DEL % DEL IVA
             }
-            
+
 
             let response = {
                 "rDepositos": this.gDepositos,
@@ -293,9 +293,9 @@ export class PaymentRefService {
      * @return {*} {Promise<object>}
      * @memberof PACKAGE BODY SERA.PAGOSREF_DEPOSITARIA lineas 179-226
      */
-    async dispersionAccreditations(name:number,good:number): Promise<object> {
+    async dispersionAccreditations(name: number, good: number): Promise<object> {
         try {
-            console.log("dispersionAccreditations","data de prueba")
+            console.log("dispersionAccreditations", "data de prueba")
             good = 345521
             name = 235
             const l1 = await this.ParametersmodDepositoryRepository.query(`
@@ -309,8 +309,8 @@ export class PaymentRefService {
                    AND (ABONO_CUBIERTO = 0 OR ABONO_CUBIERTO IS NULL)
                  ORDER BY ID_PAGOGENS`);
 
-            
-                 
+
+
             let ga = 0;
 
             for (const row of l1) {
@@ -323,12 +323,12 @@ export class PaymentRefService {
                     reference: row.referencia,
                     typeInput: row.tipoingreso,
                     noTransferable: row.no_transferente,
-                    iva:Number( Number(row.iva).toFixed(2)),
+                    iva: Number(Number(row.iva).toFixed(2)),
                     amountIva: Number(Number(row.monto_iva).toFixed(2)),
                     payment: Number(Number(row.abono).toFixed(2)),
                     paymentAct: row.pago_act ? Number(Number(row.pago_act).toFixed(2)) : null,
                     deduxcent: row.deduxcent,
-                    deduValue:Number( Number(row.deduvalor).toFixed(2)),
+                    deduValue: Number(Number(row.deduvalor).toFixed(2)),
                     status: row.status,
                     noAppointment: row.no_nombramiento,
                     dateProcess: row.fecha_proceso,
@@ -391,9 +391,9 @@ export class PaymentRefService {
                             payGensId: row.payGensId,
                             payId: row.payId,
                             noGood: row.noGood,
-                            amount:Number(row.amount.toFixed(2)),
+                            amount: Number(row.amount.toFixed(2)),
                             reference: row.reference,
-                            typeInput:Number( row.typeInput),
+                            typeInput: Number(row.typeInput),
                             noTransferable: row.noTransferable,
                             iva: Number(row.iva.toFixed(2)),
                             amountIva: Number(row.amountIva.toFixed(2)),
@@ -827,7 +827,7 @@ export class PaymentRefService {
         let rDispercion = this.gDispersion;
 
         for (let deposito of this.gDepositos) {
-            let dispersion:Dispersion
+            let dispersion: Dispersion
             if (deposito.paid < this.gIvaContra && deposito.paid > 0) {
                 lMontoSinIva = await this.amountWithoutIva(deposito.paid, this.gIva);
                 lXcentIva = await this.xCentIva(lMontoSinIva, this.gIva);
@@ -980,9 +980,9 @@ export class PaymentRefService {
         var L_IVATOTAL: number = 0.0;
         if (dto.process == 1) {
             this.gDispercionAbonos = []
-            
-            var r = await this.dispersionAccreditations(dto.name,dto.good )
-            
+
+            var r = await this.dispersionAccreditations(dto.name, dto.good)
+
             L_RESTO = 0.0;
             L_PAGTOT = 0.0;
             L_XCENT = 0.0;
@@ -990,9 +990,9 @@ export class PaymentRefService {
             L_XCUBRIR = 0.0;
             L_IVA = 0.0;
             L_IVATOTAL = 0.0
-            
+
             for (const deposito of this.gDepositos) {
-                
+
                 await this.fillAccreditationDisper()
 
                 for (const disperAbonos of this.gDispercionAbonos) {
@@ -1007,7 +1007,7 @@ export class PaymentRefService {
                                 L_MONTOSIN_IVA = Number((await this.amountWithoutIva(deposito.paid, disperAbonos.iva)).toFixed(2));
                                 L_XCENTIVA = Number((await this.xCentIva(L_MONTOSIN_IVA, disperAbonos.iva)).toFixed(2));
                                 L_XCUBRIR = Number((this.gIvaContra - (disperAbonos.paymentAct + deposito.paid)).toFixed(2))
-                                
+
                                 dispersion.payId = deposito.payId
                                 dispersion.noGood = disperAbonos.noGood
                                 dispersion.amount = this.round(disperAbonos.amount);
@@ -1220,12 +1220,12 @@ export class PaymentRefService {
             gK: number = -1;
         const gDepositos = this.gDepositos;
         const gDispercion = this.gDispersion;
-        let lDispercion: any ={};
+        let lDispercion: any = {};
         const dateNow = LocalDate.getNow();
 
         for (const depos of gDepositos) {
             for (const dispersion of gDispercion) {
-                
+
                 if (dispersion.status == 'A' && dispersion.xCover > 0) {
                     if (!dispersion?.deduxcent) {
                         lResto = this.round(dispersion.xCover);
@@ -1334,8 +1334,8 @@ export class PaymentRefService {
             }
         }
         return {
-            statusCode:200,
-            message:["OK"]
+            statusCode: 200,
+            message: ["OK"]
         }
     }
     //#endregion
@@ -1351,8 +1351,8 @@ export class PaymentRefService {
      */
     async insertDispersion(dto: GenericParamsDto): Promise<object> {
         let lIdprgens: number = 0,
-            lIdpgens: number=0,
-            lMespag: number=0
+            lIdpgens: number = 0,
+            lMespag: number = 0
         let tpm: any = this.TmpPagosGensDepRepository; //TMP_PAGOS_GENS_DEP
 
         try {
@@ -1373,13 +1373,13 @@ export class PaymentRefService {
                 });
 
             //TODO: consultar que debo borrar
-             await this.TmpPagosGensDepRepository.delete({});
+            await this.TmpPagosGensDepRepository.delete({});
             for (const dispersion of this.gDispersion) {
-                
+
                 if (dispersion.type == 'U') {
                     dispersion.insert = 'DB';
 
-                    let obj = { 
+                    let obj = {
                         payGensId: lIdpgens,
                         payId: dispersion.payId,
                         noGood: dispersion.noGood,
@@ -1390,7 +1390,7 @@ export class PaymentRefService {
                         iva: dispersion.iva,
                         insert: dispersion.insert,
                         impWithoutIva: this.round(dispersion.impWithoutIva),
-                        origin:dispersion.origin,
+                        origin: dispersion.origin,
                         amountIva: this.round(dispersion.amountIva),
                         payment: this.round(dispersion.payment),
                         deduxcent: dispersion.deduxcent,
@@ -1401,11 +1401,12 @@ export class PaymentRefService {
                         type: dispersion.type,
                         paymentAct: this.round(dispersion.paymentAct),
                         payCoverId: dispersion.payCoverId,
-                        chkDedu: dispersion.chkDedu}
+                        chkDedu: dispersion.chkDedu
+                    }
                     await this.TmpPagosGensDepRepository.save(obj);
- 
+
                 } else {
-                    
+
                     lIdprgens = Number(lIdprgens) + 1;
                     dispersion.insert = 'NW';
 
@@ -1424,8 +1425,8 @@ export class PaymentRefService {
                     if (dispersion.status == 'C' && lMespag > 0) {
                         lIdpgens = lMespag
                     }
-                  //  console.log(dispersion);
-                    
+                    //  console.log(dispersion);
+
                     var s = {
                         payGensId: lIdprgens,
                         payId: dispersion.payId,
@@ -1451,7 +1452,7 @@ export class PaymentRefService {
                         chkDedu: dispersion.chkDedu
                     }
                     var res = await this.TmpPagosGensDepRepository.save(s)
-                    
+
                 }
             }
 
@@ -1460,7 +1461,7 @@ export class PaymentRefService {
                 message: ['OK']
             };
         } catch (e) {
-            
+
             return {
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: e.message,
@@ -1687,9 +1688,9 @@ export class PaymentRefService {
      */
     async removeDisperPaymentsRef(dto: RemoveDisperPaymentsRefDto): Promise<object> {
         var date = LocalDate.getCustom(dto.pDate, "MM/DD/YYYY")
-        
+
         try {
-            var response = await this.RefpayDepositoriesRepository.query(
+            await this.RefpayDepositoriesRepository.query(
                 `UPDATE sera.PAGOREF_DEPOSITARIAS
                 SET VALIDO_SISTEMA = 'A',
                     FECHA_VAL_SISTEMA = NULL
@@ -1710,19 +1711,16 @@ export class PaymentRefService {
                             WHERE GEN.NO_NOMBRAMIENTO = ${dto.pOne}
                             AND GEN.ID_PAGO = sera.PAGOREF_DEPOSITARIAS.ID_PAGO)
                 AND VALIDO_SISTEMA = 'S'
-                AND FECHA_VAL_SISTEMA = date('${date}') ;
-                DELETE FROM SERA.PAGOSGENS_DEPOSITARIAS
+                AND FECHA_VAL_SISTEMA = date('${date}')`
+            )
+            await this.RefpayDepositoriesRepository.query(
+                `DELETE FROM SERA.PAGOSGENS_DEPOSITARIAS
                 WHERE DATE(FECHA_PROCESO) = DATE('${date}')
                 AND NO_NOMBRAMIENTO = ${dto.pOne}`
-            ).then((result: any) => {
-                return result;
-            }).catch(error=>{
-                console.log("ERROR QUERY",error);
-                
-            });
+            )
 
             return {
-                data: response,
+                data: true,
                 statusCode: HttpStatus.OK,
                 message: ['OK']
             };
@@ -1746,7 +1744,7 @@ export class PaymentRefService {
      * @memberof PACKAGE BODY SERA.PAGOSREF_DEPOSITARIA lineas 1724-1924
      */
     async validDep(dto: ValidDep): Promise<any> {
-        
+
         var L_PERSONA = 0;
         var j = 0;
         var i = 0;
@@ -1773,7 +1771,7 @@ export class PaymentRefService {
         var L_XCUBRIR = 0.0;
         var date = LocalDate.getCustom(dto.date, "MM/DD/YYYY")
         console.log(date);
-        
+
         var L7: any = await this.RefpayDepositoriesRepository.query(`
             SELECT DISTINCT ND.NO_PERSONA, ND.NO_NOMBRAMIENTO, ND.REFERENCIA, ND.NO_BIEN, COALESCE(ND.IVA, 0) AS IVA
             FROM sera.NOMBRAMIENTOS_DEPOSITARIA ND
@@ -1805,12 +1803,12 @@ export class PaymentRefService {
             L_NOMBRAMIENTO = iterator.no_nombramiento
             L_REFERENCIA = iterator.referencia
             L_NO_BIEN = iterator.no_bien
-            
+
             L_IVA = iterator.iva
             this.gDispersion = []
 
             var r = await this.fillPayments({ name: dto.name, person: L_PERSONA, date: dto.date, phase: 1 })
-            
+
             this.gSumaTot = r.data?.lDepTot || 0
             await this.fillAccreditations({ name: dto.name, good: L_NO_BIEN, process: 1 })
             for (const deposito of this.gDepositos) {
@@ -1929,15 +1927,15 @@ export class PaymentRefService {
                 }
                 //LLENA_ABONOS_DISPER
                 //console.log(this.gDispersion);
-                
+
                 await this.fillAccreditationDisper()
 
             }
 
         }
-        
+
         // INS_DISPERSION(P_NOMBR, L_PERSONA);
-        await this.insertDispersion({pOne:dto.name,pTwo:L_PERSONA})
+        await this.insertDispersion({ pOne: dto.name, pTwo: L_PERSONA })
         return {
             statusCode: 200,
             message: ["OK"],
