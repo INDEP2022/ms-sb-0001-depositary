@@ -5,7 +5,7 @@ import { VTypeWellEntity } from '../infrastructure/entities/views/v-type-well.en
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 //import { PaginateQuery } from 'nestjs-paginate';
-import { FilterOperator, Paginate, PaginateQuery, paginate, Paginated } from 'nestjs-paginate'
+import { FilterOperator, Paginate, PaginateQuery, paginate, Paginated, PaginateConfig } from 'nestjs-paginate'
 import { GetByParamMapperMenajeDto } from './dto/get-by-param-mapper-menaje.dto';
 import { CatEntfedEntity } from '../infrastructure/entities/cat-entfed.entity';
 import { mapperPadepositaryAssets2Dto } from './dto/mapper-pa-depositary-assets2.dto';
@@ -18,12 +18,16 @@ import { PaginationDto } from 'src/shared/dto/pagination';
 @Injectable()
 export class DepositaryQueriesService {
     constructor(
+        private commonFilterQueryService:CommonFilterQueryService,
         private commonFilterService: CommonFiltersService,
-        private commonFilterQueryService: CommonFilterQueryService,
         @InjectRepository(VTypeWellEntity) private repository: Repository<VTypeWellEntity>,
         @InjectRepository(CatEntfedEntity) private repositoryCatEntFed: Repository<CatEntfedEntity>,
         @InjectRepository(AppointmentDepositoryEntity) private appointmentDepositoryEntity: Repository<AppointmentDepositoryEntity>,
         @InjectRepository(GoodEntity) private goodEntity: Repository<GoodEntity>,
+        @InjectRepository(SegUsersEntity) private segUsersEntity: Repository<SegUsersEntity>,
+        @InjectRepository(PersonEntity) private personEntity: Repository<PersonEntity>,
+
+
         private readonly entity: Connection
     ) { }
 
@@ -192,5 +196,64 @@ export class DepositaryQueriesService {
 
     }
     //#endregion getFactJurRegDestLeg
+
+    
+    //#region getFactJurRegDestLegCustom
+    async getFactJurRegDestLegCustom(query: PaginateQuery) {
+        try { 
+ 
+            let columnsName1: any[] = this.commonFilterService.getColumnsName<AppointmentDepositoryEntity>(this.appointmentDepositoryEntity); 
+            let filterableColumns1 = this.commonFilterService.getFilterableColumns<AppointmentDepositoryEntity>(this.appointmentDepositoryEntity); 
+            console.log(filterableColumns1)
+            
+            let searchableColumns1: any[] = this.commonFilterService.getSearchableColumns(this.appointmentDepositoryEntity); 
+       
+            let columnsName2: any[] = this.commonFilterService.getColumnsName2<PersonEntity>(this.personEntity); 
+            let filterableColumns2 = this.commonFilterService.getFilterableColumns2<PersonEntity>(this.personEntity); 
+            let searchableColumns2: any[] = this.commonFilterService.getSearchableColumns2(this.personEntity); 
+       
+            let columnsName3: any[] = this.commonFilterService.getColumnsName2<GoodEntity>(this.goodEntity); 
+            let filterableColumns3 = this.commonFilterService.getFilterableColumns2<GoodEntity>(this.goodEntity); 
+            let searchableColumns3: any[] = this.commonFilterService.getSearchableColumns2(this.goodEntity); 
+
+            let columnsName4: any[] = this.commonFilterService.getColumnsName2<SegUsersEntity>(this.segUsersEntity); 
+            let filterableColumns4 = this.commonFilterService.getFilterableColumns2<SegUsersEntity>(this.segUsersEntity); 
+            let searchableColumns4: any[] = this.commonFilterService.getSearchableColumns2(this.segUsersEntity); 
+       
+            let columnsName = columnsName1.concat(columnsName2,columnsName3,columnsName4); 
+            let filterableColumns = Object.assign(filterableColumns1, filterableColumns2,filterableColumns3,filterableColumns4); 
+            let searchableColumns = Object.assign(searchableColumns1, searchableColumns2,searchableColumns3,searchableColumns4); 
+            
+
+            
+            await this.commonFilterService.setAllItem(query, this.appointmentDepositoryEntity); 
+            
+            const queryBuilder = this.appointmentDepositoryEntity.createQueryBuilder('table')
+
+            let config: PaginateConfig<AppointmentDepositoryEntity> = { 
+              sortableColumns: columnsName, 
+              relations: ['user', 'good', 'personNumber'], 
+              nullSort: 'last', 
+              searchableColumns: searchableColumns, 
+              filterableColumns: filterableColumns, 
+            } 
+            const res = await paginate<AppointmentDepositoryEntity>(query, queryBuilder, config) 
+       
+            return { 
+              statusCode: res.meta.totalItems > 0 ? HttpStatus.OK : HttpStatus.BAD_REQUEST, 
+              message: res.meta.totalItems > 0 ? ["Datos obtenidos correctamente."] : ["No se encontrarón registros."], 
+              data: res.meta.totalItems > 0 ? res.data : [], 
+              count: res.meta.totalItems 
+       
+            } 
+          } catch (error) { 
+            return { 
+              statusCode: HttpStatus.INTERNAL_SERVER_ERROR, 
+              message: error.message, 
+              data: null, 
+            } 
+          }
+    }
+    //#endregion getFactJurRegDestLegCustom
 
 }

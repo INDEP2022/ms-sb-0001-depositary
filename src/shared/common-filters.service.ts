@@ -60,6 +60,25 @@ export class CommonFiltersService {
             .map( column => column.propertyName);
     }
 
+    getColumnsName2<T>(entity2:Repository<T>):string[] { 
+        return entity2.metadata.columns.map(column => `${entity2.metadata.relations[0].propertyName}.`+column.propertyName); 
+    }
+
+    getSearchableColumns2<T>(entity2:Repository<T>) { 
+        let typesText = ['character varying','text','character']; 
+        return entity2.metadata.columns.filter( column => typesText.includes(column.type as string) ) 
+            .map( column => `${entity2.metadata.relations[0].propertyName}.`+column.propertyName); 
+    }
+
+    getFilterableColumns2<T>(entity2:Repository<T>) { 
+        let filterableColumns = {}; 
+        entity2.metadata.columns.forEach( column => { 
+            let hasFilters = this.types.find( item => item.type === column.type) 
+            filterableColumns[`${entity2.metadata.relations[0].propertyName}.`+column.propertyName] = hasFilters ? hasFilters.value : [] 
+        }); 
+        return filterableColumns; 
+    }
+
     async setAllItem<T>(query: PaginateQuery,repository:Repository<T>) {
         if(query.limit === 0) {
             query.limit = await repository.count();

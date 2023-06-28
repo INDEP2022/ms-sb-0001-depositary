@@ -5,11 +5,13 @@ import {
     OneToOne,
     PrimaryColumn 
   } from 'typeorm';
+import { AppointmentDepositoryEntity } from './appointment-depository.entity';
   
   @Entity('bien', { schema: 'sera' })
   export class GoodEntity {
   
     @PrimaryColumn({
+      type: 'numeric',
       name: 'no_bien',
       nullable: false,
       precision: 10,
@@ -1692,5 +1694,7 @@ import {
     @Column('character varying', { name: 'val120', nullable: true, length: 200 })
     val120: string | null; 
 
+    @OneToOne(() => AppointmentDepositoryEntity, (e) => e.good) // specify inverse side as a second parameter 
+    good: AppointmentDepositoryEntity
 }
   
