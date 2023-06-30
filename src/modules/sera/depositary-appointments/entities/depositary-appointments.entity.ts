@@ -1,12 +1,12 @@
-import {Column, Entity, PrimaryColumn} from "typeorm";
+import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
     @Entity("nombramientos_depositaria", { schema: "sera" })
     export class depositaryAppointmentsEntity {
         
-      @PrimaryColumn({
+      @PrimaryGeneratedColumn({
           type: 'numeric',
           name: 'no_nombramiento',
           
-          precision: 5
+          //precision: 5
       })
       appointmentNum: number;
       
