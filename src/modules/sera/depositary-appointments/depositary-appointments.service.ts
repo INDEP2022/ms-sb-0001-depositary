@@ -58,15 +58,17 @@ export class DepositaryAppointmentsService {
 
         try {
 
-            const exists = await this.repository.findOne({ where: {appointmentNum}})
-            if(exists)
-            return {
-                statusCode: HttpStatus.BAD_REQUEST,
-                message: 'Existe un registro con este appointmentNum',
-                count: 0,
-                data:[] 
-            }
-            const data = await this.repository.save(body)
+            // const exists = await this.repository.findOne({ where: {appointmentNum}})
+            // if(exists)
+            // return {
+            //     statusCode: HttpStatus.BAD_REQUEST,
+            //     message: 'Existe un registro con este appointmentNum',
+            //     count: 0,
+            //     data:[] 
+            // }
+            const datacreate = await this.repository.create(body)
+            console.log(datacreate)
+            const data = await this.repository.save(datacreate)
             return {
                 statusCode: HttpStatus.OK,
                 message: 'Registro guardado correctamente.',
@@ -76,7 +78,7 @@ export class DepositaryAppointmentsService {
         } catch (error) {
             return  { 
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: "Ocurrio un error al intentar obtener los datos.",
+                message: error.message,
                 }
         }
     }
