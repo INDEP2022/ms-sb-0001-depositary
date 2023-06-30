@@ -13,7 +13,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
       @Column({
           type: 'date',
           name: 'fec_nomb_prov',
-          
+          nullable: true
           
       })
       nameProvDete: Date;
@@ -21,7 +21,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
       @Column({
           type: 'date',
           name: 'fec_revocacion',
-          
+          nullable: true
           
       })
       revocationDate: Date;
@@ -30,6 +30,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'revocacion',
           length: '1',
+          nullable: true
           
       })
       revocation: string;
@@ -38,14 +39,14 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'cve_contrato',
           length: '60',
-          
+          nullable: true
       })
       contractKey: string;
       
       @Column({
           type: 'date',
           name: 'fec_ini_contrato',
-          
+          nullable: true
           
       })
       startContractDate: Date;
@@ -53,7 +54,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
       @Column({
           type: 'date',
           name: 'fec_fin_contrato',
-          
+          nullable: true
           
       })
       endContractDate: Date;
@@ -61,7 +62,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
       @Column({
           type: 'numeric',
           name: 'cantidad',
-          
+          nullable: true,
           precision: 9
       })
       amount: number;
@@ -70,7 +71,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'cve_tipo_nomb',
           length: '1',
-          
+          nullable: true,
       })
       nameTypeKey: string;
       
@@ -78,14 +79,14 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'cve_tipo_administrador',
           length: '1',
-          
+          nullable: true,
       })
       administratorTypeKey: string;
       
       @Column({
           type: 'date',
           name: 'fec_asignacion',
-          
+          nullable: true,
           
       })
       assignmentDate: Date;
@@ -93,7 +94,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
       @Column({
           type: 'date',
           name: 'fec_nombramiento',
-          
+          nullable: true,
           
       })
       appointmentDate: Date;
@@ -102,7 +103,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'cedula_nombramiento',
           length: '60',
-          
+          nullable: true,
       })
       cardAppointmentId: string;
       
@@ -110,7 +111,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'tipo_depositaria',
           length: '1',
-          
+          nullable: true,
       })
       typeDepositary: string;
       
@@ -118,7 +119,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'observaciones',
           length: '1000',
-          
+          nullable: true,
       })
       observations: string;
       
@@ -126,14 +127,14 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'no_oficio_revocacion',
           length: '20',
-          
+          nullable: true,
       })
       jobRevocationNum: string;
       
       @Column({
           type: 'numeric',
           name: 'importe_contraprestacion',
-          
+          nullable: true,
           precision: 15
       })
       amountConsideration: number;
@@ -141,7 +142,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
       @Column({
           type: 'numeric',
           name: 'importe_honorarios',
-          
+          nullable: true,
           precision: 15
       })
       amountFee: number;
@@ -150,7 +151,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'no_oficio_provisional',
           length: '20',
-          
+          nullable: true,
       })
       jobProvisionalNum: string;
       
@@ -158,14 +159,14 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'anexo',
           length: '20',
-          
+          nullable: true,
       })
       exhibit: string;
       
       @Column({
           type: 'date',
           name: 'fec_oficio_junta_gob',
-          
+          nullable: true,
           
       })
       jobBoardgovtDate: Date;
@@ -174,14 +175,14 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'no_oficio_junta_gob',
           length: '20',
-          
+          nullable: true,
       })
       jobBoardgovtNum: string;
       
       @Column({
           type: 'date',
           name: 'fec_envio_dir_gral',
-          
+          nullable: true,
           
       })
       shipmentDirgralDate: Date;
@@ -189,7 +190,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
       @Column({
           type: 'date',
           name: 'fec_contestacion_dir_gral',
-          
+          nullable: true,
           
       })
       replyDirgralDate: Date;
@@ -198,14 +199,14 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'no_oficio_turno',
           length: '20',
-          
+          nullable: true,
       })
       jobShiftNum: string;
       
       @Column({
           type: 'date',
           name: 'fec_turno',
-          
+          nullable: true,
           
       })
       shiftDate: Date;
@@ -213,7 +214,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
       @Column({
           type: 'date',
           name: 'fec_retorno',
-          
+          nullable: true,
           
       })
       returnDate: Date;
@@ -222,7 +223,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'no_oficio_contestacion',
           length: '20',
-          
+          nullable: true,
       })
       jobReplyNum: string;
       
@@ -230,7 +231,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'acuerdo_nombramiento',
           length: '2000',
-          
+          nullable: true,
       })
       agreementAppointment: string;
       
@@ -238,7 +239,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'cedula_nombramiento_junta_gob',
           length: '60',
-          
+          nullable: true,
       })
       cardAppointmentIdBoardgovt: string;
       
@@ -246,7 +247,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'no_oficio_contesta_dir_gral',
           length: '20',
-          
+          nullable: true,
       })
       jobAnswerDirgralNum: string;
       
@@ -254,7 +255,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'autoridad_ordena_asignacion',
           length: '200',
-          
+          nullable: true,
       })
       authorityorderAssignment: string;
       
@@ -262,7 +263,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'responsable',
           length: '30',
-          
+          nullable: false
       })
       responsible: string;
       
@@ -270,14 +271,14 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'representante_sera',
           length: '30',
-          
+          nullable: false
       })
       representativeSera: string;
       
       @Column({
           type: 'numeric',
           name: 'no_bien',
-          
+          nullable: false,
           precision: 10
       })
       goodNum: number;
@@ -285,7 +286,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
       @Column({
           type: 'numeric',
           name: 'no_registro',
-          
+          nullable: true,
           
       })
       registryNum: number;
@@ -294,14 +295,14 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'vigencia',
           length: '20',
-          
+          nullable: true,
       })
       validity: string;
       
       @Column({
           type: 'numeric',
           name: 'importe_iva',
-          
+          nullable: true,
           precision: 15
       })
       amountVat: number;
@@ -309,7 +310,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
       @Column({
           type: 'numeric',
           name: 'folio_universal',
-          
+          nullable: true,
           precision: 15
       })
       folioUniversal: number;
@@ -317,7 +318,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
       @Column({
           type: 'numeric',
           name: 'folio_regreso',
-          
+          nullable: true,
           precision: 15
       })
       folioReturn: number;
@@ -325,7 +326,7 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
       @Column({
           type: 'numeric',
           name: 'no_persona',
-          
+          nullable: false,
           precision: 10
       })
       personNum: number;
@@ -334,14 +335,14 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'referencia',
           length: '30',
-          
+          nullable: true,
       })
       reference: string;
       
       @Column({
           type: 'numeric',
           name: 'iva',
-          
+          nullable: true,
           precision: 5
       })
       vat: number;
@@ -350,14 +351,14 @@ import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
           type: 'character varying',
           name: 'con_menaje',
           length: '1',
-          
+          nullable: true,
       })
       withHousehold: string;
       
       @Column({
           type: 'character varying',
           name: 'nb_origen',
-          
+          nullable: true,
           
       })
       nbOrigin: string;
