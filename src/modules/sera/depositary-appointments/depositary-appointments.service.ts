@@ -66,8 +66,33 @@ export class DepositaryAppointmentsService {
             //     count: 0,
             //     data:[] 
             // }
+            const queryUsers = await this.repository.query(`
+                SELECT *
+                FROM sera.SEG_USUARIOS
+                WHERE usuario = '${body.representativeSera}'
+            `);
+            if(queryUsers.length == 0) {
+                return {
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    message: `El dato representativeSera: '${body.representativeSera}' no existe en la tabla seg_usuarios.`,
+                    data:[]  
+                }
+            }
+
+            const queryPerson = await this.repository.query(`
+                SELECT *
+                FROM sera.cat_personas
+                WHERE no_persona = '${body.personNum}'
+            `);
+            if(queryPerson.length == 0) {
+                return {
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    message: `El dato personNum: '${body.personNum}' no existe en la tabla cat_personas.`,
+                    data:[]  
+                }
+            }
+
             const datacreate = await this.repository.create(body)
-            console.log(datacreate)
             const data = await this.repository.save(datacreate)
             return {
                 statusCode: HttpStatus.OK,
@@ -85,35 +110,66 @@ export class DepositaryAppointmentsService {
 
      //============ PUT ============
      async depositaryAppointmentsPut(body: depositaryAppointmentsDto) {
-        let appointmentNum=body.appointmentNum;
-
-
         try{
+            let appointmentNum = body.appointmentNum;
+
+            if(!body.appointmentNum) {
+                return {
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    message: 'El campo appointmentNum no puede ir vacío.',
+                    data:[] 
+                }
+            }
+
             const exists = await this.repository.findOne({ where:{appointmentNum} })
             if(!exists)
-            return {
-                statusCode: HttpStatus.BAD_REQUEST,
-                message: 'No existe un registro con este appointmentNum',
-                count: 0,
-                data:[] 
+                return {
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    message: `No existe un registro con este appointmentNum: ${appointmentNum}.`,
+                    count: 0,
+                    data:[] 
+                }
+
+                const queryUsers = await this.repository.query(`
+                SELECT *
+                FROM sera.SEG_USUARIOS
+                WHERE usuario = '${body.representativeSera}'
+            `);
+            if(queryUsers.length == 0) {
+                return {
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    message: `El dato representativeSera: '${body.representativeSera}' no existe en la tabla seg_usuarios.`,
+                    data:[]  
+                }
+            }
+
+            const queryPerson = await this.repository.query(`
+                SELECT *
+                FROM sera.cat_personas
+                WHERE no_persona = '${body.personNum}'
+            `);
+            if(queryPerson.length == 0) {
+                return {
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    message: `El dato personNum: '${body.personNum}' no existe en la tabla cat_personas.`,
+                    data:[]  
+                }
             }
 
             delete body.appointmentNum;
-            const data = await this.repository.update({appointmentNum},body)
-
-            if(data)
-            return {
-                statusCode: HttpStatus.OK,
-                message: 'Registro actualizado correctamente.'
-            
-            }
+            const { affected } = await this.repository.update({appointmentNum}, body)
+            if(affected)
+                return {
+                    statusCode: HttpStatus.OK,
+                    message: 'Registro actualizado correctamente.'
+                }
             return {
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: 'No se guardo el registro',
             }
-            
         }
         catch (error) {
+            console.log(error);
             return  { 
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: error,
@@ -124,25 +180,25 @@ export class DepositaryAppointmentsService {
     //============ delete ============
     async depositaryAppointmentsDelete(theKey:depositaryAppointmentsIdDto) {
         
-        let appointmentNum=theKey.appointmentNum;
+        let appointmentNum = theKey.appointmentNum;
 
         try {
             const exists = await this.repository.findOne({ where: {appointmentNum}})
             if (!exists) return { 
                 statusCode: HttpStatus.BAD_REQUEST,
-                message: 'No existe un registro con este appointmentNum'
+                message: `No existe un registro con este appointmentNum: '${appointmentNum}'`
             }
 
             await this.repository.delete({appointmentNum})
             return { 
                 statusCode: HttpStatus.OK,
                 message: 'Registro eliminado correctamente.',
-                }
+            }
         } catch (error) {
             return  { 
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: "Ocurrio un error al intentar obtener los datos.",
-                }
+            }
         }
     }
 }
