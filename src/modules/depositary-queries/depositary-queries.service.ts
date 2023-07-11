@@ -5,7 +5,7 @@ import { VTypeWellEntity } from '../infrastructure/entities/views/v-type-well.en
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 //import { PaginateQuery } from 'nestjs-paginate';
-import { FilterOperator, Paginate, PaginateQuery, paginate, Paginated, PaginateConfig } from 'nestjs-paginate'
+import { FilterOperator, PaginateQuery, paginate, Paginated,PaginateConfig } from 'nestjs-paginate';
 import { GetByParamMapperMenajeDto } from './dto/get-by-param-mapper-menaje.dto';
 import { CatEntfedEntity } from '../infrastructure/entities/cat-entfed.entity';
 import { mapperPadepositaryAssets2Dto } from './dto/mapper-pa-depositary-assets2.dto';
