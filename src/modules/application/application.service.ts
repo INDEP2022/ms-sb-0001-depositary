@@ -1,10 +1,11 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { CRUDMessages } from 'src/shared/utils/message.enum';
 import { Connection } from 'typeorm';
+import { PbApplyDto } from './dto/pb-apply.dto';
 
 @Injectable()
 export class ApplicationService {
-  constructor(private readonly entity: Connection) {}
+  constructor(private readonly entity: Connection) { }
   //---------------------------------------------------------------------------------------------
   async validBlacklist(validBlacklist: number) {
     try {
@@ -92,7 +93,7 @@ export class ApplicationService {
 
       await this.entity.query(q);
 
-      
+
 
       return {
         statusCode: HttpStatus.OK,
@@ -130,6 +131,58 @@ export class ApplicationService {
         statusCode: HttpStatus.OK,
         message: [CRUDMessages.GetSuccess],
         data: qr,
+      };
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.OK,
+        message: [error.message],
+      };
+    }
+  }
+
+  async pbApply(dto: PbApplyDto) {
+
+    let VCONP: number = null
+    let VCONC: number = null
+    let VCONE: number = null
+    let VCONJ: number = null
+    let VCONA: number = null
+    let V_DESCRIPCION: string = null
+    let V_CHECA: number = null
+    let V_BAN: boolean = null
+
+    let NO_BIEN = null
+
+    let T_REG_LEIDOS
+    let T_REG_PROCESADOS
+    let T_REG_CORRECTOS
+    let T_REG_ERRONEOS
+    let T_REG_CORJUR
+    let T_REG_CORADM
+
+    try {
+
+      VCONP = 0;
+      VCONC = 0;
+      VCONE = 0;
+      VCONJ = 0;
+      VCONA = 0;
+      T_REG_LEIDOS = 0
+      T_REG_PROCESADOS = 0
+      T_REG_CORRECTOS = 0
+      T_REG_ERRONEOS = 0
+      T_REG_CORJUR = 0
+      T_REG_CORADM = 0
+      V_BAN = false
+
+      if (NO_BIEN) {
+        
+      }
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: ['ok'],
+        data: true,
       };
     } catch (error) {
       return {
