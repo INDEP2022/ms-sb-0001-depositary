@@ -1,11 +1,10 @@
 import { Controller } from '@nestjs/common';
 import { ApplicationService } from './application.service';
 import { MessagePattern } from '@nestjs/microservices';
-import { PbApplyDto } from './dto/pb-apply.dto';
 
 @Controller('application')
 export class ApplicationController {
-  constructor(private readonly service: ApplicationService) {}
+  constructor(private readonly service: ApplicationService) { }
   //---------------------------------------------------------------------------------------------
   @MessagePattern({ cmd: 'validBlacklist' })
   async validBlacklist(validBlacklist: number) {
@@ -25,7 +24,19 @@ export class ApplicationController {
     return await this.service.responsable(no_bien);
   }
   @MessagePattern({ cmd: 'appointmentNumber' })
-  async appointmentNumber({goodNumber, pagination}) {
+  async appointmentNumber({ goodNumber, pagination }) {
     return await this.service.appointmentNumber(goodNumber, pagination);
+  }
+  @MessagePattern({ cmd: 'vCheca' })
+  async vCheca({ conceptPayKey, pagination }) {
+    return await this.service.vCheca(conceptPayKey, pagination);
+  }
+  @MessagePattern({ cmd: 'vChecaPost' })
+  async vChecaPost({ dto, pagination }) {
+    return await this.service.vChecaPost(dto, pagination);
+  }
+  @MessagePattern({ cmd: 'vChecaPostReport' })
+  async vChecaPostReport({ dto, pagination }) {
+    return await this.service.vChecaPostReport(dto, pagination);
   }
 }

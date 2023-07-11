@@ -1,9 +1,11 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { CRUDMessages } from 'src/shared/utils/message.enum';
 import { Connection } from 'typeorm';
-import { PbApplyDto } from './dto/pb-apply.dto';
 import { CommonFilterQueryService } from 'src/shared/service/common-filter-query.service';
 import { PaginationDto } from 'src/shared/dto/pagination.dto';
+import { VChecaPostDto } from './dto/v-checa-post.dto';
+import { VChecaPostReportDto } from './dto/v-checa-post-report.dto';
+import * as moment from 'moment-timezone';
 
 @Injectable()
 export class ApplicationService {
@@ -158,11 +160,70 @@ export class ApplicationService {
         and REVOCACION = 'N'
       `
       return await this.commonFilterQueryService.callView(PaginationDto, sql, 1)
+    } catch (error) {
       return {
         statusCode: HttpStatus.OK,
-        message: ['ok'],
-        data: true,
+        message: [error.message],
       };
+    }
+  }
+
+  async vCheca(conceptPayKey: number, pagination: PaginationDto) {
+
+    try {
+      const sql = `
+        select
+          1 as V_CHECA
+        from
+          sera.CAT_CONCEPTO_PAGOS
+        where
+          CVE_CONCEPTO_PAGO = ${conceptPayKey}
+      `
+      return await this.commonFilterQueryService.callView(PaginationDto, sql, 1)
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.OK,
+        message: [error.message],
+      };
+    }
+  }
+
+  async vChecaPost({ appointmentNumber, conceptPayKey, payDate }: VChecaPostDto, pagination: PaginationDto) {
+
+    try {
+      const sql = `
+          SELECT 
+            1 as V_CHECA
+          from
+            sera.DETPAGO_DEPOSITARIAS
+          where
+            NO_NOMBRAMIENTO = '${appointmentNumber}'
+            and FEC_PAGO = '${moment.utc(payDate).format('YYYY-MM-DD')}'
+            and CVE_CONCEPTO_PAGO = '${conceptPayKey}'
+      `
+      return await this.commonFilterQueryService.callView(PaginationDto, sql, 1)
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.OK,
+        message: [error.message],
+      };
+    }
+  }
+
+  async vChecaPostReport({ appointmentNumber, payDate, reportKey }: VChecaPostReportDto, pagination: PaginationDto) {
+
+    try {
+      const sql = `
+          select
+            1 as V_CHECA
+          from
+            sera.DETREPO_DEPOSITARIAS
+          where
+            NO_NOMBRAMIENTO = '${appointmentNumber}'
+            and FEC_REPO = '${moment.utc(payDate).format('YYYY-MM-DD')}'
+            and CVE_REPORTE = ${reportKey}
+      `
+      return await this.commonFilterQueryService.callView(PaginationDto, sql, 1)
     } catch (error) {
       return {
         statusCode: HttpStatus.OK,
