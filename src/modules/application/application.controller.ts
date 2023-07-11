@@ -24,8 +24,8 @@ export class ApplicationController {
   async responsable(no_bien: number) {
     return await this.service.responsable(no_bien);
   }
-  @MessagePattern({ cmd: 'pbApply' })
-  async pbApply(dto: PbApplyDto) {
-    return await this.service.pbApply(dto);
+  @MessagePattern({ cmd: 'appointmentNumber' })
+  async appointmentNumber({goodNumber, pagination}) {
+    return await this.service.appointmentNumber(goodNumber, pagination);
   }
 }
