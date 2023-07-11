@@ -15,6 +15,7 @@ import { GoodEntity } from '../infrastructure/entities/good.entity';
 import { PersonEntity } from '../sera/depositary-appointment/entity/person.entity';
 import { SegUsersEntity } from '../sera/depositary-appointment/entity/seg-users.entity';
 import { PaginationDto } from 'src/shared/dto/pagination';
+import { FmaSinsPagDepositariasDto, FmaSinsPagDepositariasMassiveDto } from './dto/fma-sins-pag-depositarias.dto';
 @Injectable()
 export class DepositaryQueriesService {
     constructor(
@@ -256,4 +257,148 @@ export class DepositaryQueriesService {
     }
     //#endregion getFactJurRegDestLegCustom
 
+    async getFmaSinsPagDepositarias({ data }: FmaSinsPagDepositariasMassiveDto) {
+        try {
+
+            let ERRTXT = [];
+            let VCONE = 0;
+            let VCONC = 0;
+            let VCONJ = 0;
+            let VCONP = 0;
+            let VCONA = 0;
+
+            for (let i = 0; i < data.length; i++) {
+                let V_NO_NOMBRAMIENTO: any;
+                let V_NO_BIEN: any;
+                let V_FEC_PAGO: any;
+                let V_CVE_CONCEPTO_PAGO: any;
+                let V_IMPORT: any;
+                let V_OBSERVACION: any;
+                let V_CHECA: any;
+                let V_BAN = false;
+
+                const element = data[i];
+                if (!element.no_bien) {
+                    return {
+                        statusCode: HttpStatus.BAD_REQUEST,
+                        message: 'El numero bien es obligatorio',
+                        data: null,
+                    }
+                } else {
+                    if (element.validado === 'S' && element.aplicado === 'N') {
+                        try {
+                            await this.entity.query(`
+                            INSERT INTO sera.DETPAGO_DEPOSITARIAS ( NO_NOMBRAMIENTO,
+                                FEC_PAGO,
+                                CVE_CONCEPTO_PAGO,
+                                IMPORTE,
+                                OBSERVACION
+                            )
+                    VALUES ( ${element.no_nombramiento},
+                                '${element.fec_pago}',
+                                ${element.cve_concepto_pago},
+                                ${element.importe},
+                                ${element.observacion}'
+                            );
+                        `)
+
+                        } catch (error) {
+                            return {
+                                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                                message: error.message,
+                                data: null,
+                            }
+                        }
+                        element.aplicado = 'S';
+                        VCONC = VCONC + 1;
+                    } else {
+                        ERRTXT.push(`(PAGOS) Registro Bien: ${element.no_bien}, Fecha pago: ${element.fec_pago}, Clave Pago: ${element.cve_concepto_pago}. Error `);
+                        VCONE = VCONE + 1;
+                        element.validado = 'N'
+                    }
+
+                    if (element.valjur === 'S' && element.apljur === 'N') {
+
+                        try {
+                            await this.entity.query(`
+                            INSERT INTO sera.DETREPO_DEPOSITARIAS ( NO_NOMBRAMIENTO,
+                                FEC_REPO,
+                                CVE_REPORTE,
+                                REPORTE
+                            )
+                    VALUES ( ${element.no_nombramiento},
+                                '${element.fec_pago}',
+                                1,
+                                '${element.juridico}'
+                            );
+                    `)
+
+
+                        } catch (error) {
+                            return {
+                                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                                message: error.message,
+                                data: null,
+                            }
+                        }
+                        element.apljur = 'S';
+                        VCONJ = VCONJ + 1;
+                    } else {
+                        ERRTXT.push(`(JURIDICO) Registro: ${element}. Bien: ${element.no_bien}, Fecha Reporte: ${element.fec_pago}. Error`)
+                        element.valjur = 'N'
+                    }
+
+                    if (element.valadm === 'S' && element.apladm === 'N') {
+
+                        try {
+                            await this.entity.query(`
+                            INSERT INTO sera.DETREPO_DEPOSITARIAS ( NO_NOMBRAMIENTO,
+                                FEC_REPO,
+                                CVE_REPORTE,
+                                REPORTE
+                              )
+                       VALUES ( ${element.no_nombramiento},
+                                '${element.fec_pago}',
+                                2,
+                                '${element.administra}'
+                              );
+                            `)
+
+                        } catch (error) {
+                            return {
+                                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                                message: error.message,
+                                data: null,
+                            }
+                        }
+                        element.apladm = 'S'
+                        VCONA = VCONA + 1;
+                    } else {
+                        ERRTXT.push(`(ADMINISTRATIVO) Registro: ${element}. Bien: ${element.no_bien}, Fecha Reporte: ${element.fec_pago}. Error`)
+                        element.valadm = 'N';
+                    }
+                    VCONP = VCONP + 1;
+                }
+            }
+
+            return {
+                statusCode: HttpStatus.OK,
+                message: 'Datos insertados',
+                data: {
+                    ERRTXT,
+                    VCONE,
+                    VCONC,
+                    VCONJ,
+                    VCONP,
+                    VCONA
+                }
+            }
+        } catch (error) {
+            return {
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: error.message,
+                data: null,
+            }
+        }
+    }
 }
