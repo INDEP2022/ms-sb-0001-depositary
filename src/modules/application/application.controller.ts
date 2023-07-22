@@ -39,4 +39,8 @@ export class ApplicationController {
   async vChecaPostReport({ dto, pagination }) {
     return await this.service.vChecaPostReport(dto, pagination);
   }
+  @MessagePattern({ cmd: 'migrateXXSaeInvDisponibleOs' })
+  async migrateXXSaeInvDisponibleOs() {
+    return await this.service.migrateXXSaeInvDisponibleOs();
+  }
 }
