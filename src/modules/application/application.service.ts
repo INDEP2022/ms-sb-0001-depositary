@@ -25,10 +25,16 @@ export class ApplicationService {
   transformObjToSqlValues(obj: any) {
     for (const field in obj) {
       const value = obj[field];
-      if (!value) continue;
+      if (!value) {
+        obj[field] = 'NULL'
+      };
+
+      if(typeof value == 'string') {
+        obj[field] = `'${value}'`;
+      }
 
       if (typeof value === 'object') {
-        obj[field] = LocalDate.getCustom(value, 'YYYY-MM-DD');
+        obj[field] = `'${LocalDate.getCustom(value, 'YYYY-MM-DD')}'`;
       }
     }
 
@@ -271,11 +277,11 @@ export class ApplicationService {
 
   async migrateXXSaeInvDisponibleOs() {
     try {
-
-      let page = 0,
-      limit = 1000,
-      data = await this.goodsQueryDbo.send({ cmd: 'selectXxsaeInvDispOs' }, { page, limit }).toPromise();
-
+console.log(3)
+      let page = 0;
+      let limit = 10;
+      let data = await this.goodsQueryDbo.send({ cmd: 'selectXxsaeInvDispOs' }, { page, limit }).toPromise();
+console.log(data)
       let hasData = true
 
       let processed = 0;
