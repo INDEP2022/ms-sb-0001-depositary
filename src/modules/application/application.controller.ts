@@ -41,7 +41,6 @@ export class ApplicationController {
   }
   @MessagePattern({ cmd: 'migrateXXSaeInvDisponibleOs' })
   async migrateXXSaeInvDisponibleOs(data:any) {
-    console.log(2);
     return await this.service.migrateXXSaeInvDisponibleOs();
   }
 }

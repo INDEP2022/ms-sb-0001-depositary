@@ -277,11 +277,11 @@ export class ApplicationService {
 
   async migrateXXSaeInvDisponibleOs() {
     try {
-console.log(3)
+
       let page = 0;
       let limit = 10;
       let data = await this.goodsQueryDbo.send({ cmd: 'selectXxsaeInvDispOs' }, { page, limit }).toPromise();
-console.log(data)
+
       let hasData = true
 
       let processed = 0;
