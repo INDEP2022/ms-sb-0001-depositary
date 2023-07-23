@@ -295,25 +295,28 @@ export class ApplicationService {
         let items = data.data;
         
         let insertIntoQuery = `INSERT INTO NSBDDB.XXSAE_INV_DISPONIBLE_OS (ORGANIZATION_ID, ORGANIZATION_CODE, INVENTORY_ITEM_ID, ITEM, NO_INVENTARIO, NO_BIEN_SIAB, NO_GESTION, SUBINVENTORY_CODE, LOCATOR_ID, LOCATOR, UOM_CODE, DESCRIPTION, DISPONIBLE, RESERVADO) VALUES`;
+        let insertValues
         
         for (let index = 0; index < items.length; index++) {
           const insertObj: XXSAE_INV_DISPONIBLE_OS = this.transformObjToSqlValues(items[index]);
           
-          let insertValues = `(${insertObj.ORGANIZATION_ID}, ${insertObj.ORGANIZATION_CODE}, ${insertObj.INVENTORY_ITEM_ID}, ${insertObj.ITEM}, ${insertObj.NO_INVENTARIO}, ${insertObj.NO_BIEN_SIAB}, ${insertObj.NO_GESTION}, ${insertObj.SUBINVENTORY_CODE}, ${insertObj.LOCATOR_ID}, ${insertObj.LOCATOR}, ${insertObj.UOM_CODE}, ${insertObj.DESCRIPTION}, ${insertObj.DISPONIBLE}, ${insertObj.RESERVADO})`;
+          insertValues = `(${insertObj.ORGANIZATION_ID}, ${insertObj.ORGANIZATION_CODE}, ${insertObj.INVENTORY_ITEM_ID}, ${insertObj.ITEM}, ${insertObj.NO_INVENTARIO}, ${insertObj.NO_BIEN_SIAB}, ${insertObj.NO_GESTION}, ${insertObj.SUBINVENTORY_CODE}, ${insertObj.LOCATOR_ID}, ${insertObj.LOCATOR}, ${insertObj.UOM_CODE}, ${insertObj.DESCRIPTION}, ${insertObj.DISPONIBLE}, ${insertObj.RESERVADO})`;
 
           let reachedLimit = index == limit - 1;
 
           if(reachedLimit) insertValues += ';';
           else insertValues += ',';
+        }
 
-          if(reachedLimit) {
-            const finalQuery = `${insertIntoQuery} ${insertValues}`;
-            console.log('SQL =>', finalQuery);
-            page++;
-            processed += limit;
-            await this.entity.query(finalQuery);
-            data = await this.goodsQueryDbo.send({ cmd: 'selectXxsaeInvDispOs' }, { page, limit }).toPromise();
-          }
+        const finalQuery = `${insertIntoQuery} ${insertValues}`;
+        console.log('SQL =>', finalQuery);
+        await this.entity.query(finalQuery);
+        data = await this.goodsQueryDbo.send({ cmd: 'selectXxsaeInvDispOs' }, { page, limit }).toPromise();
+        processed += limit;
+        page++;
+
+        if(data?.data?.length == 0) {
+          hasData = false;
         }
       }
 
