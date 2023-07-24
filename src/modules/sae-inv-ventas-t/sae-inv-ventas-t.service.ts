@@ -199,32 +199,28 @@ export class SaeInvVentasTService {
         V_EXIST_BIENS = searchCount[0].count;
 
         if (V_EXIST_BIENS == 0 && VAL_VEN.STATUS != 9) {
-          const q1 = await this.entity.query(`
+          const q = await this.entity.query(`
                 SELECT  NO_INVENTARIO,  NO_GESTION, SUBINVENTORY_CODE,  UOM_CODE UNIDAD_MEDIDA, DISPONIBLE, LOCATOR as LOCALIZADOR
                 FROM  NSBDDB.XXSAE_INV_DISPONIBLE_OS
                 WHERE  NO_INVENTARIO='${VAL_VEN.numero_inventario}'
                     AND SUBINVENTORY_CODE ='${VAL_VEN.subinventario}'
-                `);
-
-          const q2 = await this.entity.query(`
+                EXCEPT
                 SELECT NO_INVENTARIO, NO_GESTION, SUBINVENTORY_CODE,  UNIDAD_MEDIDA, DISPONIBLE,LOCALIZADOR
                 FROM NSBDDB.V_BIEN_BAJA_NSBDDB_ESTAUS0
                 WHERE NO_INVENTARIO='${VAL_VEN.numero_inventario}'
                     AND SUBINVENTORY_CODE = '${VAL_VEN.subinventario}'
                 `);
 
-          if (!q1.length && !q2.length) {
+          if (!q.length) {
             return {
               statusCode: HttpStatus.BAD_REQUEST,
               message: [
                 'No se encontro la informacion requerida V_BIEN_BAJA_NSBDDB_ESTAUS0 & XXSAE_INV_DISPONIBLE_OS',
               ],
             };
-          } else if (q1.length) {
-            CUR_LOC = q1;
-          } else if (q2.length && !CUR_LOC) {
-            CUR_LOC = q2;
           }
+
+          CUR_LOC = q;
 
           for (const item of CUR_LOC) {
             if (

@@ -19,7 +19,7 @@ export class ApplicationService {
     @Inject('ms-sb-0001-goodsquerydbo')
     private readonly goodsQueryDbo: ClientProxy,
   ) {
-    this.goodsQueryDbo.connect();
+    // this.goodsQueryDbo.connect();
   }
 
   transformObjToSqlValues(obj: any) {
@@ -287,15 +287,19 @@ export class ApplicationService {
       let processed = 0;
       
 
-      if(data.data.length == 0) {
+      if(data?.data?.length == 0) {
         hasData= false
       }
 
       while(hasData) {
-        let items = data.data;
+        let items = data?.data;
         
         let insertIntoQuery = `INSERT INTO NSBDDB.XXSAE_INV_DISPONIBLE_OS (ORGANIZATION_ID, ORGANIZATION_CODE, INVENTORY_ITEM_ID, ITEM, NO_INVENTARIO, NO_BIEN_SIAB, NO_GESTION, SUBINVENTORY_CODE, LOCATOR_ID, LOCATOR, UOM_CODE, DESCRIPTION, DISPONIBLE, RESERVADO) VALUES`;
         let insertValues
+
+        if(items?.length == 0) {
+          hasData = false;
+        }
         
         for (let index = 0; index < items.length; index++) {
           const insertObj: XXSAE_INV_DISPONIBLE_OS = this.transformObjToSqlValues(items[index]);

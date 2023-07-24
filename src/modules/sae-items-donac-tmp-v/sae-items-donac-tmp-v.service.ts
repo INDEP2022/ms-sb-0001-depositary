@@ -10,7 +10,11 @@ import { SaeItemsDonacVBEntity } from './entities/sae-items-donac-v-b.entity';
 export class SaeItemsDonacTmpVService {
   #eventId: number = 3106;
   #table: string = 'SAE_ITEMS_DONAC_TMP_V';
-  constructor(private entity: Connection, @InjectRepository(SaeItemsDonacVBEntity) private entityB: Repository<SaeItemsDonacVBEntity>) {}
+  constructor(
+    private entity: Connection,
+    @InjectRepository(SaeItemsDonacVBEntity)
+    private entityB: Repository<SaeItemsDonacVBEntity>,
+  ) {}
 
   async PA_INS_VALI_BIEN_DON(usuario: string) {
     try {
@@ -173,33 +177,29 @@ export class SaeItemsDonacTmpVService {
 
         V_EXIST_BIENS = searchCount[0].count;
 
-        if (V_EXIST_BIENS == 0 && VAL_DON.STATUS != 9) {
-          const q1 = await this.entity.query(`
+        if (V_EXIST_BIENS == 0 && VAL_DON.status != 9) {
+          const q = await this.entity.query(`
                 SELECT  NO_INVENTARIO,  NO_GESTION, SUBINVENTORY_CODE,  UOM_CODE UNIDAD_MEDIDA, DISPONIBLE, LOCATOR as LOCALIZADOR
                 FROM  NSBDDB.XXSAE_INV_DISPONIBLE_OS
                 WHERE  NO_INVENTARIO='${VAL_DON.numero_inventario}'
                     AND SUBINVENTORY_CODE ='${VAL_DON.subinventario}'
-                `);
-
-          const q2 = await this.entity.query(`
+                EXCEPT
                 SELECT NO_INVENTARIO, NO_GESTION, SUBINVENTORY_CODE,  UNIDAD_MEDIDA, DISPONIBLE,LOCALIZADOR
                 FROM NSBDDB.V_BIEN_BAJA_NSBDDB_ESTAUS0
                 WHERE NO_INVENTARIO='${VAL_DON.numero_inventario}'
                     AND SUBINVENTORY_CODE = '${VAL_DON.subinventario}'
                 `);
 
-          if (!q1.length && !q2.length) {
+          if (!q.length) {
             return {
               statusCode: HttpStatus.BAD_REQUEST,
               message: [
                 'No se encontro la informacion requerida V_BIEN_BAJA_NSBDDB_ESTAUS0 & XXSAE_INV_DISPONIBLE_OS',
               ],
             };
-          } else if (q1.length) {
-            CUR_LOC = q1;
-          } else if (q2.length && !CUR_LOC) {
-            CUR_LOC = q2;
           }
+
+          CUR_LOC = q;
 
           for (const item of CUR_LOC) {
             if (
@@ -427,8 +427,10 @@ export class SaeItemsDonacTmpVService {
     try {
       Logger.debug('TRIGGER', this.#table);
       const result: any[] = await this.entity.query(`
-        select * from audit.logged_actions where event_id > ${this.#eventId} and action in ('D', 'U') and table_name = '${this.#table.toLocaleLowerCase()}' order by event_id DESC;
-      `)
+        select * from audit.logged_actions where event_id > ${
+          this.#eventId
+        } and action in ('D', 'U') and table_name = '${this.#table.toLocaleLowerCase()}' order by event_id DESC;
+      `);
 
       this.#eventId = result[0]?.event_id || this.#eventId;
 
@@ -438,12 +440,12 @@ export class SaeItemsDonacTmpVService {
       for (const loggedAction of result) {
         const client_query = JSON.parse(loggedAction.client_query);
 
-        if(!client_query) continue;
-        if(loggedAction.action == 'U') {
+        if (!client_query) continue;
+        if (loggedAction.action == 'U') {
           await this.updateSaeItemsDonacTmpVB(client_query);
         }
 
-        if(loggedAction.action == 'D') {
+        if (loggedAction.action == 'D') {
           await this.deleteSaeItemsDonacTmpVB(client_query.id);
         }
       }
