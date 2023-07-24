@@ -43,8 +43,10 @@ export class SaeItemsDonacTmpVService {
             AND LAST_UPDATE_DATE > TO_DATE('${LocalDate.getCustom(
               LocalDate.getNow(),
               'YYYY-MM-DD',
-            )}', 'YYYY-MM-DD')
+            )}', 'YYYY-MM-DD') - 1
         `;
+
+        console.log(q);
       const qR = await this.entity.query(q);
 
       if (!qR.length) {

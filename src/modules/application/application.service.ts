@@ -280,6 +280,8 @@ export class ApplicationService {
 
       let page = 0;
       let limit = 10;
+
+      await this.entity.query('DELETE FROM NSBDDB.XXSAE_INV_DISPONIBLE_OS');
       let data = await this.goodsQueryDbo.send({ cmd: 'selectXxsaeInvDispOs' }, { page, limit }).toPromise();
 
       let hasData = true
