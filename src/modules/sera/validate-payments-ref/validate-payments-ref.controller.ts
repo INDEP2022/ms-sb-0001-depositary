@@ -72,4 +72,9 @@ export class ValidatePaymentsRefController {
         return await this.service.updateStatusBase(data.event)
     }
 
+    @MessagePattern({ cmd: 'ventaSbm' })
+    async ventaSbm(data:{event:number,date:Date}){
+        return await this.service.ventaSbm(data.event,data.date)
+    }
+
 }
