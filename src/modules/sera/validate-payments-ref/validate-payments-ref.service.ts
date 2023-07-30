@@ -4610,7 +4610,11 @@ export class ValidatePaymentsRefService {
                 return CONT
         }
 
-
+        /**
+         * @procedure BORRA_COMPLETO_ACT
+         * @param params 
+         * @returns 
+         */
         async currentFullErase(params: CurrentFullErase) {
                 var BR_IDLOTE = 0
                 var BR_IDBXL = 0
@@ -5035,6 +5039,11 @@ export class ValidatePaymentsRefService {
                 return
 
         }
+        /**
+         * @procedure BORRA_COMPLETO
+         * @param params 
+         * @returns 
+         */
         async fullErase(params: CurrentFullErase) {
                 var BR_IDLOTE = 0
                 var BR_IDBXL = 0

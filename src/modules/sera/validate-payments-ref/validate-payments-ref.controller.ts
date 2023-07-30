@@ -44,6 +44,11 @@ export class ValidatePaymentsRefController {
         return await this.service.currentFullErase(params)
     }
 
+    @MessagePattern({ cmd: 'currentFullErase' })
+    async fullErase(params:CurrentFullErase){
+        return await this.service.fullErase(params)
+    }
+
     
 
     @MessagePattern({ cmd: 'actLotAct' })
