@@ -16,6 +16,7 @@ import { ComerEventEntity } from './entity/comer-event.entity';
 import { ComerLotsEntity } from './entity/comer-lots.entity';
 import { ComerParameterModEntity } from './entity/comer-parameter-mod.entity';
 import { LocalDate } from 'src/shared/utils/local-date';
+import { UpdateCurrentGeneralStatus } from './dto/update-current-general-status.dto';
 
 @Injectable()
 export class ValidatePaymentsRefService {
@@ -103,7 +104,11 @@ export class ValidatePaymentsRefService {
 
         }
 
-
+        /**
+         * 
+         * @procedure LISTA_NEGRA
+         * @returns 
+         */
         async blackList(eventId: number) {
 
                 const LNN: any[] = await this.entity.query(`SELECT     LOT.ID_CLIENTE
@@ -148,51 +153,57 @@ export class ValidatePaymentsRefService {
         }
 
 
-
+        /**
+         * 
+         * @procedure LISTA_NEGRA_ACT
+         * @returns 
+         */
         async currentBlackList(data: BlackListCurrent) {
 
                 const LNN: any[] = await this.entity.query(` SELECT     LOT.ID_CLIENTE
-                FROM    sera.COMER_PAGOSREFGENS GEN, sera.COMER_LOTES LOT
-                WHERE    LOT.ID_EVENTO = ${data.eventId} 
-                AND      LOT.ID_LOTE = ${data.lotId} 
-                AND        GEN.ID_LOTE = LOT.ID_LOTE
-                AND        GEN.TIPO = 'N'
-                AND        EXISTS (SELECT    1
-                                FROM    sera.COMER_CLIENTESXEVENTO CXE
-                                WHERE    CXE.ID_EVENTO = ${data.eventId}
-                                AND        CXE.ID_CLIENTE = LOT.ID_CLIENTE
-                                AND        CXE.PROCESAR = 'S'
-                                );`);
+                        FROM    sera.COMER_PAGOSREFGENS GEN, sera.COMER_LOTES LOT
+                        WHERE    LOT.ID_EVENTO = ${data.event} 
+                        AND      LOT.ID_LOTE = ${data.lot} 
+                        AND        GEN.ID_LOTE = LOT.ID_LOTE
+                        AND        GEN.TIPO = 'N'
+                        AND        EXISTS (SELECT    1
+                                        FROM    sera.COMER_CLIENTESXEVENTO CXE
+                                        WHERE    CXE.ID_EVENTO = ${data.event}
+                                        AND        CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                        AND        CXE.PROCESAR = 'S'
+                );`);
 
 
                 const LNS: any[] = await this.entity.query(`SELECT     LOT.ID_CLIENTE
-                FROM    sera.COMER_PAGOSREFGENS GEN, sera.COMER_LOTES LOT
-                WHERE    LOT.ID_EVENTO = ${data.eventId} 
-                AND      LOT.ID_LOTE = ${data.lotId} 
-                AND        LOT.ID_LOTE = GEN.ID_LOTE
-                AND        GEN.TIPO = 'P'
-                AND         SUBSTR(GEN.REFERENCIA,1,1) IN ('1','2')
-                AND        EXISTS (SELECT    1
-                                FROM   sera.COMER_CLIENTESXEVENTO CXE
-                                WHERE    CXE.ID_EVENTO = ${data.eventId} 
-                                AND        CXE.ID_CLIENTE = LOT.ID_CLIENTE
-                                AND        CXE.PROCESAR = 'S'
-                        )`);
+                        FROM    sera.COMER_PAGOSREFGENS GEN, sera.COMER_LOTES LOT
+                        WHERE    LOT.ID_EVENTO = ${data.event} 
+                        AND      LOT.ID_LOTE = ${data.lot} 
+                        AND        LOT.ID_LOTE = GEN.ID_LOTE
+                        AND        GEN.TIPO = 'P'
+                        AND         SUBSTR(GEN.REFERENCIA,1,1) IN ('1','2')
+                        AND        EXISTS (SELECT    1
+                                        FROM   sera.COMER_CLIENTESXEVENTO CXE
+                                        WHERE    CXE.ID_EVENTO = ${data.event} 
+                                        AND        CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                        AND        CXE.PROCESAR = 'S'
+                )`);
 
-                LNN.forEach(element => {
+                for (var element of LNN){
                         this.entity.query(` UPDATE    sera.COMER_CLIENTES
-            SET     LISTA_NEGRA = 'N'
-            WHERE    ID_CLIENTE = ${element.id_cliente}`)
-                });
+                        SET     LISTA_NEGRA = 'N'
+                        WHERE    ID_CLIENTE = ${element.id_cliente}`)
+                };
 
-                LNS.forEach(element => {
+                for (var element of LNS) {
                         this.entity.query(`  UPDATE    sera.COMER_CLIENTES
-            SET     LISTA_NEGRA = 'S',
-                    ID_PENALIZACION = 1 
-            WHERE    ID_CLIENTE = ${element.id_cliente}`)
-                });
-
-                return `Clientes en la lista negra ${LNS.length || 0}, clientes sacados de la lista negra ${LNN.length || 0}`;
+                        SET     LISTA_NEGRA = 'S',
+                                ID_PENALIZACION = 1 
+                        WHERE    ID_CLIENTE = ${element.id_cliente}`)
+                };
+                return {
+                        statusCode:200,
+                        message:[`Clientes en la lista negra ${LNS.length || 0}, clientes sacados de la lista negra ${LNN.length || 0}`]
+                }
         }
 
 
@@ -5273,8 +5284,12 @@ export class ValidatePaymentsRefService {
                 return {}
 
         }
-
-        async actLotAct(params: { event: number, phase: number, publicLot: number, lot: number }) {
+        /**
+         * 
+         * @procedure ACT_LOTES_ACT
+         * @returns 
+         */
+        async actLotAct(params: UpdateCurrentGeneralStatus) {
                 var V_PRECIO_FINAL = 0
                 var V_MONTO = 0
                 var V_ID_ESTATUSVTA = ""
@@ -9140,6 +9155,552 @@ export class ValidatePaymentsRefService {
                                 SET    ID_ESTATUSVTA = 'NDIS'
                                 WHERE    ID_EVENTO = ${element.id_evento_remesa}`)
                         }
+                }
+        }
+        /**
+         * 
+         * @procedure REMESASMUE_ACT 
+         */
+        async remittancesCurrentGoods(data:UpdateCurrentGeneralStatus){
+                let R1 = await this.entity.query(`SELECT BXL.ID_BIENXLOTE_REMESA, BXL.ID_LOTE_REMESA
+                        FROM sera.COMER_BIENESXLOTE BXL
+                        JOIN sera.BIEN BIE ON BXL.NO_BIEN = BIE.NO_BIEN
+                        JOIN sera.COMER_LOTES LOT ON LOT.ID_LOTE = BXL.ID_LOTE
+                        WHERE LOT.ID_ESTATUSVTA = 'PAG'
+                        AND BXL.ID_BIENXLOTE_REMESA IS NOT NULL
+                        AND EXISTS (
+                        SELECT 1
+                        FROM sera.COMER_LOTES LOT2
+                        WHERE LOT2.ID_EVENTO = ${data.event}
+                        AND LOT2.ID_LOTE = ${data.lot}
+                        AND BXL.ID_LOTE = LOT2.ID_LOTE
+                        AND EXISTS (
+                                SELECT 1
+                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                WHERE CXE.ID_EVENTO = ${data.event}
+                                AND CXE.ID_CLIENTE = LOT2.ID_CLIENTE
+                                AND CXE.PROCESAR = 'S'
+                                AND CXE.ENVIADO_SIRSAE = 'N'
+                        )
+                        );
+                `)
+                let R2 = await this.entity.query(`
+                        SELECT DISTINCT BXL.ID_EVENTO_REMESA as event
+                        FROM sera.COMER_BIENESXLOTE BXL
+                        WHERE BXL.ID_BIENXLOTE_REMESA IS NOT NULL
+                        AND EXISTS (
+                        SELECT 1
+                        FROM sera.COMER_LOTES LOT
+                        WHERE
+                        LOT.ID_LOTE = ${data.lot}
+                        AND BXL.ID_LOTE = LOT.ID_LOTE
+                        and  LOT.ID_EVENTO = ${data.event}
+                        AND EXISTS (
+                                SELECT 1
+                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                WHERE CXE.ID_EVENTO = ${data.event}
+                                AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                AND CXE.PROCESAR = 'S'
+                                AND CXE.ENVIADO_SIRSAE = 'N'
+                        )
+                        );
+                `);
+                var R_EVENTO            :number
+                var R_IDBXLREM          :number
+                var R_IDLOTREM          :number
+                var R_BIENESDISPO       = 0;
+                for (const iterator of R1) {
+                        await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE
+                        SET    VENDIDO = 'S'
+                        WHERE    ID_LOTE = ${iterator.id_lote_remesa}
+                        AND    ID_BIENXLOTE =${iterator.id_bienxlote_remesa}`)
+                }
+                for (const iterator of R2) {
+                        let count = (await this.entity.query(`
+                                SELECT    COUNT(*) val1
+                                FROM    sera.COMER_BIENESXLOTE BXL2
+                                WHERE    EXISTS (SELECT    1
+                                        FROM    sera.COMER_LOTES LOT
+                                        WHERE    LOT.ID_EVENTO = ${iterator.event}
+                                        AND    LOT.ID_LOTE = BXL2.ID_LOTE
+                                        )
+                                AND    VENDIDO IS NULL
+                        `))[0]?.val1 || 0
+                        if(count >0){
+                                await this.entity.query(` UPDATE    sera.COMER_EVENTOS EVE
+                                SET    EVE.ID_ESTATUSVTA = 'NDIS'
+                                WHERE    EVE.ID_EVENTO = ${iterator.event}`)
+                        }
+                }
+                return {
+                        statusCode:200,
+                        message:["OK"]
+                }
+        }
+
+        /**
+         * 
+         * @procedure REMESASMUE 
+         */
+        async remittancesGoods(event:number){
+                let R1 = await this.entity.query(`SELECT BXL.ID_BIENXLOTE_REMESA, BXL.ID_LOTE_REMESA
+                        FROM sera.COMER_BIENESXLOTE BXL
+                        INNER JOIN sera.BIEN BIE ON BXL.NO_BIEN = BIE.NO_BIEN
+                        INNER JOIN sera.COMER_LOTES LOT ON LOT.ID_LOTE = BXL.ID_LOTE
+                        WHERE EXISTS (
+                        SELECT 1
+                        FROM sera.COMER_LOTES LOT
+                        WHERE LOT.ID_EVENTO = ${event}
+                        AND BXL.ID_LOTE = LOT.ID_LOTE
+                        AND EXISTS (
+                                SELECT 1
+                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                WHERE CXE.ID_EVENTO = ${event}
+                                AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                AND CXE.PROCESAR = 'S'
+                                AND CXE.ENVIADO_SIRSAE = 'N'
+                        )
+                        )
+                        AND LOT.ID_ESTATUSVTA = 'PAG'
+                        AND BXL.ID_BIENXLOTE_REMESA IS NOT NULL;
+                
+                `)
+                let R2 = await this.entity.query(`
+                        SELECT DISTINCT BXL.ID_EVENTO_REMESA as event
+                        FROM sera.COMER_BIENESXLOTE BXL
+                        WHERE BXL.ID_BIENXLOTE_REMESA IS NOT NULL
+                        AND EXISTS (
+                                SELECT 1
+                                FROM sera.COMER_LOTES LOT
+                                WHERE
+                                LOT.ID_LOTE = BXL.id_lote
+                                AND BXL.ID_LOTE = LOT.ID_LOTE
+                                and  LOT.ID_EVENTO = ${event}
+                                AND EXISTS (
+                                        SELECT 1
+                                        FROM sera.COMER_CLIENTESXEVENTO CXE
+                                        WHERE CXE.ID_EVENTO = ${event}
+                                        AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                        AND CXE.PROCESAR = 'S'
+                                        AND CXE.ENVIADO_SIRSAE = 'N'
+                                )
+                        );
+                `);
+                var R_BIENESDISPO       = 0;
+                for (const iterator of R1) {
+                        await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE
+                        SET    VENDIDO = 'S'
+                        WHERE    ID_LOTE = ${iterator.id_lote_remesa}
+                        AND    ID_BIENXLOTE =${iterator.id_bienxlote_remesa}`)
+                }
+                for (const iterator of R2) {
+                        let count = (await this.entity.query(`
+                                SELECT    COUNT(*) val1
+                                FROM    sera.COMER_BIENESXLOTE BXL2
+                                WHERE    EXISTS (SELECT    1
+                                        FROM    sera.COMER_LOTES LOT
+                                        WHERE    LOT.ID_EVENTO = ${iterator.event}
+                                        AND    LOT.ID_LOTE = BXL2.ID_LOTE
+                                        )
+                                AND    VENDIDO IS NULL
+                        `))[0]?.val1 || 0
+                        if(count >0){
+                                await this.entity.query(` UPDATE    sera.COMER_EVENTOS EVE
+                                SET    EVE.ID_ESTATUSVTA = 'NDIS'
+                                WHERE    EVE.ID_EVENTO = ${iterator.event}`)
+                        }
+                }
+                return {
+                        statusCode:200,
+                        message:["OK"]
+                }
+        }
+
+        /**
+         * @procedure HISTORICO_ACT
+         */
+        async currentHistoric(data:UpdateCurrentGeneralStatus){
+                var H1 = await this.entity.query(`
+                        SELECT BXL.NO_BIEN, BIE.ESTATUS        
+                        FROM sera.COMER_BIENESXLOTE BXL
+                        INNER JOIN sera.BIEN BIE ON BXL.NO_BIEN = BIE.NO_BIEN
+                        WHERE EXISTS (
+                        SELECT 1
+                        FROM sera.COMER_LOTES LOT
+                        WHERE LOT.ID_EVENTO = ${data.event}
+                        AND LOT.ID_LOTE = ${data.lot}
+                        AND BXL.ID_LOTE = LOT.ID_LOTE
+                        AND EXISTS (
+                                SELECT 1
+                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                WHERE CXE.ID_EVENTO = ${data.event}
+                                AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                AND CXE.PROCESAR = 'S'
+                                AND CXE.ENVIADO_SIRSAE = 'N'
+                        )
+                        )
+                        AND EXISTS (
+                        SELECT 1
+                        FROM sera.COMER_LOTES LOT2
+                        WHERE LOT2.ID_LOTE = BXL.ID_LOTE
+                        AND LOT2.ID_ESTATUSVTA = 'PAG'
+                        )
+                        AND BXL.ID_EVENTO_REMESA IS NOT NULL
+                        
+                        UNION
+                        
+                        SELECT BXL.NO_BIEN, BIE.ESTATUS
+                        FROM sera.COMER_BIENESXLOTE BXL
+                        INNER JOIN sera.BIEN BIE ON BXL.NO_BIEN = BIE.NO_BIEN
+                        WHERE EXISTS (
+                        SELECT 1
+                        FROM sera.COMER_LOTES LOT
+                        WHERE LOT.ID_EVENTO = ${data.event}
+                        AND LOT.ID_LOTE =  ${data.lot}
+                        AND BXL.ID_LOTE = LOT.ID_LOTE
+                        AND LOT.ID_CLIENTE IS NOT NULL
+                        AND LOT.LOTE_PUBLICO != 0
+                        AND EXISTS (
+                                SELECT 1
+                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                WHERE CXE.ID_EVENTO = ${data.event}
+                                AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                AND CXE.PROCESAR = 'S'
+                                AND CXE.ENVIADO_SIRSAE = 'N'
+                        )
+                        )
+                        AND BXL.ID_EVENTO_REMESA IS NULL
+                        
+                        UNION
+                        
+                        SELECT BXL.NO_BIEN, BIE.ESTATUS
+                        FROM sera.COMER_BIENESXLOTE BXL
+                        INNER JOIN sera.BIEN BIE ON BXL.NO_BIEN = BIE.NO_BIEN
+                        WHERE EXISTS (
+                        SELECT 1
+                        FROM sera.COMER_LOTES LOT
+                        WHERE LOT.ID_EVENTO = ${data.event}
+                        AND LOT.ID_LOTE =  ${data.lot}
+                        AND BXL.ID_LOTE = LOT.ID_LOTE
+                        AND LOT.ID_CLIENTE IS NULL
+                        )
+                        AND BXL.ID_EVENTO_REMESA IS NULL;
+                
+                `)
+                var H_PROGRAMA   = 'FCOMER612';
+                if(data.address =="I"){
+                        H_PROGRAMA = 'FCOMER612_I';
+                }
+                var errores = []
+                for (const iterator of H1) {
+                        try {
+                                await this.entity.query(`
+                                INSERT INTO sera.HISTORICO_ESTATUS_BIEN
+                                (NO_BIEN, ESTATUS,     FEC_CAMBIO,     USUARIO_CAMBIO, PROGRAMA_CAMBIO_ESTATUS, MOTIVO_CAMBIO)
+                                VALUES
+                                (${iterator.no_bien}, '${iterator.estatus}',    current_date, '${data.user}',         '${H_PROGRAMA}',         'AUTOMATICO')
+                                `)
+                        } catch (error) {
+                                errores.push(`Bien duplicado ${iterator.no_bien}`)
+                        }
+                }
+                return {
+                        statusCode:200,
+                        message:errores
+                }
+        }
+
+        /**
+         * 
+         * @procedure HISTORICO 
+         * @returns 
+         */
+        async historic(data:{event:number,address:string,user:string}){
+                var H1 = await this.entity.query(`
+                        SELECT BXL.NO_BIEN, BIE.ESTATUS
+                        FROM sera.COMER_BIENESXLOTE BXL
+                        INNER JOIN sera.BIEN BIE ON BXL.NO_BIEN = BIE.NO_BIEN
+                        WHERE EXISTS (
+                        SELECT 1
+                        FROM sera.COMER_LOTES LOT
+                        WHERE LOT.ID_EVENTO = ${data.event}
+                        AND BXL.ID_LOTE = LOT.ID_LOTE
+                        AND EXISTS (
+                                SELECT 1
+                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                WHERE CXE.ID_EVENTO = ${data.event}
+                                AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                AND CXE.PROCESAR = 'S'
+                                AND CXE.ENVIADO_SIRSAE = 'N'
+                        )
+                        )
+                        AND EXISTS (
+                        SELECT 1
+                        FROM sera.COMER_LOTES LOT2
+                        WHERE LOT2.ID_LOTE = BXL.ID_LOTE
+                        AND LOT2.ID_ESTATUSVTA = 'PAG'
+                        )
+                        AND BXL.ID_EVENTO_REMESA IS NOT NULL
+                        
+                        UNION
+                        
+                        SELECT BXL.NO_BIEN, BIE.ESTATUS
+                        FROM sera.COMER_BIENESXLOTE BXL
+                        INNER JOIN sera.BIEN BIE ON BXL.NO_BIEN = BIE.NO_BIEN
+                        WHERE EXISTS (
+                        SELECT 1
+                        FROM sera.COMER_LOTES LOT
+                        WHERE LOT.ID_EVENTO = ${data.event}
+                        AND BXL.ID_LOTE = LOT.ID_LOTE
+                        AND LOT.ID_CLIENTE IS NOT NULL
+                        AND LOT.LOTE_PUBLICO != 0
+                        AND EXISTS (
+                                SELECT 1
+                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                WHERE CXE.ID_EVENTO = ${data.event}
+                                AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                AND CXE.PROCESAR = 'S'
+                                AND CXE.ENVIADO_SIRSAE = 'N'
+                        )
+                        )
+                        AND BXL.ID_EVENTO_REMESA IS NULL
+                        
+                        UNION
+                        
+                        SELECT BXL.NO_BIEN, BIE.ESTATUS
+                        FROM sera.COMER_BIENESXLOTE BXL
+                        INNER JOIN sera.BIEN BIE ON BXL.NO_BIEN = BIE.NO_BIEN
+                        WHERE EXISTS (
+                        SELECT 1
+                        FROM sera.COMER_LOTES LOT
+                        WHERE LOT.ID_EVENTO = ${data.event}
+                        AND BXL.ID_LOTE = LOT.ID_LOTE
+                        AND LOT.ID_CLIENTE IS NULL
+                        )
+                        AND BXL.ID_EVENTO_REMESA IS NULL
+                
+                `)
+                var H_PROGRAMA   = 'FCOMER612';
+                if(data.address =="I"){
+                        H_PROGRAMA = 'FCOMER612_I';
+                }
+                var errores = []
+                for (const iterator of H1) {
+                        try {
+                                await this.entity.query(`
+                                INSERT INTO sera.HISTORICO_ESTATUS_BIEN
+                                (NO_BIEN, ESTATUS,     FEC_CAMBIO,     USUARIO_CAMBIO, PROGRAMA_CAMBIO_ESTATUS, MOTIVO_CAMBIO)
+                                VALUES
+                                (${iterator.no_bien}, '${iterator.estatus}',    current_date, '${data.user}',         '${H_PROGRAMA}',         'AUTOMATICO')
+                                `)
+                        } catch (error) {
+                                errores.push(`Bien duplicado ${iterator.no_bien}`)
+                        }
+                }
+                return {
+                        statusCode:200,
+                        message:errores
+                }
+        }
+
+        /**
+         * @procedure ACT_LOTES_BASES
+         */
+        async updateLotBase(event:number){
+                await this.entity.query(`
+                        update
+                        sera.COMER_LOTES LOT
+                        set
+                                VALIDO_SISTEMA = 'S'
+                                , ID_ESTATUSVTA = 'PAG'
+                        where
+                                LOT.ID_EVENTO =  ${event}
+                                and exists (
+                                        select
+                                                1
+                                        from
+                                                sera.COMER_CLIENTESXEVENTO CXE
+                                        where
+                                                CXE.ID_EVENTO =  ${event}
+                                                and CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                                and CXE.PROCESAR = 'S'
+                                                and CXE.ENVIADO_SIRSAE = 'N'
+                                )
+                                and VALIDO_SISTEMA is null
+                                and LOTE_PUBLICO != 0
+                                and exists (
+                                        select
+                                                1
+                                        from
+                                                sera.COMER_PAGOSREFGENS GEN
+                                        where
+                                                GEN.ID_EVENTO = ${event}
+                                                and GEN.TIPO = 'N'
+                                                and GEN.ID_LOTE = LOT.ID_LOTE
+                                )
+                `)
+
+                await this.entity.query(`
+                        update
+                        sera.COMER_LOTES LOT
+                        set
+                                VALIDO_SISTEMA = 'S'
+                                , ID_ESTATUSVTA = 'CAN'
+                        where
+                                LOT.ID_EVENTO =  ${event}
+                                and exists (
+                                        select
+                                                1
+                                        from
+                                                sera.COMER_CLIENTESXEVENTO CXE
+                                        where
+                                                CXE.ID_EVENTO =  ${event}
+                                                and CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                                and CXE.PROCESAR = 'S'
+                                                and CXE.ENVIADO_SIRSAE = 'N'
+                                )
+                                and VALIDO_SISTEMA is null
+                                and LOTE_PUBLICO != 0
+                                and exists (
+                                        select
+                                                1
+                                        from
+                                                sera.COMER_PAGOSREFGENS GEN
+                                        where
+                                                GEN.ID_EVENTO = ${event}
+                                                and GEN.TIPO = 'P'
+                                                and GEN.ID_LOTE = LOT.ID_LOTE
+                                )
+                `)
+                await this.entity.query(`
+                update
+                        sera.COMER_LOTES LOT
+                        
+                        set
+                                VALIDO_SISTEMA = 'S'
+                                , ID_ESTATUSVTA = 'DES'
+                        where
+                                not exists (
+                                        select
+                                                1
+                                        from
+                                                sera.COMER_PAGOSREFGENS GEN
+                                        where
+                                                GEN.ID_EVENTO = ${event}
+                                                and LOT.ID_LOTE = GEN.ID_LOTE
+                                )
+                                and exists (
+                                        select
+                                                1
+                                        from
+                                                sera.COMER_CLIENTESXEVENTO CXE
+                                        where
+                                                CXE.ID_EVENTO =  ${event}
+                                                and CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                                and CXE.PROCESAR = 'S'
+                                                and CXE.ENVIADO_SIRSAE = 'N'
+                        )
+                `)
+                await this.entity.query(`
+                update
+                        sera.COMER_LOTES LOT
+                        set
+                                VALIDO_SISTEMA = 'S'
+                                , ID_ESTATUSVTA = 'DES'
+                        where
+                                not exists (
+                                        select
+                                                1
+                                        from
+                                                sera.COMER_PAGOSREFGENS GEN
+                                        where
+                                                GEN.ID_EVENTO = ${event}
+                                                and LOT.ID_LOTE = GEN.ID_LOTE
+                                )
+                                and exists (
+                                        select
+                                                1
+                                        from
+                                                sera.COMER_CLIENTESXEVENTO CXE
+                                        where
+                                                CXE.ID_EVENTO = ${event}
+                                                and CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                                and CXE.PROCESAR = 'S'
+                                                and CXE.ENVIADO_SIRSAE = 'N'
+                                )
+                                and LOT.ID_EVENTO = ${event}
+                                and LOT.LOTE_PUBLICO != 0
+                `)
+                await this.entity.query(`
+                update
+                                sera.COMER_LOTES LOT
+                        set
+                                VALIDO_SISTEMA = 'S'
+                                , ID_ESTATUSVTA = 'DES'
+                        where
+                                not exists (
+                                        select
+                                                1
+                                        from
+                                                sera.COMER_PAGOSREFGENS GEN
+                                        where
+                                                GEN.ID_EVENTO = ${event}
+                                                and LOT.ID_LOTE = GEN.ID_LOTE
+                                )
+                                and ID_EVENTO = ${event}
+                                and LOTE_PUBLICO != 0
+                                and ID_CLIENTE is null
+                                and ID_ESTATUSVTA != 'DES';
+                `)
+                return {
+                        statusCode:200,
+                        message:["OK"]
+                }
+
+        }
+
+        /**
+         * @procedure ACT_EST_GRAL_ACT
+         */
+        async updateCurrentGeneralStatus(data:UpdateCurrentGeneralStatus){
+               
+                data.address='M'
+                await this.actLotAct(data)
+                await this.remittancesCurrentGoods(data)
+                await this.currentHistoric(data);
+                await this.currentBlackList(data)
+                return {
+                        statusCode:200,
+                        message:["OK"]
+                }
+
+        }
+
+         /**
+         * @procedure ACT_EST_GRAL
+         */
+         async updateGeneralStatus(event:number,user:string){
+               
+               
+                await this.actLotes(event)
+                await this.remittancesGoods(event)
+                await this.historic({event:event,address:'M',user:user});
+                await this.blackList(event)
+                return {
+                        statusCode:200,
+                        message:["OK"]
+                }
+
+        }
+
+        /**
+         * @procedure ACT_EST_BASES
+         */
+        async updateStatusBase(event:number){
+                await this.updateLotBase(event)
+                return {
+                        statusCode:200,
+                        message:["OK"]
                 }
         }
 

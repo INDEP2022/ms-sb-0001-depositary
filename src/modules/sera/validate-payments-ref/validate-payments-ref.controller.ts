@@ -5,6 +5,7 @@ import { ParametersValues } from './dto/get-parameters-values.dto';
 import { PresencialBM } from './dto/presencial-bm.dto';
 import { RealStateSale, RealStateSaleCurrent } from './dto/real-state-sale.dto';
 import { ValidatePaymentsRefService } from './validate-payments-ref.service';
+import { UpdateCurrentGeneralStatus } from './dto/update-current-general-status.dto';
 
 @Controller('validate-payments-ref')
 export class ValidatePaymentsRefController {
@@ -54,6 +55,21 @@ export class ValidatePaymentsRefController {
     @MessagePattern({ cmd: 'actLotAct' })
     async actLotAct(params:any){
         return await this.service.actLotAct(params)
+    }
+
+    @MessagePattern({ cmd: 'updateCurrentGeneralStatus' })
+    async updateCurrentGeneralStatus(params:UpdateCurrentGeneralStatus){
+        return await this.service.updateCurrentGeneralStatus(params)
+    }
+
+    @MessagePattern({ cmd: 'updateGeneralStatus' })
+    async updateGeneralStatus(data:{event:number,user:string}){
+        return await this.service.updateGeneralStatus(data.event,data.user)
+    }
+
+    @MessagePattern({ cmd: 'updateStatusBase' })
+    async updateStatusBase(data:{event:number}){
+        return await this.service.updateStatusBase(data.event)
     }
 
 }

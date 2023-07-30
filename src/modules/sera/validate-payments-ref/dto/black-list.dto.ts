@@ -1,4 +1,4 @@
 export class BlackListCurrent{
-    eventId:number
-    lotId:number
+    event:number
+    lot:number
 }
