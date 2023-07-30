@@ -5082,7 +5082,7 @@ export class ValidatePaymentsRefService {
                                         )`)
 
                 V_ID_LOTE = LOTBRSP[0].id_lote
-                LOTBRSP.forEach(async (element) => {
+                for(var item of LOTBRSP) {
                         await this.entity.query(` UPDATE sera.COMER_PAGOREF 
                                         SET VALIDO_SISTEMA = 'A'
                                         WHERE EXISTS (SELECT 1
@@ -5249,7 +5249,7 @@ export class ValidatePaymentsRefService {
                                                    WHERE PRE.ID_PAGO = sera.COMER_PAGOSREFGENS.ID_PAGO
                                                      AND PRE.IDORDENINGRESO IS NOT NULL
                                                  );`)
-                });
+                };
 
 
                 await this.entity.query(` UPDATE  sera.COMER_CLIENTESXEVENTO
@@ -5270,7 +5270,7 @@ export class ValidatePaymentsRefService {
                              WHERE CXE.ID_EVENTO = ${params.event}
                                AND CXE.PROCESAR = 'S'
                              );`)
-                return
+                return {}
 
         }
 
@@ -5297,7 +5297,7 @@ export class ValidatePaymentsRefService {
                                          AND CLOT.ID_ESTATUSVTA NOT IN ('PAG')
                                          AND GENS.REFERENCIA LIKE('1%')
                                        GROUP BY ID_ESTATUSVTA, PRECIO_FINAL`)
-                                        C_GARS_SPBM.forEach(async element => {
+                                       for (var element of C_GARS_SPBM) {
                                                 V_ID_ESTATUSVTA = element.id_estatusvta
                                                 V_PRECIO_FINAL = element.precio_final
                                                 V_MONTO = element.monto
@@ -5447,7 +5447,7 @@ export class ValidatePaymentsRefService {
                                                                                      )
                                                                       )`)
                                                 }
-                                        });
+                                        };
                                 } else if (params.phase == 3) {
                                         const C_LIQN_SPBM: any[] = await this.entity.query(` SELECT ID_ESTATUSVTA, PRECIO_FINAL, SUM(GENS.MONTO) MONTO
                                                 FROM sera.COMER_LOTES CLOT, sera.COMER_PAGOSREFGENS GENS
@@ -5458,7 +5458,7 @@ export class ValidatePaymentsRefService {
                                                 AND CLOT.ID_ESTATUSVTA NOT IN ('PAG')
                                                 AND (GENS.REFERENCIA LIKE('1%') OR GENS.REFERENCIA LIKE('3%'))
                                                 GROUP BY ID_ESTATUSVTA, PRECIO_FINAL`)
-                                        C_LIQN_SPBM.forEach(async element => {
+                                        for(var element of C_LIQN_SPBM) {
                                                 V_ID_ESTATUSVTA = element.id_estatusvta
                                                 V_PRECIO_FINAL = element.precio_final
                                                 V_MONTO = element.monto
@@ -5536,7 +5536,7 @@ export class ValidatePaymentsRefService {
                                                                         )`)
 
                                                 }
-                                        });
+                                        };
                                 } else if (params.phase == 4) {
                                         const C_LIQE_SPBM: any[] = await this.entity.query(`SELECT ID_ESTATUSVTA, PRECIO_FINAL, SUM(GENS.MONTO) MONTO
                                         FROM sera.COMER_LOTES CLOT, sera.COMER_PAGOSREFGENS GENS
@@ -5547,7 +5547,7 @@ export class ValidatePaymentsRefService {
                                          AND CLOT.ID_ESTATUSVTA NOT IN ('PAG')
                                          AND (GENS.REFERENCIA LIKE('1%') OR GENS.REFERENCIA LIKE('4%'))
                                        GROUP BY ID_ESTATUSVTA, PRECIO_FINAL`)
-                                        C_LIQE_SPBM.forEach(async element => {
+                                       for(var element of C_LIQE_SPBM) {
                                                 V_ID_ESTATUSVTA = element.id_estatusvta
                                                 V_PRECIO_FINAL = element.precio_final
                                                 V_MONTO = element.monto
@@ -5674,7 +5674,7 @@ export class ValidatePaymentsRefService {
                                                                         )`)
 
                                                 }
-                                        });
+                                        };
                                 }
                         } else {
                                 if (params.phase == 1) {
@@ -5696,7 +5696,7 @@ export class ValidatePaymentsRefService {
                                            AND CLOT.ID_ESTATUSVTA NOT IN ('PAG')
                                            AND CP.VALIDO_SISTEMA = 'S') as C
                                          GROUP BY C.ID_ESTATUSVTA, C.PRECIO_FINAL`)
-                                        C_GARS.forEach(async element => {
+                                        for(var element of C_GARS) {
                                                 V_ID_ESTATUSVTA = element.id_estatusvta
                                                 V_PRECIO_FINAL = element.precio_final
                                                 V_MONTO = element.monto
@@ -5846,7 +5846,7 @@ export class ValidatePaymentsRefService {
                                                                                      )
                                                                       )`)
                                                 }
-                                        });
+                                        };
                                 } else if (params.phase == 2) {
                                         const C_GARC: any[] = await this.entity.query(` SELECT ID_ESTATUSVTA, PRECIO_FINAL, SUM(MONTO) MONTO FROM (
                                                 SELECT CLOT.ID_ESTATUSVTA,
@@ -5878,7 +5878,7 @@ export class ValidatePaymentsRefService {
                                                 AND CLOT.ID_ESTATUSVTA NOT IN ('PAG')
                                                 AND CP.VALIDO_SISTEMA = 'S'  )
                                                 GROUP BY ID_ESTATUSVTA, PRECIO_FINAL`)
-                                        C_GARC.forEach(async element => {
+                                        for (var element of C_GARC) {
                                                 V_ID_ESTATUSVTA = element.id_estatusvta
                                                 V_PRECIO_FINAL = element.precio_final
                                                 V_MONTO = element.monto
@@ -5956,7 +5956,7 @@ export class ValidatePaymentsRefService {
                                                                         )`)
 
                                                 }
-                                        });
+                                        };
                                 } else if (params.phase == 7) {
                                         const C_GARCE: any[] = await this.entity.query(` SELECT ID_ESTATUSVTA, PRECIO_FINAL, SUM(MONTO) MONTO FROM (
                                                 SELECT CLOT.ID_ESTATUSVTA,
@@ -5988,7 +5988,7 @@ export class ValidatePaymentsRefService {
                                                    AND CLOT.ID_ESTATUSVTA NOT IN ('PAG')
                                                    AND CP.VALIDO_SISTEMA = 'S'  )
                                                  GROUP BY ID_ESTATUSVTA, PRECIO_FINAL`)
-                                        C_GARCE.forEach(async element => {
+                                        for (var element of C_GARCE) {
                                                 V_ID_ESTATUSVTA = element.id_estatusvta
                                                 V_PRECIO_FINAL = element.precio_final
                                                 V_MONTO = element.monto
@@ -6066,7 +6066,7 @@ export class ValidatePaymentsRefService {
                                                                         )`)
 
                                                 }
-                                        });
+                                        };
                                 } else if (params.phase == 3) {
                                         const C_LIQN: any[] = await this.entity.query(` SELECT ID_ESTATUSVTA, PRECIO_FINAL, SUM(MONTO) MONTO FROM (
                                                 SELECT CLOT.ID_ESTATUSVTA,
@@ -6098,7 +6098,7 @@ export class ValidatePaymentsRefService {
                                                    AND CLOT.ID_ESTATUSVTA NOT IN ('PAG')
                                                    AND CP.VALIDO_SISTEMA = 'S')
                                                  GROUP BY ID_ESTATUSVTA, PRECIO_FINAL`)
-                                        C_LIQN.forEach(async element => {
+                                        for(var element of C_LIQN) {
                                                 V_ID_ESTATUSVTA = element.id_estatusvta
                                                 V_PRECIO_FINAL = element.precio_final
                                                 V_MONTO = element.monto
@@ -6176,7 +6176,7 @@ export class ValidatePaymentsRefService {
                                                                         )`)
 
                                                 }
-                                        });
+                                        };
                                 } else if (params.phase == 4) {
                                         const C_LIQE: any[] = await this.entity.query(`SELECT ID_ESTATUSVTA, PRECIO_FINAL, SUM(MONTO) MONTO FROM (
                                                 SELECT CLOT.ID_ESTATUSVTA,
@@ -6208,7 +6208,7 @@ export class ValidatePaymentsRefService {
                                                    AND CLOT.ID_ESTATUSVTA NOT IN ('PAG')
                                                    AND CP.VALIDO_SISTEMA = 'S')
                                                  GROUP BY ID_ESTATUSVTA, PRECIO_FINAL`)
-                                        C_LIQE.forEach(async element => {
+                                        for (var element of C_LIQE) {
                                                 V_ID_ESTATUSVTA = element.id_estatusvta
                                                 V_PRECIO_FINAL = element.precio_final
                                                 V_MONTO = element.monto
@@ -6335,7 +6335,7 @@ export class ValidatePaymentsRefService {
                                                                         )`)
 
                                                 }
-                                        });
+                                        };
                                 }
                         }
                         return { statusCode: 200, message: ["OK"], data: [] }
