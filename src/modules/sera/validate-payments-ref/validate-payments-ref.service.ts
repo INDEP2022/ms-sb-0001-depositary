@@ -17,6 +17,7 @@ import { ComerLotsEntity } from './entity/comer-lots.entity';
 import { ComerParameterModEntity } from './entity/comer-parameter-mod.entity';
 import { LocalDate } from 'src/shared/utils/local-date';
 import { UpdateCurrentGeneralStatus } from './dto/update-current-general-status.dto';
+import { ACUMDETALLESOI } from './dto/prep-oi.dto';
 
 @Injectable()
 export class ValidatePaymentsRefService {
@@ -95,12 +96,13 @@ export class ValidatePaymentsRefService {
         HIJOSLOT: Asigna[] = []
         PENASDEV: Asigna[] = []
         DEPOSITOS: Pago[] = []
-
+        DETOI : ACUMDETALLESOI[] = []
+        DETAUX : ACUMDETALLESOI[] = []
         LOTIPGAR: LOTEXGARA[] = [];
         RETIPGAR: LOTEXGARA[] = [];
         DISPERSIONPEN: DISPERPENA[] = []
         constructor(@InjectRepository(ComerEventEntity) private entity: Repository<ComerEventEntity>,
-        @InjectRepository(ComerParameterModEntity) private entity2: Repository<ComerParameterModEntity>) {
+                @InjectRepository(ComerParameterModEntity) private entity2: Repository<ComerParameterModEntity>) {
 
         }
 
@@ -188,7 +190,7 @@ export class ValidatePaymentsRefService {
                                         AND        CXE.PROCESAR = 'S'
                 )`);
 
-                for (var element of LNN){
+                for (var element of LNN) {
                         this.entity.query(` UPDATE    sera.COMER_CLIENTES
                         SET     LISTA_NEGRA = 'N'
                         WHERE    ID_CLIENTE = ${element.id_cliente}`)
@@ -201,8 +203,8 @@ export class ValidatePaymentsRefService {
                         WHERE    ID_CLIENTE = ${element.id_cliente}`)
                 };
                 return {
-                        statusCode:200,
-                        message:[`Clientes en la lista negra ${LNS.length || 0}, clientes sacados de la lista negra ${LNN.length || 0}`]
+                        statusCode: 200,
+                        message: [`Clientes en la lista negra ${LNS.length || 0}, clientes sacados de la lista negra ${LNN.length || 0}`]
                 }
         }
 
@@ -256,8 +258,8 @@ export class ValidatePaymentsRefService {
                                 this.G_PERGACUML = parameterModCuml.value
                                 /*
                 
-                                FECH_GAR:= OBTENER_POST_FECHA_HABIL (FECHA_F , G_PERGACUML) ;
-                                        LIQ_I := FECHA_F + G_PERPAGO;*/
+                                FECH_GAR: OBTENER_POST_FECHA_HABIL (FECHA_F , G_PERGACUML) ;
+                                        LIQ_I : FECHA_F + G_PERPAGO;*/
                         }
                         if (this.G_TPEVENTO == 4 && this.G_DIRECCION == "M") {
                                 const query4m = await this.entity2.createQueryBuilder('table')
@@ -286,9 +288,9 @@ export class ValidatePaymentsRefService {
 
                                 /*
                                 
-                                  FECH_GAR := OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERIODO24HRS);
-                                        LIQ_I := OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERIODOLIQUI);
-                                        LIQ_EXT := OBTENER_POST_FECHA_HABIL (LIQ_I ,  G_PERIODOLIQEX);
+                                  FECH_GAR : OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERIODO24HRS);
+                                        LIQ_I : OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERIODOLIQUI);
+                                        LIQ_EXT : OBTENER_POST_FECHA_HABIL (LIQ_I ,  G_PERIODOLIQEX);
                                 */
 
                         }
@@ -332,10 +334,10 @@ export class ValidatePaymentsRefService {
                                 /**
                                  * 
                                  * 
-                                 *  FECH_GS  :=   OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERIODO24HRSSI);
-                                        FECH_GAR := OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERIGARCUMSEI);
-                                        LIQ_I := OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERIODO60LIQSEI);
-                                        LIQ_EXT :=   OBTENER_POST_FECHA_HABIL (LIQ_I , G_PERIGARCUMSEI);
+                                 *  FECH_GS  :   OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERIODO24HRSSI);
+                                        FECH_GAR : OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERIGARCUMSEI);
+                                        LIQ_I : OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERIODO60LIQSEI);
+                                        LIQ_EXT :   OBTENER_POST_FECHA_HABIL (LIQ_I , G_PERIGARCUMSEI);
                 
                                  */
 
@@ -370,8 +372,8 @@ export class ValidatePaymentsRefService {
 
                                 /*
                                 
-                                   LIQ_I := OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERILIQSPBM);
-                                        LIQ_EXT :=   OBTENER_POST_FECHA_HABIL (LIQ_I , G_PERILIQEXTSPM);
+                                   LIQ_I : OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERILIQSPBM);
+                                        LIQ_EXT :   OBTENER_POST_FECHA_HABIL (LIQ_I , G_PERILIQEXTSPM);
                                 */
 
                         }
@@ -414,10 +416,10 @@ export class ValidatePaymentsRefService {
 
                                 /*
                                 
-                                  FECH_GAR := OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERGARCUMLP);
-                                        PAG_ANT :=   OBTENER_POST_FECHA_HABIL (LIQ_I , G_PERPAGANTLP);
-                                        LIQ_I := OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERLIQLP);
-                                        LIQ_EXT :=   OBTENER_POST_FECHA_HABIL (LIQ_I , G_PERLIQEXTLP)
+                                  FECH_GAR : OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERGARCUMLP);
+                                        PAG_ANT :   OBTENER_POST_FECHA_HABIL (LIQ_I , G_PERPAGANTLP);
+                                        LIQ_I : OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERLIQLP);
+                                        LIQ_EXT :   OBTENER_POST_FECHA_HABIL (LIQ_I , G_PERLIQEXTLP)
                                 */
 
                         }
@@ -459,8 +461,8 @@ export class ValidatePaymentsRefService {
 
                                 /*
                                 
-                                   LIQ_I := OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERIODOLRM);
-                                        LIQ_EXT :=   OBTENER_POST_FECHA_HABIL (LIQ_I , G_PERIODOLERM);
+                                   LIQ_I : OBTENER_POST_FECHA_HABIL (FECHA_F ,  G_PERIODOLRM);
+                                        LIQ_EXT :   OBTENER_POST_FECHA_HABIL (LIQ_I , G_PERIODOLERM);
                                 */
 
                         }
@@ -4468,6 +4470,10 @@ export class ValidatePaymentsRefService {
                                 }
                         }
                 }
+                return {
+                        statusCode: 200,
+                        message: ["OK"]
+                }
         }
         async penalizaInmu(buy: number, payment: number, client: number, phase: number) {
                 var DBPAGAR = 0;
@@ -4476,11 +4482,15 @@ export class ValidatePaymentsRefService {
                 for (const iterator of this.LOTESXCLI) {
                         DBPAGAR = this.apagar(phase)
                         if (DBPAGAR > payment) {
-                                this.penInmuDefUsu(client, phase)
-                                this.penInmuMenor(client, phase)
+                                await this.penInmuDefUsu(client, phase)
+                                await this.penInmuMenor(client, phase)
                         } else {
                                 return
                         }
+                }
+                return {
+                        statusCode: 200,
+                        message: ["OK"]
                 }
         }
         apagarAct(phase: number) {
@@ -4610,13 +4620,13 @@ export class ValidatePaymentsRefService {
                 var POSICION = 0;
                 var CONT = 0;
 
-                POSICION = this.LOTESXCLI.length
-                this.LOTESXCLI.forEach(element => {
+                POSICION = this.LOTESXCLI.length - 1
+                for (const element of this.LOTESXCLI) {
                         if ((element.MARCPENA || "N") != "S") {
                                 CONT = element.LOTE
-                                return CONT
+                                break
                         }
-                });
+                };
 
                 return CONT
         }
@@ -5093,7 +5103,7 @@ export class ValidatePaymentsRefService {
                                         )`)
 
                 V_ID_LOTE = LOTBRSP[0].id_lote
-                for(var item of LOTBRSP) {
+                for (var item of LOTBRSP) {
                         await this.entity.query(` UPDATE sera.COMER_PAGOREF 
                                         SET VALIDO_SISTEMA = 'A'
                                         WHERE EXISTS (SELECT 1
@@ -5312,7 +5322,7 @@ export class ValidatePaymentsRefService {
                                          AND CLOT.ID_ESTATUSVTA NOT IN ('PAG')
                                          AND GENS.REFERENCIA LIKE('1%')
                                        GROUP BY ID_ESTATUSVTA, PRECIO_FINAL`)
-                                       for (var element of C_GARS_SPBM) {
+                                        for (var element of C_GARS_SPBM) {
                                                 V_ID_ESTATUSVTA = element.id_estatusvta
                                                 V_PRECIO_FINAL = element.precio_final
                                                 V_MONTO = element.monto
@@ -5473,7 +5483,7 @@ export class ValidatePaymentsRefService {
                                                 AND CLOT.ID_ESTATUSVTA NOT IN ('PAG')
                                                 AND (GENS.REFERENCIA LIKE('1%') OR GENS.REFERENCIA LIKE('3%'))
                                                 GROUP BY ID_ESTATUSVTA, PRECIO_FINAL`)
-                                        for(var element of C_LIQN_SPBM) {
+                                        for (var element of C_LIQN_SPBM) {
                                                 V_ID_ESTATUSVTA = element.id_estatusvta
                                                 V_PRECIO_FINAL = element.precio_final
                                                 V_MONTO = element.monto
@@ -5562,7 +5572,7 @@ export class ValidatePaymentsRefService {
                                          AND CLOT.ID_ESTATUSVTA NOT IN ('PAG')
                                          AND (GENS.REFERENCIA LIKE('1%') OR GENS.REFERENCIA LIKE('4%'))
                                        GROUP BY ID_ESTATUSVTA, PRECIO_FINAL`)
-                                       for(var element of C_LIQE_SPBM) {
+                                        for (var element of C_LIQE_SPBM) {
                                                 V_ID_ESTATUSVTA = element.id_estatusvta
                                                 V_PRECIO_FINAL = element.precio_final
                                                 V_MONTO = element.monto
@@ -5711,7 +5721,7 @@ export class ValidatePaymentsRefService {
                                            AND CLOT.ID_ESTATUSVTA NOT IN ('PAG')
                                            AND CP.VALIDO_SISTEMA = 'S') as C
                                          GROUP BY C.ID_ESTATUSVTA, C.PRECIO_FINAL`)
-                                        for(var element of C_GARS) {
+                                        for (var element of C_GARS) {
                                                 V_ID_ESTATUSVTA = element.id_estatusvta
                                                 V_PRECIO_FINAL = element.precio_final
                                                 V_MONTO = element.monto
@@ -6113,7 +6123,7 @@ export class ValidatePaymentsRefService {
                                                    AND CLOT.ID_ESTATUSVTA NOT IN ('PAG')
                                                    AND CP.VALIDO_SISTEMA = 'S')
                                                  GROUP BY ID_ESTATUSVTA, PRECIO_FINAL`)
-                                        for(var element of C_LIQN) {
+                                        for (var element of C_LIQN) {
                                                 V_ID_ESTATUSVTA = element.id_estatusvta
                                                 V_PRECIO_FINAL = element.precio_final
                                                 V_MONTO = element.monto
@@ -6366,7 +6376,7 @@ export class ValidatePaymentsRefService {
                 var A_FINAL = 0
                 var A_ACUMULADO = 0
                 var ACUMULADO_ANT = 0
-               
+
                 if (params.phase == 1) {
 
                         const HL_F1: any[] = await this.entity.query(` SELECT RGE.ID_LOTE,
@@ -6645,7 +6655,7 @@ export class ValidatePaymentsRefService {
 
 
                         });
-                }else if (params.phase == 7) {
+                } else if (params.phase == 7) {
                         const HL_F7: any[] = await this.entity.query(` SELECT RGE.ID_LOTE,
                         LOT.PRECIO_FINAL,
                         SUM(coalesce(RGE.MONTO_NOAPP_IVA,0) + coalesce(RGE.IVA,0) + coalesce(RGE.MONTO_APP_IVA,0) ) as monto,
@@ -6749,7 +6759,7 @@ export class ValidatePaymentsRefService {
 
 
                         });
-                }else if (params.phase == 3) {
+                } else if (params.phase == 3) {
 
                         const HL_F3: any[] = await this.entity.query(`  SELECT RGE.ID_LOTE,
                                         LOT.PRECIO_FINAL,
@@ -6844,10 +6854,10 @@ export class ValidatePaymentsRefService {
                                                                                         )
                                                                         )
                                                         );`)
-                                } 
+                                }
 
                         });
-                }else if (params.phase == 4) {
+                } else if (params.phase == 4) {
 
                         const HL_F4: any[] = await this.entity.query(`  SELECT RGE.ID_LOTE,
                         LOT.PRECIO_FINAL,
@@ -6941,19 +6951,19 @@ export class ValidatePaymentsRefService {
                                                                                         )
                                                                         )
                                                         );`)
-                                } 
+                                }
 
                         });
                 }
         }
-        async actLotesInmu(params: { event: number, phase: number,lot: number }){
+        async actLotesInmu(params: { event: number, phase: number, lot: number }) {
                 var A_LOTE = 0
                 var A_FINAL = 0
                 var A_ACUMULADO = 0
                 var ACUMULADO_ANT = 0
 
                 if (params.phase == 1 || params.phase == 3) {
-                        
+
                         const HL: any[] = await this.entity.query(`SELECT  RGE.ID_LOTE, LOT.PRECIO_FINAL, SUM(coalesce(RGE.MONTO_NOAPP_IVA,0) + coalesce(RGE.IVA,0) + coalesce(RGE.MONTO_APP_IVA,0) ) as monto
                                 FROM    sera.COMER_PAGOSREFGENS RGE, sera.COMER_LOTES LOT
                                 WHERE    LOT.ID_EVENTO = ${params.event}
@@ -6973,8 +6983,8 @@ export class ValidatePaymentsRefService {
                                 A_ACUMULADO = element.monto
                                 A_LOTE = element.id_lote
                                 A_FINAL = element.precio_final
-                                if (A_ACUMULADO >= A_FINAL && params.phase != 3 ) {
-                                        
+                                if (A_ACUMULADO >= A_FINAL && params.phase != 3) {
+
                                         await this.entity.query(` UPDATE sera.COMER_LOTES
                                                 SET VALIDO_SISTEMA = 'S',
                                                 IDESTATUSVTANT = ID_ESTATUSVTA,
@@ -7010,14 +7020,14 @@ export class ValidatePaymentsRefService {
                                                                         AND        ESP.ESTATUS = sera.bien.ESTATUS
                                                                         AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                             )`)
-                                } else if (A_ACUMULADO < A_FINAL && params.phase != 2 ) {
+                                } else if (A_ACUMULADO < A_FINAL && params.phase != 2) {
                                         await this.entity.query(` UPDATE sera.COMER_LOTES
                                                 SET VALIDO_SISTEMA = 'G',
                                                 ID_ESTATUSVTA = 'GARA',
                                                 ACUMULADO = ${A_ACUMULADO}
                                                 WHERE ID_LOTE = ${A_LOTE}
                                        `)
-                                       if(params.phase != 3 ){
+                                        if (params.phase != 3) {
                                                 await this.entity.query(`UPDATE    sera.bien 
                                                         SET    sera.bien.ESTATUS =(    SELECT    ESP.ESTATUS_FINAL
                                                                     FROM    sera.ESTATUS_X_PANTALLA ESP
@@ -7030,7 +7040,7 @@ export class ValidatePaymentsRefService {
                                                                     WHERE    BXL.ID_LOTE = ${A_LOTE}
                                                                     )
                                                 )`)
-                                       }
+                                        }
                                 }
 
                         });
@@ -7058,8 +7068,8 @@ export class ValidatePaymentsRefService {
                                 A_ACUMULADO = element.monto
                                 A_LOTE = element.id_lote
                                 A_FINAL = element.precio_final
-                                if (A_ACUMULADO >= A_FINAL && params.phase != 3 ) {
-                                        
+                                if (A_ACUMULADO >= A_FINAL && params.phase != 3) {
+
                                         await this.entity.query(` UPDATE sera.COMER_LOTES
                                                 SET VALIDO_SISTEMA = 'S',
                                                 IDESTATUSVTANT = ID_ESTATUSVTA,
@@ -7095,14 +7105,14 @@ export class ValidatePaymentsRefService {
                                                                         AND        ESP.ESTATUS = sera.bien.ESTATUS
                                                                         AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
                                                             )`)
-                                } else if (A_ACUMULADO < A_FINAL && params.phase != 2 ) {
+                                } else if (A_ACUMULADO < A_FINAL && params.phase != 2) {
                                         await this.entity.query(` UPDATE sera.COMER_LOTES
                                                 SET VALIDO_SISTEMA = 'G',
                                                 ID_ESTATUSVTA = 'GARA',
                                                 ACUMULADO = ${A_ACUMULADO}
                                                 WHERE ID_LOTE = ${A_LOTE}
                                        `)
-                                       if(params.phase != 3 ){
+                                        if (params.phase != 3) {
                                                 await this.entity.query(`UPDATE    sera.bien 
                                                         SET    sera.bien.ESTATUS =(    SELECT    ESP.ESTATUS_FINAL
                                                                     FROM    sera.ESTATUS_X_PANTALLA ESP
@@ -7115,17 +7125,17 @@ export class ValidatePaymentsRefService {
                                                                     WHERE    BXL.ID_LOTE = ${A_LOTE}
                                                                     )
                                                 )`)
-                                       }
+                                        }
                                 }
 
 
 
 
                         });
-                } 
-                
-                
-                
+                }
+
+
+
                 if (params.phase == 1) {
                         await this.entity.query(` UPDATE    sera.COMER_LOTES 
                                 SET    VALIDO_SISTEMA = 'S', ID_ESTATUSVTA = 'CAN'
@@ -7268,7 +7278,7 @@ export class ValidatePaymentsRefService {
                                            
                                             AND        BXL.ID_EVENTO_REMESA IS NULL
                                             )`);
-                }else if (params.phase == 2) {
+                } else if (params.phase == 2) {
                         await this.entity.query(` UPDATE    sera.COMER_LOTES
                                 SET    VALIDO_SISTEMA = 'S', IDESTATUSVTANT = ID_ESTATUSVTA, ID_ESTATUSVTA = 'CAN'
                                 WHERE    ID_LOTE IN (    SELECT    DISTINCT GEN.ID_LOTE
@@ -7459,6 +7469,10 @@ export class ValidatePaymentsRefService {
                                 }
 
                         }
+                }
+                return {
+                        statusCode: 200,
+                        message: ["OK"]
                 }
         }
 
@@ -8034,39 +8048,39 @@ export class ValidatePaymentsRefService {
                 var SALDO = 0;
                 var PRIMERA = 1;
                 this.DEPOSITOS.forEach(deposito => {
-                        if(deposito.RESTA > 0){
+                        if (deposito.RESTA > 0) {
                                 this.LOTESXCLI.forEach(lot => {
-                                        if(phase == 1 && PRIMERA ==1 ){
+                                        if (phase == 1 && PRIMERA == 1) {
                                                 lot.MEFALTA = lot.ANTICIPO
-                                        }else if(phase == 2 && PRIMERA ==1 ){
+                                        } else if (phase == 2 && PRIMERA == 1) {
                                                 lot.MEFALTA = lot.MEFALTA - lot.ACUM
                                         }
                                         PRIMERA += 1
-                                        if(lot.PAGADO == 'N' && lot.MEFALTA > 0 && (lot.MARCPENA || 'N') != 'S'){
-                                                var dispersion:Dispersa= {}
-                                                if(deposito.RESTA < lot.MEFALTA){
+                                        if (lot.PAGADO == 'N' && lot.MEFALTA > 0 && (lot.MARCPENA || 'N') != 'S') {
+                                                var dispersion: Dispersa = {}
+                                                if (deposito.RESTA < lot.MEFALTA) {
                                                         dispersion.CLIENTE = lot.CLIENTE;
                                                         dispersion.LOTE = lot.LOTE;
                                                         dispersion.MANDATO = lot.MANDATO;
                                                         dispersion.PRECIO = lot.PRECIO;
                                                         dispersion.ID_PAGO = deposito.ID_PAGO;
-                                                        dispersion.ABONADO = ((deposito.RESTA*lot.PORCIVA)/this.G_IVA);
-                                                        dispersion.IVA = ((deposito.RESTA*lot.PORCIVA),2)-dispersion.ABONADO;
-                                                        dispersion.MONSIVA = (deposito.RESTA-(dispersion.ABONADO+dispersion.IVA));
+                                                        dispersion.ABONADO = ((deposito.RESTA * lot.PORCIVA) / this.G_IVA);
+                                                        dispersion.IVA = ((deposito.RESTA * lot.PORCIVA), 2) - dispersion.ABONADO;
+                                                        dispersion.MONSIVA = (deposito.RESTA - (dispersion.ABONADO + dispersion.IVA));
                                                         dispersion.GARATIA = lot.GARATIA;
-                                                        lot.MEFALTA = lot.MEFALTA-deposito.RESTA;
+                                                        lot.MEFALTA = lot.MEFALTA - deposito.RESTA;
                                                         dispersion.TIPO = 'N';
                                                         deposito.RESTA = 0;
                                                         lot.PAGADO = 'N';
-                                                }else{
+                                                } else {
                                                         dispersion.CLIENTE = lot.CLIENTE;
                                                         dispersion.LOTE = lot.LOTE;
                                                         dispersion.MANDATO = lot.MANDATO;
                                                         dispersion.PRECIO = lot.PRECIO;
                                                         dispersion.ID_PAGO = deposito.ID_PAGO;
-                                                        dispersion.ABONADO = ((lot.MEFALTA*lot.PORCIVA)/this.G_IVA);
-                                                        dispersion.IVA = ((lot.MEFALTA*lot.PORCIVA))-dispersion.ABONADO;
-                                                        dispersion.MONSIVA = (lot.MEFALTA-(dispersion.ABONADO+dispersion.IVA));
+                                                        dispersion.ABONADO = ((lot.MEFALTA * lot.PORCIVA) / this.G_IVA);
+                                                        dispersion.IVA = ((lot.MEFALTA * lot.PORCIVA)) - dispersion.ABONADO;
+                                                        dispersion.MONSIVA = (lot.MEFALTA - (dispersion.ABONADO + dispersion.IVA));
                                                         dispersion.GARATIA = lot.GARATIA;
                                                         deposito.RESTA = deposito.RESTA - lot.MEFALTA;
                                                         lot.MEFALTA = 0;
@@ -8109,6 +8123,7 @@ export class ValidatePaymentsRefService {
                         deposito.RESTA = element.monto;
                         deposito.MANDATO = element.no_transferente;
                         deposito.LOTE = element.id_lote;
+                        this.DEPOSITOS.push(deposito)
                         L_DEPTOT = L_DEPTOT + L_MONTO;
                 });
 
@@ -8828,7 +8843,7 @@ export class ValidatePaymentsRefService {
                 await this.actRefesMue(event)
         }
 
-        async actLotes(event:number){
+        async actLotes(event: number) {
                 await this.entity.query(` UPDATE    sera.COMER_LOTES LOT
                         SET    VALIDO_SISTEMA = 'S',
                                         ID_ESTATUSVTA = 'PAG'
@@ -9091,13 +9106,13 @@ export class ValidatePaymentsRefService {
              )`)
         }
 
-        async remesas(event:number){
-                var R_EVENTO            = 0 
-                var R_IDBXLREM          = 0 
-                var R_IDLOTREM          = 0 
-                var R_BIENESDISPO       = 0 
+        async remesas(event: number) {
+                var R_EVENTO = 0
+                var R_IDBXLREM = 0
+                var R_IDLOTREM = 0
+                var R_BIENESDISPO = 0
 
-                var R1:any[]  = await this.entity.query(`SELECT    BXL.ID_BIENXLOTE_REMESA as remesa, BXL.ID_LOTE       
+                var R1: any[] = await this.entity.query(`SELECT    BXL.ID_BIENXLOTE_REMESA as remesa, BXL.ID_LOTE       
                 FROM    sera.COMER_BIENESXLOTE BXL, sera.bien BIE
                 WHERE    BXL.NO_BIEN = BIE.NO_BIEN
                 AND    EXISTS (SELECT    1
@@ -9124,7 +9139,7 @@ export class ValidatePaymentsRefService {
                 });
 
 
-                var R2:any[]  = await this.entity.query(` SELECT    DISTINCT BXL.ID_EVENTO_REMESA 
+                var R2: any[] = await this.entity.query(` SELECT    DISTINCT BXL.ID_EVENTO_REMESA 
                 FROM    sera.COMER_BIENESXLOTE BXL
                 WHERE    EXISTS (SELECT    1
                         FROM    sera.COMER_LOTES LOT
@@ -9150,7 +9165,7 @@ export class ValidatePaymentsRefService {
                                 )
                         AND    VENDIDO IS NULL`)
                         R_BIENESDISPO = result[0].total || 0
-                        if(R_BIENESDISPO == 0 ){
+                        if (R_BIENESDISPO == 0) {
                                 await this.entity.query(` UPDATE    sera.COMER_EVENTOS 
                                 SET    ID_ESTATUSVTA = 'NDIS'
                                 WHERE    ID_EVENTO = ${element.id_evento_remesa}`)
@@ -9161,7 +9176,7 @@ export class ValidatePaymentsRefService {
          * 
          * @procedure REMESASMUE_ACT 
          */
-        async remittancesCurrentGoods(data:UpdateCurrentGeneralStatus){
+        async remittancesCurrentGoods(data: UpdateCurrentGeneralStatus) {
                 let R1 = await this.entity.query(`SELECT BXL.ID_BIENXLOTE_REMESA, BXL.ID_LOTE_REMESA
                         FROM sera.COMER_BIENESXLOTE BXL
                         JOIN sera.BIEN BIE ON BXL.NO_BIEN = BIE.NO_BIEN
@@ -9205,10 +9220,10 @@ export class ValidatePaymentsRefService {
                         )
                         );
                 `);
-                var R_EVENTO            :number
-                var R_IDBXLREM          :number
-                var R_IDLOTREM          :number
-                var R_BIENESDISPO       = 0;
+                var R_EVENTO: number
+                var R_IDBXLREM: number
+                var R_IDLOTREM: number
+                var R_BIENESDISPO = 0;
                 for (const iterator of R1) {
                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE
                         SET    VENDIDO = 'S'
@@ -9226,15 +9241,15 @@ export class ValidatePaymentsRefService {
                                         )
                                 AND    VENDIDO IS NULL
                         `))[0]?.val1 || 0
-                        if(count >0){
+                        if (count > 0) {
                                 await this.entity.query(` UPDATE    sera.COMER_EVENTOS EVE
                                 SET    EVE.ID_ESTATUSVTA = 'NDIS'
                                 WHERE    EVE.ID_EVENTO = ${iterator.event}`)
                         }
                 }
                 return {
-                        statusCode:200,
-                        message:["OK"]
+                        statusCode: 200,
+                        message: ["OK"]
                 }
         }
 
@@ -9242,7 +9257,7 @@ export class ValidatePaymentsRefService {
          * 
          * @procedure REMESASMUE 
          */
-        async remittancesGoods(event:number){
+        async remittancesGoods(event: number) {
                 let R1 = await this.entity.query(`SELECT BXL.ID_BIENXLOTE_REMESA, BXL.ID_LOTE_REMESA
                         FROM sera.COMER_BIENESXLOTE BXL
                         INNER JOIN sera.BIEN BIE ON BXL.NO_BIEN = BIE.NO_BIEN
@@ -9286,7 +9301,7 @@ export class ValidatePaymentsRefService {
                                 )
                         );
                 `);
-                var R_BIENESDISPO       = 0;
+                var R_BIENESDISPO = 0;
                 for (const iterator of R1) {
                         await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE
                         SET    VENDIDO = 'S'
@@ -9304,22 +9319,22 @@ export class ValidatePaymentsRefService {
                                         )
                                 AND    VENDIDO IS NULL
                         `))[0]?.val1 || 0
-                        if(count >0){
+                        if (count > 0) {
                                 await this.entity.query(` UPDATE    sera.COMER_EVENTOS EVE
                                 SET    EVE.ID_ESTATUSVTA = 'NDIS'
                                 WHERE    EVE.ID_EVENTO = ${iterator.event}`)
                         }
                 }
                 return {
-                        statusCode:200,
-                        message:["OK"]
+                        statusCode: 200,
+                        message: ["OK"]
                 }
         }
 
         /**
          * @procedure HISTORICO_ACT
          */
-        async currentHistoric(data:UpdateCurrentGeneralStatus){
+        async currentHistoric(data: UpdateCurrentGeneralStatus) {
                 var H1 = await this.entity.query(`
                         SELECT BXL.NO_BIEN, BIE.ESTATUS        
                         FROM sera.COMER_BIENESXLOTE BXL
@@ -9387,8 +9402,8 @@ export class ValidatePaymentsRefService {
                         AND BXL.ID_EVENTO_REMESA IS NULL;
                 
                 `)
-                var H_PROGRAMA   = 'FCOMER612';
-                if(data.address =="I"){
+                var H_PROGRAMA = 'FCOMER612';
+                if (data.address == "I") {
                         H_PROGRAMA = 'FCOMER612_I';
                 }
                 var errores = []
@@ -9405,8 +9420,8 @@ export class ValidatePaymentsRefService {
                         }
                 }
                 return {
-                        statusCode:200,
-                        message:errores
+                        statusCode: 200,
+                        message: errores
                 }
         }
 
@@ -9415,7 +9430,7 @@ export class ValidatePaymentsRefService {
          * @procedure HISTORICO 
          * @returns 
          */
-        async historic(data:{event:number,address:string,user:string}){
+        async historic(data: { event: number, address: string, user: string }) {
                 var H1 = await this.entity.query(`
                         SELECT BXL.NO_BIEN, BIE.ESTATUS
                         FROM sera.COMER_BIENESXLOTE BXL
@@ -9480,8 +9495,8 @@ export class ValidatePaymentsRefService {
                         AND BXL.ID_EVENTO_REMESA IS NULL
                 
                 `)
-                var H_PROGRAMA   = 'FCOMER612';
-                if(data.address =="I"){
+                var H_PROGRAMA = 'FCOMER612';
+                if (data.address == "I") {
                         H_PROGRAMA = 'FCOMER612_I';
                 }
                 var errores = []
@@ -9498,15 +9513,15 @@ export class ValidatePaymentsRefService {
                         }
                 }
                 return {
-                        statusCode:200,
-                        message:errores
+                        statusCode: 200,
+                        message: errores
                 }
         }
 
         /**
          * @procedure ACT_LOTES_BASES
          */
-        async updateLotBase(event:number){
+        async updateLotBase(event: number) {
                 await this.entity.query(`
                         update
                         sera.COMER_LOTES LOT
@@ -9653,8 +9668,8 @@ export class ValidatePaymentsRefService {
                                 and ID_ESTATUSVTA != 'DES';
                 `)
                 return {
-                        statusCode:200,
-                        message:["OK"]
+                        statusCode: 200,
+                        message: ["OK"]
                 }
 
         }
@@ -9662,33 +9677,33 @@ export class ValidatePaymentsRefService {
         /**
          * @procedure ACT_EST_GRAL_ACT
          */
-        async updateCurrentGeneralStatus(data:UpdateCurrentGeneralStatus){
-               
-                data.address='M'
+        async updateCurrentGeneralStatus(data: UpdateCurrentGeneralStatus) {
+
+                data.address = 'M'
                 await this.actLotAct(data)
                 await this.remittancesCurrentGoods(data)
                 await this.currentHistoric(data);
                 await this.currentBlackList(data)
                 return {
-                        statusCode:200,
-                        message:["OK"]
+                        statusCode: 200,
+                        message: ["OK"]
                 }
 
         }
 
-         /**
-         * @procedure ACT_EST_GRAL
-         */
-         async updateGeneralStatus(event:number,user:string){
-               
-               
+        /**
+        * @procedure ACT_EST_GRAL
+        */
+        async updateGeneralStatus(event: number, user: string) {
+
+
                 await this.actLotes(event)
                 await this.remittancesGoods(event)
-                await this.historic({event:event,address:'M',user:user});
+                await this.historic({ event: event, address: 'M', user: user });
                 await this.blackList(event)
                 return {
-                        statusCode:200,
-                        message:["OK"]
+                        statusCode: 200,
+                        message: ["OK"]
                 }
 
         }
@@ -9696,8 +9711,925 @@ export class ValidatePaymentsRefService {
         /**
          * @procedure ACT_EST_BASES
          */
-        async updateStatusBase(event:number){
+        async updateStatusBase(event: number) {
                 await this.updateLotBase(event)
+                return {
+                        statusCode: 200,
+                        message: ["OK"]
+                }
+        }
+
+        /**
+         * @procedure ACTMAN_BIELOTE
+         */
+        async updateMandateGoodLot(event: number) {
+                await this.entity.query(`
+                        UPDATE sera.COMER_BIENESXLOTE BXL
+                        SET NO_TRANSFERENTE = (
+                        SELECT NO_TRANSFERENTE
+                        FROM sera.EXPEDIENTES EXP
+                        INNER JOIN sera.BIEN BIE1 ON EXP.NO_EXPEDIENTE = BIE1.NO_EXPEDIENTE
+                        WHERE BXL.NO_BIEN = BIE1.NO_BIEN
+                        )
+                        WHERE EXISTS (
+                        SELECT 1
+                        FROM sera.COMER_LOTES LOT
+                        WHERE BXL.ID_LOTE = LOT.ID_LOTE
+                        AND EXISTS (
+                                SELECT 1
+                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                WHERE CXE.ID_EVENTO = ${event}
+                                AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                AND CXE.PROCESADO = 'S'
+                                AND CXE.PROCESAR = 'S'
+                        )
+                                AND EXISTS (
+                                        SELECT 1
+                                        FROM sera.COMER_EVENTOS EVE
+                                        WHERE EVE.ID_EVENTO = ${event}
+                                        AND EVE.ID_EVENTO = LOT.ID_EVENTO
+                                )
+                        );
+                        
+                `)
+                await this.entity.query(`
+                 UPDATE    sera.COMER_LOTES LOT
+                        SET    NO_TRANSFERENTE = (    SELECT    NO_TRANSFERENTE
+                                        FROM    sera.COMER_BIENESXLOTE BXL
+                                        WHERE    BXL.ID_LOTE = LOT.ID_LOTE
+                                        AND    ROWNUM      = 1
+                                )
+                        WHERE    EXISTS (SELECT    1
+                                FROM    sera.COMER_CLIENTESXEVENTO CXE
+                                WHERE    CXE.ID_EVENTO = ${event}
+                                AND    CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                AND    CXE.PROCESADO = 'S'
+                                AND    CXE.PROCESAR = 'S'
+                        )
+                `)
+                return {
+                        statusCode: 200,
+                        message: ["OK"]
+                }
+        }
+
+        /**
+         * @procedure PREP_OI_BASES_CA
+         */
+        async prepOiBaseCa(data: { event: number, descrption: string, user?: string }) {
+
+                var P_CONCEP: string
+                var O_IDENTI = 0;
+
+                var USUARIO: string
+                var L_PARAMETROS: any
+
+                var C1 = await this.entity.query(`
+                        SELECT
+                                REF.ID_PAGO,
+                                CLI.RFC,
+                                TO_CHAR(REF.FECHA, 'YYYYMMDD') AS FECHA,
+                                REF.MONTO m1,
+                                SUBSTRING(REF.REFERENCIAORI, 1, 30) AS REFERENCIAORI,
+                                REF.NO_MOVIMIENTO,
+                                LOT.LOTE_PUBLICO,
+                                REF.MONTO m2,
+                                SUBSTRING(LOT.DESCRIPCION, 1, 380) AS DESCRIPCION,
+                                MOD.VALOR,
+                                REF.IDORDENINGRESO
+                        FROM
+                        sera.COMER_PAGOREF REF
+                        INNER JOIN
+                        sera.COMER_LOTES LOT ON LOT.ID_LOTE = REF.ID_LOTE
+                        INNER JOIN
+                        sera.COMER_CLIENTES CLI ON LOT.ID_CLIENTE = CLI.ID_CLIENTE
+                        INNER JOIN
+                        sera.COMER_PARAMETROSMOD MOD ON REF.CVE_BANCO = MOD.PARAMETRO
+                        WHERE
+                                LOT.ID_EVENTO = ${data.event}
+                                AND LOT.LOTE_PUBLICO != 0
+                                AND EXISTS (
+                                        SELECT 1
+                                        FROM sera.COMER_CLIENTESXEVENTO CXE
+                                        WHERE CXE.ID_EVENTO = ${data.event}
+                                        AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                )
+                                AND MOD.DIRECCION = 'C'
+                                AND REF.IDORDENINGRESO IS NULL
+                                ORDER BY
+                        REF.ID_PAGO
+                `)
+                L_PARAMETROS = this.getParameters({ eventId: data.event, address: 'M' });
+                if (L_PARAMETROS.statusCode == 400) return L_PARAMETROS
+                await this.updateMandateGoodLot(data.event);
+                await this.entity.query(`
+                        DELETE FROM sera.COMER_CABECERAS CAB
+                        WHERE CAB.ID_EVENTO = ${data.event}
+                        AND CAB.CLIENTE_RFC IN (
+                                SELECT CLI.RFC
+                                FROM sera.COMER_CLIENTES CLI
+                                INNER JOIN sera.COMER_CLIENTESXEVENTO CXE ON CLI.ID_CLIENTE = CXE.ID_CLIENTE
+                                WHERE CXE.ID_EVENTO = ${data.event}
+                                AND CXE.PROCESADO = 'S'
+                                AND CXE.PROCESAR = 'S'
+                        )
+               `)
+                await this.entity.query(`
+                        DELETE FROM sera.COMER_DETALLES DET
+                        WHERE ID_EVENTO = ${event}
+                        AND EXISTS (
+                                SELECT 1
+                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                INNER JOIN sera.COMER_LOTES LOT ON CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                WHERE CXE.ID_EVENTO = ${event}
+                                AND CXE.PROCESADO = 'S'
+                                AND CXE.PROCESAR = 'S'
+                                AND DET.ID_LOTE = LOT.ID_LOTE
+                        )
+               `)
+                O_IDENTI = (await this.entity.query(`
+                        SELECT MAX(IDENTIFICADOR) as val1
+                        FROM sera.COMER_CABECERAS
+                        WHERE ID_EVENTO = ${data.event}
+               `))[0]?.val1 || 0
+                USUARIO = (await this.entity.query(`
+                        SELECT coalesce(RTRIM(LTRIM(USUARIO_SIRSAE)),'SAE'||'${data.user}') as user
+                        FROM sera.SEG_USUARIOS
+                        WHERE USUARIO = '${data.user}';
+                       
+               `))[0]?.user || ""
+                for (const iterator of C1) {
+                        O_IDENTI = O_IDENTI + 1;
+                        P_CONCEP = `DEPOSITO POR VENTA DE BASES EVENTO ${data.event} ${data.descrption} DE LA BASE ${iterator.lote_publico} `;
+                        await this.entity.query(`
+                        INSERT INTO sera.COMER_CABECERAS
+                                (IDENTIFICADOR, CONSECUTIVO, AREA, DOCUMENTO, UNRESPONSABLE, CLIENTE_RFC, CONCEPTO,
+                                ANEXO, FECHA, TIPOPE, FORMAPAGO, FECHAORDEN, BANCO, USAUTORIZA,
+                                MONTO_TOTAL_PADRE, NUMOVTO, REFERENCIA, IDPAGO, ID_EVENTO, IDORDENGRABADA
+                                )
+                                VALUES
+                                (${O_IDENTI}, 0, '${this.G_AREA}', 'OI', 720, '${iterator.rfc}', '${P_CONCEP}',
+                                'PANTALLA BANCARIA', '${iterator.fecha}', 3, 'T',  '${iterator.fecha}', '${iterator.valor}', '${USUARIO}',
+                                ${iterator.monto}, '${iterator.no_movimiento}', '${iterator.referenciaori}', '${iterator.id_pago}', ${data.event}, '${iterator.idordeningreso}'
+                                )
+                        `)
+                }
+                return {
+                        statusCode: 200,
+                        message: ["OK"]
+                }
+
+        }
+
+        /**
+         * @procedure PENALIZA
+         */
+
+        async penaliza(data: { buy: number, payment: number, client: number }) {
+                var t = 0;
+                var L_MONTOPENA = 0;
+                var todos_lotes = 0;
+                var penalizados = 0;
+                var TOT_PENALIZA = 0;
+                var tot_pagara = 0;
+                var ERROR = 0;
+                var PRIMERAVEZ = 1;
+                var MATCH = 1;
+                this.LOTIPGAR = []
+                this.RETIPGAR = []
+                if (data.payment < data.buy) {
+                        PRIMERAVEZ = 1
+                        t = 0
+                        this.LOTESXCLI.forEach(element => {
+                                MATCH = 0;
+                                if (element.ASIGNADO == 'N') {
+                                        tot_pagara = tot_pagara + element.PRECIO;
+                                        if (PRIMERAVEZ > 1) {
+                                                for (const lotpgar of this.LOTIPGAR) {
+                                                        if (lotpgar.MONTO == element.GARATIA) {
+                                                                lotpgar.LOTES = lotpgar.LOTES + 1
+                                                                MATCH = 1
+                                                                break
+                                                        }
+                                                }
+                                                if (MATCH == 0) {
+                                                        this.LOTIPGAR.push({
+                                                                LOTES: 1,
+                                                                MONAPP: 0,
+                                                                MONTO: element.GARATIA
+                                                        })
+                                                }
+
+
+                                        } else {
+                                                this.LOTIPGAR.push({
+                                                        LOTES: 1,
+                                                        MONAPP: 0,
+                                                        MONTO: element.GARATIA
+                                                })
+                                        }
+                                }
+                                PRIMERAVEZ = PRIMERAVEZ + 1;
+                        });
+                        t = 0
+                        PRIMERAVEZ = 1
+                        this.LOTESXCLI.forEach(element => {
+                                MATCH = 0
+                                if (PRIMERAVEZ > 1) {
+                                        for (const RETIPGAR of this.RETIPGAR) {
+                                                if (RETIPGAR.MONTO == element.GARATIA) {
+                                                        RETIPGAR.LOTES = RETIPGAR.LOTES + 1;
+                                                        RETIPGAR.TOTXGA = RETIPGAR.TOTXGA + element.PRECIO;
+                                                        MATCH = 1;
+                                                        break;
+                                                }
+
+                                        }
+                                        if (MATCH == 0) {
+                                                this.RETIPGAR.push({
+                                                        LOTES: 1,
+                                                        TOTXGA: element.PRECIO,
+                                                        MONTO: element.GARATIA
+                                                })
+                                        }
+
+                                } else {
+                                        this.RETIPGAR.push({
+                                                LOTES: 1,
+                                                TOTXGA: element.PRECIO,
+                                                MONTO: element.GARATIA
+                                        })
+                                }
+                                PRIMERAVEZ = PRIMERAVEZ + 1;
+                        });
+                        this.LOTIPGAR.forEach(element => {
+                                TOT_PENALIZA = TOT_PENALIZA + Math.ceil(element.LOTES / this.G_NUMLOTES) * element.MONTO
+                        });
+                        if (data.payment >= (data.buy - tot_pagara) + TOT_PENALIZA) {
+                                ERROR = await this.appPenaExcel(data.client)
+                        } else {
+                                await this.appPenaSiste(data.buy, data.payment, data.client)
+                        }
+                }
+                return {
+                        statusCode: 200,
+                        message: ["OK"]
+                }
+        }
+
+        /**
+         * @procedure VALIDA_COMER
+         */
+        async validComer(data: { event: number, date: string }) {
+                var L_CLIENTE = 0;
+                var j = 0;
+                var i = 0;
+                var k = 0;
+                var t = 0;
+                var COMPRA_TOT = 0.0;
+                var PAGADO_TOT = 0.0;
+                var L_MONTOPENA = 0.0;
+                var L_PARAMETROS: any
+                var PENALTY = 'N';
+                var PROP_IVA_CHAT = 0.0;
+                var PROP_ISR_CHAT = 0.0;
+
+                var L7 = await this.entity.query(`
+                        SELECT    DISTINCT LOT.ID_CLIENTE 
+                        FROM    sera.COMER_LOTES LOT
+                        WHERE    LOT.ID_EVENTO    = ${data.event}
+                        AND        EXISTS (SELECT    PRF.ID_LOTE
+                                        FROM    sera.COMER_PAGOREF PRF
+                                        WHERE    PRF.ID_LOTE        = LOT.ID_LOTE
+                                        AND        PRF.VALIDO_SISTEMA = 'A'
+                                        AND        PRF.FECHA         <= '${data.date}'
+                                        )
+                        AND        EXISTS (SELECT    1
+                                        FROM    sera.COMER_CLIENTESXEVENTO CXE
+                                        WHERE    CXE.ID_EVENTO      = ${data.event}
+                                        AND        CXE.ID_CLIENTE     = LOT.ID_CLIENTE
+                                        AND        CXE.PROCESAR       = 'S'
+                                        AND        CXE.ENVIADO_SIRSAE = 'N'
+                                        )
+                        AND        LOT.PRECIO_FINAL > 0
+                        AND        LOT.VALIDO_SISTEMA IS NULL
+                        AND        LOT.ID_CLIENTE IS NOT NULL
+                `)
+                L_PARAMETROS = await this.getParameters({ eventId: data.event, address: "M" })
+                await this.prepareLot(data.event, "M")
+                await this.actEstLotesMue(data.event)
+                await this.borraMuebles(data.event, null, null)
+                this.G_PKREFGEN = 0;
+                for (const iterator of L7) {
+                        await this.entity.query(`
+                                UPDATE    sera.COMER_CLIENTESXEVENTO
+                                SET    PROCESADO  = 'S'
+                                WHERE    ID_EVENTO  = ${data.event}
+                                AND    ID_CLIENTE = ${iterator.id_cliente};
+                        `)
+                        this.DISPERSION = []
+                        COMPRA_TOT = await this.llenaLotes(data.event, iterator.id_cliente, null, 1)
+                        PAGADO_TOT = await this.llenaPagos(data.event, iterator.id_cliente, new Date(data.date), 1)
+                        await this.penaliza({ buy: COMPRA_TOT, payment: PAGADO_TOT, client: iterator.id_cliente })
+                        this.DEPOSITOS.forEach(DEPOSITOS => {
+                                if (DEPOSITOS.RESTA > 0) {
+                                        this.LOTESXCLI.forEach(LOTESXCLI => {
+                                                if (LOTESXCLI.PAGADO == 'N' && DEPOSITOS.RESTA > 0 && LOTESXCLI.ASIGNADO == "S" && LOTESXCLI.MEFALTA > 0) {
+                                                        var DISPERSION: Dispersa = {}
+                                                        if (DEPOSITOS.RESTA == LOTESXCLI.MEFALTA && DEPOSITOS.RESTA > 0) {
+                                                                DISPERSION.CLIENTE = L_CLIENTE;
+                                                                DISPERSION.LOTE = LOTESXCLI.LOTE;
+                                                                DISPERSION.MANDATO = LOTESXCLI.MANDATO;
+                                                                DISPERSION.PRECIO = LOTESXCLI.MEFALTA;
+                                                                DISPERSION.ID_PAGO = DEPOSITOS.ID_PAGO;
+                                                                if (LOTESXCLI.ESCHATA == 'S') {
+                                                                        DISPERSION.MONCHATA = Number(((LOTESXCLI.MEFALTA * LOTESXCLI.PORCIVA) * (this.G_PCTCHATARRA / 100)).toFixed(2));
+                                                                        PROP_ISR_CHAT = Number(((DISPERSION.MONCHATA / this.G_IVA), 2).toFixed(2));
+                                                                        PROP_IVA_CHAT = Number((DISPERSION.MONCHATA - PROP_ISR_CHAT).toFixed(2));
+                                                                        DISPERSION.ABONADO = Number(((LOTESXCLI.MEFALTA * LOTESXCLI.PORCIVA) / this.G_IVA).toFixed(2));
+                                                                        DISPERSION.IVA = Number(((LOTESXCLI.MEFALTA * LOTESXCLI.PORCIVA)).toFixed(2)) - DISPERSION.ABONADO + PROP_IVA_CHAT;
+                                                                        DISPERSION.ABONADO = DISPERSION.ABONADO + PROP_ISR_CHAT;
+                                                                        DISPERSION.MONSIVA = Number(((LOTESXCLI.MEFALTA * LOTESXCLI.PORNIVA)).toFixed(2));
+                                                                } else {
+                                                                        DISPERSION.ABONADO = Number(((LOTESXCLI.MEFALTA * LOTESXCLI.PORCIVA) / this.G_IVA).toFixed(2));
+                                                                        DISPERSION.IVA = Number(((LOTESXCLI.MEFALTA * LOTESXCLI.PORCIVA)).toFixed(2)) - DISPERSION.ABONADO
+                                                                        DISPERSION.MONSIVA = Number(((LOTESXCLI.MEFALTA * LOTESXCLI.PORNIVA)).toFixed(2));
+                                                                }
+                                                                DISPERSION.GARATIA = LOTESXCLI.GARATIA;
+                                                                LOTESXCLI.MEFALTA = 0;
+                                                                DISPERSION.TIPO = 'N';
+                                                                LOTESXCLI.PAGADO = 'S';
+                                                                DEPOSITOS.RESTA = 0;
+                                                        } else if (DEPOSITOS.RESTA < LOTESXCLI.MEFALTA && DEPOSITOS.RESTA > 0) {
+                                                                DISPERSION.CLIENTE = L_CLIENTE;
+                                                                DISPERSION.LOTE = LOTESXCLI.LOTE;
+                                                                DISPERSION.MANDATO = LOTESXCLI.MANDATO;
+                                                                DISPERSION.PRECIO = LOTESXCLI.PRECIO;
+                                                                DISPERSION.ID_PAGO = DEPOSITOS.ID_PAGO;
+                                                                if (LOTESXCLI.ESCHATA == 'S') {
+                                                                        DISPERSION.MONCHATA = Number(((DEPOSITOS.RESTA * LOTESXCLI.PORCIVA) * (this.G_PCTCHATARRA / 100)).toFixed(2));
+                                                                        PROP_ISR_CHAT = Number(((DISPERSION.MONCHATA / this.G_IVA), 2).toFixed(2));
+                                                                        PROP_IVA_CHAT = Number((DISPERSION.MONCHATA - PROP_ISR_CHAT).toFixed(2));
+                                                                        DISPERSION.ABONADO = Number(((DEPOSITOS.RESTA * LOTESXCLI.PORCIVA) / this.G_IVA).toFixed(2));
+                                                                        DISPERSION.IVA = Number(((DEPOSITOS.RESTA * LOTESXCLI.PORCIVA)).toFixed(2)) - DISPERSION.ABONADO + PROP_IVA_CHAT;
+                                                                        DISPERSION.ABONADO = DISPERSION.ABONADO + PROP_ISR_CHAT;
+                                                                        DISPERSION.MONSIVA = Number(((DEPOSITOS.RESTA * LOTESXCLI.PORNIVA)).toFixed(2));
+                                                                } else {
+                                                                        DISPERSION.ABONADO = Number(((DEPOSITOS.RESTA * LOTESXCLI.PORCIVA) / this.G_IVA).toFixed(2));
+                                                                        DISPERSION.IVA = Number(((DEPOSITOS.RESTA * LOTESXCLI.PORCIVA)).toFixed(2)) - DISPERSION.ABONADO
+                                                                        DISPERSION.MONSIVA = Number(((DEPOSITOS.RESTA * LOTESXCLI.PORNIVA)).toFixed(2));
+                                                                }
+                                                                DISPERSION.GARATIA = LOTESXCLI.GARATIA;
+                                                                LOTESXCLI.MEFALTA = LOTESXCLI.MEFALTA - DEPOSITOS.RESTA;
+                                                                DISPERSION.TIPO = 'N';
+                                                                LOTESXCLI.PAGADO = 'N';
+                                                                DEPOSITOS.RESTA = 0;
+                                                        } else if (DEPOSITOS.RESTA > LOTESXCLI.MEFALTA && DEPOSITOS.RESTA > 0) {
+                                                                DISPERSION.CLIENTE = L_CLIENTE;
+                                                                DISPERSION.LOTE = LOTESXCLI.LOTE;
+                                                                DISPERSION.MANDATO = LOTESXCLI.MANDATO;
+                                                                DISPERSION.PRECIO = LOTESXCLI.PRECIO;
+                                                                DISPERSION.ID_PAGO = DEPOSITOS.ID_PAGO;
+                                                                if (LOTESXCLI.ESCHATA == 'S') {
+                                                                        DISPERSION.MONCHATA = Number(((LOTESXCLI.MEFALTA * LOTESXCLI.PORCIVA) * (this.G_PCTCHATARRA / 100)).toFixed(2));
+                                                                        PROP_ISR_CHAT = Number(((DISPERSION.MONCHATA / this.G_IVA), 2).toFixed(2));
+                                                                        PROP_IVA_CHAT = Number((DISPERSION.MONCHATA - PROP_ISR_CHAT).toFixed(2));
+                                                                        DISPERSION.ABONADO = Number(((LOTESXCLI.MEFALTA * LOTESXCLI.PORCIVA) / this.G_IVA).toFixed(2));
+                                                                        DISPERSION.IVA = Number(((LOTESXCLI.MEFALTA * LOTESXCLI.PORCIVA)).toFixed(2)) - DISPERSION.ABONADO + PROP_IVA_CHAT;
+                                                                        DISPERSION.ABONADO = DISPERSION.ABONADO + PROP_ISR_CHAT;
+                                                                        DISPERSION.MONSIVA = Number(((LOTESXCLI.MEFALTA * LOTESXCLI.PORNIVA)).toFixed(2));
+                                                                } else {
+                                                                        DISPERSION.ABONADO = Number(((LOTESXCLI.MEFALTA * LOTESXCLI.PORCIVA) / this.G_IVA).toFixed(2));
+                                                                        DISPERSION.IVA = Number(((LOTESXCLI.MEFALTA * LOTESXCLI.PORCIVA)).toFixed(2)) - DISPERSION.ABONADO
+                                                                        DISPERSION.MONSIVA = Number(((LOTESXCLI.MEFALTA * LOTESXCLI.PORNIVA)).toFixed(2));
+                                                                }
+                                                                DISPERSION.GARATIA = LOTESXCLI.GARATIA;
+                                                                LOTESXCLI.MEFALTA = 0;
+                                                                DISPERSION.TIPO = 'N';
+                                                                LOTESXCLI.PAGADO = 'S';
+                                                                DEPOSITOS.RESTA = DEPOSITOS.RESTA - LOTESXCLI.MEFALTA;
+                                                        }
+                                                        this.DISPERSION.push(DISPERSION)
+                                                }
+                                        });
+                                }
+                        });
+                        this.DEPOSITOS.forEach(DEPOSITOS => {
+                                if (DEPOSITOS.RESTA > 0) {
+                                        var DISPERSION: Dispersa = {}
+                                        DISPERSION.CLIENTE = L_CLIENTE;
+                                        DISPERSION.MANDATO = DEPOSITOS.MANDATO;
+                                        DISPERSION.PRECIO = DEPOSITOS.RESTA;
+                                        DISPERSION.ID_PAGO = DEPOSITOS.ID_PAGO;
+                                        DISPERSION.ABONADO = DEPOSITOS.RESTA;
+                                        DISPERSION.GARATIA = DEPOSITOS.RESTA;
+                                        DISPERSION.TIPO = 'D';
+                                        DISPERSION.LOTE = DEPOSITOS.LOTE;
+                                        this.DISPERSION.push(DISPERSION)
+                                }
+                        });
+                        await this.insDispBm(L_CLIENTE, 6, data.event)
+
+                }
+                await this.actPagosMue(data.event)
+                await this.actRefesMue(data.event)
+                return {
+                        statusCode: 200,
+                        message: ["OK"],
+                        data: {
+                                dispersion: this.DISPERSION,
+                                depositos: this.DEPOSITOS
+                        }
+                }
+        }
+
+        /**
+         * @procedure UTIL_DECGROUP
+         */
+        async utilDecGroup(amount:number){
+                var  UD_SUMA   = 0;
+                var  PRIMERA_VEZ= 1;
+                var  H         = 0;
+                var  UD_NUEVO   = 1;
+                var  UD_POS     = 0;
+                var  UD_DIF     = 0;
+                var  UD_MAYOR   = 0;
+                var  UD_AJUIMP  = 0;
+                var  UD_AJUIVA  = 0;
+                var  UD_AJUSIVA = 0;
+                var  UD_AUX1    = 0;
+                this.DETAUX = []
+                this.DETOI.forEach(DETOI => {
+                        if(DETOI.IMPORTE > 0){
+                                UD_SUMA = UD_SUMA + DETOI.IMPORTE + DETOI.IVA + DETOI.MONSIVA;
+                        }
+                });
+                this.DETOI.forEach(DETOI => {
+                        if(PRIMERA_VEZ == 1){
+                                this.DETAUX.push({
+                                        IDENTIFICADOR : DETOI.IDENTIFICADOR,
+                                        MANDATO    : DETOI.MANDATO,
+                                        INGRESO    : DETOI.INGRESO,
+                                        IMPORTE    : DETOI.IMPORTE,
+                                        IVA        : DETOI.IVA,
+                                        REFERENCIA    : DETOI.REFERENCIA,
+                                        INDTIPO    : DETOI.INDTIPO,
+                                        LOTESIAB    : DETOI.LOTESIAB,
+                                        DESCRIPCION    : DETOI.DESCRIPCION,
+                                        EVENTO    : DETOI.EVENTO,
+                                        LOTE        : DETOI.LOTE,
+                                        VTALOTE    : DETOI.VTALOTE,
+                                        MONTORET    : DETOI.MONTORET,
+                                        MONSIVA    : DETOI.MONSIVA
+                                })
+                        }else{
+                                UD_NUEVO = 1
+                                for (const DETAUX of  this.DETAUX) {
+                                        if(DETAUX.MANDATO == DETOI.MANDATO){
+                                                DETAUX.IMPORTE =DETAUX.IMPORTE + DETOI.IMPORTE,
+                                                DETAUX.IVA     =DETAUX.IVA + DETOI.IVA,
+                                                DETAUX.MONSIVA =DETAUX.MONSIVA + DETOI.MONSIVA,
+                                                DETAUX.MONTORET=DETAUX.MONTORET + DETOI.MONTORET
+                                                UD_NUEVO = 0;
+                                                break
+                                        }
+                                }
+                                if(UD_NUEVO ==1){
+                                        this.DETAUX.push({
+                                                IDENTIFICADOR : DETOI.IDENTIFICADOR,
+                                                MANDATO    : DETOI.MANDATO,
+                                                INGRESO    : DETOI.INGRESO,
+                                                IMPORTE    : DETOI.IMPORTE,
+                                                IVA        : DETOI.IVA,
+                                                REFERENCIA    : DETOI.REFERENCIA,
+                                                INDTIPO    : DETOI.INDTIPO,
+                                                LOTESIAB    : DETOI.LOTESIAB,
+                                                DESCRIPCION    : DETOI.DESCRIPCION,
+                                                EVENTO    : DETOI.EVENTO,
+                                                LOTE        : DETOI.LOTE,
+                                                VTALOTE    : DETOI.VTALOTE,
+                                                MONTORET    : DETOI.MONTORET,
+                                                MONSIVA    : DETOI.MONSIVA
+                                        })
+                                }
+                        }
+                        PRIMERA_VEZ = PRIMERA_VEZ +1
+                });
+                if(amount  != UD_SUMA){
+                        UD_DIF = amount - UD_SUMA;
+                        this.DETAUX.forEach((DETAUX,index) => {
+                                if(UD_MAYOR< DETAUX.IMPORTE + DETAUX.MONSIVA){
+                                        UD_MAYOR = DETAUX.IMPORTE + DETAUX.MONSIVA;
+                                        UD_POS = index;
+                                }
+                        });
+                        UD_AUX1                         = this.DETAUX[UD_POS].IMPORTE + this.DETAUX[UD_POS].IVA + UD_DIF;
+                        UD_AJUIMP                       = UD_AUX1/this.G_IVA;
+                        UD_AJUIVA                       = UD_AUX1 - UD_AJUIMP;
+                        this.DETAUX[UD_POS].IMPORTE     = UD_AJUIMP;
+                        this.DETAUX[UD_POS].IVA         = UD_AJUIVA;
+                }
+                return {
+                        statusCode:200,
+                        message:["OK"]
+                }
+        }
+
+        /**
+         * @procedure PREP_OI
+         */
+        async prepOi(event: number, description: string,user:string) {
+                var P_IDPAGO: number
+                var P_RFC: string
+                var P_CONCEP: string
+                var P_CONAUX: string
+                var P_BANCO: string
+                var O_IDENTI = 0
+                var O_CONSE = 0
+                var P_FECHAHOY = LocalDate.getNow()
+                var P_FECHA: string
+                var P_MONIVA: number
+                var P_MOVTO: number;
+                var P_REFE: string
+                var P_MONTO: number
+                var P_LOTPUB: number
+                var P_OI: number
+                var LOT_MONTO: number
+                var H_TIPO: string
+                var H_MAND: string
+                var H_MONTO: number
+                var H_REF: string
+                var H_MONIVA: number
+                var H_MONSIVA: number
+                var H_IVA: number
+                var H_REFE: string
+                var H_MOV: number
+                var H_LOTDES: string
+                var H_CONCEP: string
+                var H_IDENT: number = 0;
+                var USUARIO: string
+                var H_LOTPUB: number
+                var H_DESCTIPO: string
+                var H_MONTOCHAT: number
+                var H_MONTOLOTE: number
+                var H_LOTE: number
+                var AUX_CONT: number
+                var L_PARAMETROS: string
+                var H_INGRESO: string
+                var H_TPINGRESO: string
+                var H_NUMBIENES: number = 0;
+                var H_SIAB: number
+                var L_MANDATOS = 0;
+                var D_PCT: number
+                var D_MANDATO: string
+                var D_NOBIEN: number
+                var D_CONCEP: string
+                var AUX_CONCEP: string
+                var D_IVA: number
+                var D_MONIVA: number
+                var D_MONSIVA: number
+                var J: number = 0;
+                var P_CVE_EVENTO: string
+                var P_ID_LOTE: number
+                var C_NO_BIEN = '';
+                var A_NO_BIEN = '';
+
+                let C1 = await this.entity.query(`
+                        SELECT
+                        REF.ID_PAGO P_IDPAGO,
+                        CLI.RFC P_RFC,
+                        TO_CHAR(REF.FECHA, 'YYYYMMDD') P_FECHA,
+                        REF.MONTO P_MONTO,
+                        SUBSTR(REF.REFERENCIAORI, 1, 30) P_REFE,
+                        REF.NO_MOVIMIENTO P_MOVTO,
+                        LOT.LOTE_PUBLICO P_LOTPUB,
+                        LOT.ID_LOTE P_ID_LOTE,
+                        REF.MONTO P_MONIVA,
+                        SUBSTR(LOT.DESCRIPCION, 1, 380) P_CONAUX,
+                        MOD.VALOR P_BANCO,
+                        REF.IDORDENINGRESO P_OI,
+                        (
+                        SELECT CVE_PROCESO FROM sera.COMER_EVENTOS EVE WHERE EVE.ID_EVENTO = LOT.ID_EVENTO
+                        ) P_CVE_EVENTO
+                FROM
+                        sera.COMER_PAGOREF REF,
+                        sera.COMER_LOTES LOT,
+                        sera.COMER_CLIENTES CLI,
+                        sera.COMER_PARAMETROSMOD MOD
+                WHERE
+                        LOT.ID_EVENTO = ${event}
+                        AND LOT.ID_LOTE = REF.ID_LOTE
+                        AND LOT.ID_CLIENTE = CLI.ID_CLIENTE
+                        AND REF.VALIDO_SISTEMA = 'S'
+                        AND LOT.LOTE_PUBLICO != 0
+                        AND EXISTS (
+                                SELECT 1
+                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                WHERE CXE.ID_EVENTO =  ${event}
+                                AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                AND CXE.PROCESADO = 'S'
+                                AND CXE.PROCESAR = 'S'
+                        )
+                        AND REF.CVE_BANCO = MOD.PARAMETRO
+                        AND MOD.DIRECCION = 'C'
+                        AND REF.IDORDENINGRESO IS NULL
+                        ORDER BY REF.ID_PAGO
+                `)
+                let C2 = async (pago:number)=>{
+                        return await this.entity.query(`
+                                SELECT
+                                (GEN.MONTO_APP_IVA + GEN.IVA) as H_MONTO,
+                                GEN.TIPO H_TIPO,
+                                SUBSTR(GEN.REFERENCIA, 1, 30) as H_REFE,
+                                GEN.MONTO_APP_IVA H_MONIVA,
+                                COALESCE(GEN.IVA, 0) as H_IVA,
+                                1 as H_MOV,
+                                CAT.CVMAN H_MAND,
+                                COALESCE(GEN.MONTO_NOAPP_IVA, 0) as H_MONSIVA,
+                                SUBSTR(LOT.DESCRIPCION, 1, 420) H_LOTDES,
+                                LOT.LOTE_PUBLICO H_LOTPUB,
+                                        CASE GEN.TIPO
+                                        WHEN 'N' THEN 'Pago Normal'
+                                        WHEN 'P' THEN 'Pago a Penalizar'
+                                        WHEN 'D' THEN 'Pago a Devolver'
+                                ELSE ''
+                                END as H_DESCTIPO,
+                                LOT.ID_LOTE H_LOTE,
+                                LOT.PRECIO_FINAL H_MONTOLOTE,
+                                GEN.MONTO_CHATARRA H_MONTOCHAT,
+                                CASE GEN.TIPO
+                                        WHEN 'N' THEN G_TPOINGRESO
+                                        WHEN 'P' THEN G_TPOINGRESOP
+                                        WHEN 'D' THEN G_TPOINGRESOD
+                                        ELSE ''
+                                END H_INGRESO ,
+                                LOT.NUM_BIENES H_NUMBIENES
+                        FROM
+                                sera.COMER_PAGOSREFGENS GEN,
+                                sera.CAT_TRANSFERENTE CAT,
+                                sera.COMER_LOTES LOT
+                        WHERE
+                                GEN.ID_PAGO = ${pago}
+                                AND CAT.NO_TRANSFERENTE = GEN.NO_TRANSFERENTE
+                                AND GEN.ID_LOTE = LOT.ID_LOTE
+                                AND LOT.LOTE_PUBLICO != 0
+                                AND EXISTS (
+                                        SELECT 1
+                                        FROM sera.COMER_CLIENTESXEVENTO CXE
+                                        WHERE CXE.ID_EVENTO = L_EVENTO
+                                        AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                        AND CXE.PROCESADO = 'S'
+                                        AND CXE.ENVIADO_SIRSAE = 'N'
+                                        AND CXE.PROCESAR = 'S'
+                                )
+                        `)
+                }
+                let C3 =async (lote:number) => await this.entity.query(`
+                        SELECT
+                                BXL.PCTSLOTE D_PCT,
+                                COALESCE(CAT.CVMAN, '0') as D_MANDATO,
+                                BXL.NO_BIEN D_NOBIEN,
+                                SUBSTR(BIE.DESCRIPCION, 1, 438) as AUX_CONCEP,
+                                BXL.PRECIO_SIN_IVA D_MONIVA,
+                                BXL.MONTO_NOAPP_IVA D_MONSIVA,
+                                BXL.IVA_FINAL D_IVA
+                        FROM
+                                sera.COMER_BIENESXLOTE BXL,
+                                sera.CAT_TRANSFERENTE CAT,
+                                sera.BIEN BIE
+                        WHERE
+                                BXL.ID_LOTE = ${lote}
+                                AND BIE.NO_BIEN = BXL.NO_BIEN
+                                AND BXL.NO_TRANSFERENTE = CAT.NO_TRANSFERENTE(+)
+                        ORDER BY BXL.NO_BIEN;
+
+                `) 
+                let C4 = async (lote:number) =>await this.entity.query(`
+                        SELECT TO_CHAR(BXL.NO_BIEN) as no_bien
+                        FROM sera.COMER_BIENESXLOTE BXL
+                        WHERE BXL.ID_LOTE = ${lote}
+                        AND ROWNUM < 300
+                        ORDER BY BXL.NO_BIEN
+                `)
+                await this.getParameters({eventId:event,address:"M"})
+                await this.updateMandateGoodLot(event)
+                
+                await this.entity.query(`
+                        UPDATE sera.COMER_BIENESXLOTE BXLS
+                        SET PCTSLOTE = (
+                                SELECT BXL.PRECIO_FINAL / LOT.PRECIO_FINAL
+                                FROM sera.COMER_LOTES LOT
+                                JOIN sera.COMER_BIENESXLOTE BXL ON LOT.ID_LOTE = BXL.ID_LOTE
+                                WHERE LOT.ID_EVENTO = ${event}
+                                AND BXLS.NO_BIEN = BXL.NO_BIEN
+                        )
+                        WHERE EXISTS (
+                                SELECT 1
+                                FROM sera.COMER_LOTES LOTS
+                                WHERE LOTS.ID_EVENTO = ${event}
+                                AND LOTS.ID_LOTE = BXLS.ID_LOTE
+                                AND EXISTS (
+                                SELECT 1
+                                        FROM sera.COMER_CLIENTESXEVENTO CXE
+                                        WHERE CXE.ID_EVENTO = ${event}
+                                        AND LOTS.ID_CLIENTE = CXE.ID_CLIENTE
+                                        AND CXE.PROCESADO = 'S'
+                                        AND CXE.PROCESAR = 'S'
+                                )
+                        )      
+                `)
+                await this.entity.query(`
+                        DELETE FROM sera.COMER_CABECERAS CAB
+                        WHERE CAB.ID_EVENTO = ${event}
+                        AND CAB.CLIENTE_RFC IN (
+                                SELECT CLI.RFC
+                                FROM sera.COMER_CLIENTES CLI
+                                JOIN sera.COMER_CLIENTESXEVENTO CXE ON CLI.ID_CLIENTE = CXE.ID_CLIENTE
+                                WHERE CXE.ID_EVENTO = ${event}
+                                AND CXE.PROCESADO = 'S'
+                                AND CXE.PROCESAR = 'S'
+                        );
+                
+                `)
+                await this.entity.query(`
+                        DELETE FROM sera.COMER_DETALLES DET
+                        WHERE ID_EVENTO = ${event}
+                        AND EXISTS (
+                                SELECT 1
+                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                JOIN sera.COMER_LOTES LOT ON CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                WHERE CXE.ID_EVENTO = ${event}
+                                AND CXE.PROCESADO = 'S'
+                                AND CXE.PROCESAR = 'S'
+                                AND DET.ID_LOTE = LOT.ID_LOTE
+                        );
+                
+                `)
+
+                O_IDENTI = (await this.entity.query(`
+                        SELECT    MAX(IDENTIFICADOR) as val1
+                        FROM    sera.COMER_CABECERAS
+                        WHERE    ID_EVENTO = ${event}
+                `))[0]?.val1 ||0
+                USUARIO = (await this.entity.query(`
+                        SELECT coalesce(RTRIM(LTRIM(USUARIO_SIRSAE)),'SAE'||'${user}') as val1
+                        FROM SEG_USUARIOS
+                        WHERE USUARIO = '${user}'
+                `))[0]?.val1 || ''
+                USUARIO = USUARIO.trim()
+                                
+                for (const c1 of C1) {
+                        O_IDENTI = O_IDENTI + 1;
+                        P_CONCEP = `DEPOSITO POR VENTA DE BIENES EVENTO ${description}`
+                        await this.entity.query(`
+                                INSERT INTO sera.COMER_CABECERAS
+                                (IDENTIFICADOR,        CONSECUTIVO,    AREA,        DOCUMENTO,    UNRESPONSABLE,    CLIENTE_RFC,    CONCEPTO,
+                                ANEXO,            FECHA,        TIPOPE,        FORMAPAGO,    FECHAORDEN,    BANCO,        USAUTORIZA,
+                                MONTO_TOTAL_PADRE,     NUMOVTO,    REFERENCIA,    IDPAGO,        ID_EVENTO,    IDORDENGRABADA, CVE_EVENTO
+                                )
+                                VALUES
+                                (${O_IDENTI},        0,        '${this.G_AREA}',        '${this.G_TPODOC}',    '${this.G_UR}',        '${c1.p_rfc}',        '${c1.p_concep}',
+                                '${this.G_ANEXO}',        '${c1.p_fecha}',    '${this.G_TPOPERACION}',     'R',        '${c1.p_fecha}',    '${c1.p_banco}',    '${USUARIO}',
+                                ${c1.p_monto},        '${c1.p_movto}',     '${c1.p_refe}',        '${c1.p_idpago}',    ${event},    '${c1.p_oi}', '${c1.p_cve_evento}'
+                                )
+                        `)
+                        var C2R = await C2(c1.p_idpago)
+                        H_IDENT = 0
+                        for (const c2 of C2R) {
+                                L_MANDATOS = (await this.entity.query(`
+                                        SELECT COUNT(DISTINCT CAT.CVMAN) as cvman
+                                        FROM sera.COMER_LOTES LOT
+                                        JOIN sera.COMER_BIENESXLOTE BXL ON LOT.ID_LOTE = BXL.ID_LOTE
+                                        LEFT JOIN sera.CAT_TRANSFERENTE CAT ON BXL.NO_TRANSFERENTE = CAT.NO_TRANSFERENTE
+                                        WHERE LOT.ID_EVENTO = ${event}
+                                        AND LOT.ID_LOTE = ${c2.h_lote}
+                                `))[0]?.cvman||0
+                                if(L_MANDATOS > 1 && ( c2.h_tipo == "N" ||  c2.h_tipo == "P")){
+                                        this.DETOI = []
+                                        J = 0
+                                        var C3R = await C3(c2.h_lote)
+                                        for (const c3 of C3R) {
+                                                H_CONCEP = c2.h_decstipo+' A cuenta del lote '+c2.h_lotpub+' que contiene '+c2.h_numbienes+' bienes '+c2.h_lotes.slice(0,410);
+                                                this.DETOI.push({
+                                                        IDENTIFICADOR    : O_IDENTI,
+                                                        MANDATO    : c3.d_mandato,
+                                                        INGRESO    : c2.h_ingreso,
+                                                        IMPORTE    : Number((c2.h_monsiva*c3.d_pct).toFixed(2)),
+                                                        IVA        :Number((c2.h_monsiva*c3.d_pct).toFixed(2))*this.G_IVA-Number((c2.h_monsiva*c3.d_pct).toFixed(2)),
+                                                        REFERENCIA    : c2.h_refe,
+                                                        INDTIPO    : c2.h_tipo,
+                                                        LOTESIAB    : c2.h_lotpub,
+                                                        DESCRIPCION    : H_CONCEP,
+                                                        EVENTO        : event,
+                                                        LOTE        : c2.h_lote,
+                                                        VTALOTE    : c2.h_montolote,
+                                                        MONTORET    : Number((c2.h_montochat*c3.d_pct).toFixed(2)),
+                                                        MONSIVA    : Number((c2.h_monsiva*c3.d_pct).toFixed(2)),
+                                                        BIEN        : c3.d_nobien,
+                                                })
+                                                J = J+1
+                                        }
+                                        await this.utilDecGroup(c2.h_monto)
+                                        for (const DETAUX of this.DETAUX) {
+                                                H_IDENT = H_IDENT + 1;
+                                                if(DETAUX.IVA == 0 || !DETAUX.IVA){
+                                                        this.G_TASAIVA = 0;
+                                                        await this.entity.query(`
+                                                                INSERT INTO sera.COMER_DETALLES
+                                                                        (IDENTIFICADOR,     CONSECUTIVO,     MANDATO,     INGRESO,     IMPORTE,
+                                                                        IVA,         LOTESIAB,     DESCRIPCION, ID_EVENTO,     REFERENCIA,
+                                                                        UNRESPONSABLE,     IMPORTE_SIVA,      ID_LOTE,         TIPO_PAGO,     PRECIO_VTA_LOTE,
+                                                                        PORC_IVA,     PORC_RET,     MONTO_RETENIDO,     INDTIPO
+                                                                        )
+                                                                VALUES
+                                                                (${O_IDENTI},     '${c2.h_ident}',     '${DETAUX.MANDATO}', '${DETAUX.INGRESO}',${ DETAUX.IMPORTE},
+                                                                        ${DETAUX.IVA}, '${DETAUX.LOTESIAB}', '${DETAUX.DESCRIPCION}', ${DETAUX.EVENTO}, '${DETAUX.REFERENCIA}',
+                                                                       ' ${this.G_UR}',         ${DETAUX.MONSIVA}, ${c2.h_lote},         'T',      ${DETAUX.VTALOTE},
+                                                                        ${this.G_TASAIVA},     ${this.G_PCTCHATARRA}, ${DETAUX.MONTORET}, '${DETAUX.INDTIPO}'
+                                                                );
+                                                        `)
+                                                        this.G_TASAIVA= 16;
+
+                                                }else{
+                                                        await this.entity.query(`
+                                                                INSERT INTO sera.COMER_DETALLES
+                                                                        (IDENTIFICADOR,     CONSECUTIVO,     MANDATO,     INGRESO,     IMPORTE,
+                                                                        IVA,         LOTESIAB,     DESCRIPCION, ID_EVENTO,     REFERENCIA,
+                                                                        UNRESPONSABLE,     IMPORTE_SIVA,      ID_LOTE,         TIPO_PAGO,     PRECIO_VTA_LOTE,
+                                                                        PORC_IVA,     PORC_RET,     MONTO_RETENIDO,     INDTIPO
+                                                                        )
+                                                                VALUES
+                                                                (${O_IDENTI},     '${c2.h_ident}',     '${DETAUX.MANDATO}', '${DETAUX.INGRESO}',${ DETAUX.IMPORTE},
+                                                                        ${DETAUX.IVA}, '${DETAUX.LOTESIAB}', '${DETAUX.DESCRIPCION}', ${DETAUX.EVENTO}, '${DETAUX.REFERENCIA}',
+                                                                ' ${this.G_UR}',         ${DETAUX.MONSIVA}, ${c2.h_lote},         'T',      ${DETAUX.VTALOTE},
+                                                                        ${this.G_TASAIVA},     ${this.G_PCTCHATARRA}, ${DETAUX.MONTORET}, '${DETAUX.INDTIPO}'
+                                                                );
+                                                        `)
+                                                }
+                                        }
+
+                                }else{
+                                        H_SIAB= 0;   
+                                        if(c2.h_numbienes == 1){
+                                                H_SIAB = (await this.entity.query(` SELECT    BXL.NO_BIEN
+                                                FROM    sera.COMER_BIENESXLOTE BXL
+                                                WHERE    BXL.ID_LOTE = ${c2.h_lote}
+                                                limit 1`))[0]?.no_bien ||0
+                                                H_CONCEP = c2.h_desctipo+' A cuenta de NO SIAB '+H_SIAB+' '+'del lote '+c2.h_lotpub+' '+
+                                                c2.h_lotdes+' del evento '+description;
+                                        }else{
+                                                H_CONCEP = c2.h_desctipo+' A cuenta del lote '+c2.h_lotpub+' que contiene '+c2.h_numbienes+
+                                                ' bienes '+c2.h_lotdes.splice(0,410)
+                                        }
+                                        H_IDENT = H_IDENT + 1;
+                                        if(c2.h_iva == 0 || !c2.h_iva){
+                                                this.G_TASAIVA = 0;
+                                                await this.entity.query(`
+                                                INSERT INTO sera.COMER_DETALLES
+                                                (IDENTIFICADOR,    CONSECUTIVO,    MANDATO,    INGRESO,    IMPORTE,    IVA,        REFERENCIA,
+                                                 INDTIPO,    LOTESIAB,    DESCRIPCION, ID_EVENTO,    UNRESPONSABLE,    IMPORTE_SIVA,     ID_LOTE,
+                                                 TIPO_PAGO, PORC_IVA,    PRECIO_VTA_LOTE,PORC_RET,    MONTO_RETENIDO
+                                                )
+                                                VALUES
+                                                (${O_IDENTI},    ${H_IDENT},    '${c2.h_mand}',        '${c2.h_ingreso}',   ${c2.h_moniva},    ${c2.h_iva},        '${c2.h_refe}',
+                                                 '${c2.h_tipo}',        '${c2.h_lotpub}',    '${H_CONCEP}',    ${event},    '${this.G_UR}',        '${c2.h_monsiva}',    ${c2.h_lote},
+                                                 'T',        ${this.G_TASAIVA}, ${c2.h_montolote},    ${this.G_PCTCHATARRA},    '${c2.h_montochat}'
+                                                );
+                        
+                                                `)
+                                                this.G_TASAIVA = 16;
+                                        }else{
+                                                await this.entity.query(`
+                                                INSERT INTO sera.COMER_DETALLES
+                                                (IDENTIFICADOR,    CONSECUTIVO,    MANDATO,    INGRESO,    IMPORTE,    IVA,        REFERENCIA,
+                                                        INDTIPO,    LOTESIAB,    DESCRIPCION, ID_EVENTO,    UNRESPONSABLE,    IMPORTE_SIVA,     ID_LOTE,
+                                                        TIPO_PAGO, PORC_IVA,    PRECIO_VTA_LOTE,PORC_RET,    MONTO_RETENIDO
+                                                )
+                                                VALUES
+                                                        (${O_IDENTI},    ${H_IDENT},    '${c2.h_mand}',        '${c2.h_ingreso}',   ${c2.h_moniva},    ${c2.h_iva},        '${c2.h_refe}',
+                                                        '${c2.h_tipo}',        '${c2.h_lotpub}',    '${H_CONCEP}',    ${event},    '${this.G_UR}',        '${c2.h_monsiva}',    ${c2.h_lote},
+                                                        'T',        ${this.G_TASAIVA}, ${c2.h_montolote},    ${this.G_PCTCHATARRA},    '${c2.h_montochat}'
+                                                        )
+                        
+                                                `)
+                                        }
+                                }
+                        }
+                        var C4R = await C4(c1.p_id_lote)
+                        C4R.forEach(element => {
+                                A_NO_BIEN   =` ${A_NO_BIEN}+${element.no_bien}-`;
+                        });
+                        A_NO_BIEN = A_NO_BIEN.slice(0, A_NO_BIEN.length - 1);
+                        await this.entity.query(`
+                        UPDATE sera.COMER_DETALLES
+                                SET BIENESSIAB   = SUBSTR('${A_NO_BIEN}',1,3000)
+                         WHERE ID_EVENTO    = ${event}
+                                AND LOTESIAB     = '${c1.p_lotpub}'
+                                AND ID_LOTE      = ${c1.p_id_lote}
+                        `)
+                        A_NO_BIEN = '';
+                       
+                }
                 return {
                         statusCode:200,
                         message:["OK"]

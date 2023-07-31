@@ -77,4 +77,18 @@ export class ValidatePaymentsRefController {
         return await this.service.ventaSbm(data.event,data.date)
     }
 
+
+    @MessagePattern({ cmd: 'prepOiBaseCa' })
+    async prepOiBaseCa(data: { event: number, descrption: string, user?: string }){
+        return await this.service.prepOiBaseCa(data)
+    }
+    @MessagePattern({ cmd: 'validComer' })
+    async validComer(data: { event: number, date: string,}){
+        return await this.service.validComer(data)
+    }
+    @MessagePattern({ cmd: 'prepOi' })
+    async prepOi(data: { event: number, description: string,user:string}){
+        return await this.service.prepOi(data.event,data.description,data.user)
+    }
+
 }
