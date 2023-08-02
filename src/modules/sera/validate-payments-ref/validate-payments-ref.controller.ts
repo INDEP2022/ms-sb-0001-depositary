@@ -78,6 +78,12 @@ export class ValidatePaymentsRefController {
     }
 
 
+    @MessagePattern({ cmd: 'ventaSbmAct' })
+    async ventaSbmAct(data:RealStateSaleCurrent){
+        return await this.service.ventaSbmAct(data)
+    }
+
+
     @MessagePattern({ cmd: 'prepOiBaseCa' })
     async prepOiBaseCa(data: { event: number, descrption: string, user?: string }){
         return await this.service.prepOiBaseCa(data)
