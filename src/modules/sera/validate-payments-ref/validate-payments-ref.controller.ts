@@ -97,4 +97,8 @@ export class ValidatePaymentsRefController {
         return await this.service.prepOi(data.event,data.description,data.user)
     }
 
+    @MessagePattern({ cmd: 'ejecutaPen' })
+    async ejecutaPen({ppos, amount}: any) {
+        return this.service.ejecutaPen(ppos, amount);
+    }
 }
