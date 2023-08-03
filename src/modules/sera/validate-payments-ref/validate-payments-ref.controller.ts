@@ -101,4 +101,9 @@ export class ValidatePaymentsRefController {
     async ejecutaPen({ppos, amount}: any) {
         return this.service.ejecutaPen(ppos, amount);
     }
+
+    @MessagePattern({ cmd: 'validaComerAct' })
+    async validaComerAct({ event, date, lot }: any) {
+        return this.service.validaComerAct(event, date, lot);
+    }
 }
