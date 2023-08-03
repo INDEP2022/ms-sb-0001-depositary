@@ -7412,6 +7412,194 @@ export class ValidatePaymentsRefService {
                 var PENALTY = 'N';
                 var PROP_IVA_CHAT = 0.0;
                 var PROP_ISR_CHAT = 0.0;
+                let L7:any
+                
+                var PROP_IVA_CHAT = 0.0;
+                var PROP_ISR_CHAT = 0.0;
+
+                const q1 = await this.entity.query(`
+                SELECT    DISTINCT LOT.ID_LOTE --*
+                FROM    sera.COMER_LOTES LOT
+                WHERE    LOT.ID_EVENTO = ${event}
+                AND        EXISTS (SELECT    PRF.ID_LOTE
+                                FROM    sera.COMER_PAGOREF PRF
+                                WHERE    PRF.ID_LOTE = LOT.ID_LOTE
+                                AND        PRF.VALIDO_SISTEMA = 'A'
+                                AND        PRF.FECHA <= ${date}
+                                )
+                AND        EXISTS (SELECT    1
+                                FROM    sera.COMER_CLIENTESXEVENTO CXE
+                                WHERE    CXE.ID_EVENTO =${event}
+                                AND        CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                AND        CXE.PROCESAR = 'S'
+                                AND        CXE.ENVIADO_SIRSAE = 'N'
+                                )
+                AND        LOT.PRECIO_FINAL > 0
+                AND        LOT.VALIDO_SISTEMA IS NULL;   
+                `);
+
+                if(!q1.length){
+                        return {
+                                statusCode:"400",
+                                message:"No se encontraron datos para cursor l7, distinct id_lote"
+                        }
+                }
+
+                L7 = q1[0].id_lote;
+                L_PARAMETROS = (await this.getParameters({eventId:event,address:'M'})).message[0];
+                await this.prepareLot(event,'M');
+                await this.actEstLotesMue(event);
+                await this.borraMuebles(event,null,null);
+                this.G_PKREFGEN = 0;
+
+                for (let i = 0; i < L7.data.length; i++) {
+                        const element = L7.data[i];
+                        
+                        const q2 = await this.entity.query(`
+                                SELECT    DISTINCT LOT.ID_CLIENTE --*
+                                FROM    sera.COMER_LOTES LOT
+                                WHERE    LOT.ID_EVENTO = ${event}
+                                AND LOT.ID_LOTE = ${lot};  
+                        `);
+
+                        if(!q2.length){
+                                return {
+                                        statusCode:"400",
+                                        message:"No se encontraron datos para  DISTINCT LOT.ID_CLIENTE q2"
+                                }  
+                        }
+                        L_CLIENTE = q2[0].id_cliente;
+
+                        await this.entity.query(`
+                        UPDATE    sera.COMER_CLIENTESXEVENTO
+                        SET    PROCESADO = 'S'
+                        WHERE    ID_EVENTO = ${event}
+                        AND    ID_CLIENTE = ${L_CLIENTE}; 
+                        `)
+                        COMPRA_TOT = await this.llenaLotesAct(event,null,lot,10);
+                        PAGADO_TOT = await this.llenaPagosAct(event,null,date,1,lot);
+                        await this.penaliza({buy:COMPRA_TOT,payment:PAGADO_TOT,client:L_CLIENTE});
+                        const firstIndex = this.DEPOSITOS.length > 0 ? 0 : 0;
+                        const lastIndex = this.DEPOSITOS.length > 0 ? this.DEPOSITOS.length - 1 : -1;
+                        
+                        for (let i = firstIndex; i <= lastIndex; i++) {
+                                const d = this.DEPOSITOS[i];
+                                const firstIndexlotes = this.LOTESXCLI.length > 0 ? 0 : 0;
+                                const lastIndexlotes = this.LOTESXCLI.length > 0 ? this.LOTESXCLI.length - 1 : -1;
+                               if(d.RESTA > 0){
+                                for(let i = firstIndexlotes; i<= lastIndexlotes; i++){
+                                        const x = this.LOTESXCLI[i];
+                                        if(x.PAGADO == 'N' && d.RESTA > 0 && x.ASIGNADO == 'S' && x.MEFALTA> 0){
+                                                if(d.RESTA == x.MEFALTA && d.RESTA > 0){
+                                                        this.GK = this.GK + 1;
+                                                        this.DISPERSION[this.GK].CLIENTE = L_CLIENTE;
+                                                        this.DISPERSION[this.GK].LOTE = x.LOTE;
+                                                        this.DISPERSION[this.GK].MANDATO = x.MANDATO;
+                                                        this.DISPERSION[this.GK].PRECIO = x.MEFALTA;
+                                                        this.DISPERSION[this.GK].ID_PAGO = d.ID_PAGO;
+                                                        if(x.ESCHATA == 'S'){
+                                                                this.DISPERSION[this.GK].MONCHATA = Math.round((x.MEFALTA * x.PORCIVA)*(this.G_PCTCHATARRA/2));
+                                                                PROP_ISR_CHAT = Math.round(this.DISPERSION[this.GK].MONCHATA /this.G_IVA);
+                                                                PROP_IVA_CHAT = Math.round(this.DISPERSION[this.GK].MONCHATA - PROP_ISR_CHAT);
+                                                                this.DISPERSION[this.GK].ABONADO = Math.round((x.MEFALTA *x.PORCIVA)/this.G_IVA);
+                                                                this.DISPERSION[this.GK].IVA = Math.round((x.MEFALTA * x.PORCIVA)- this.DISPERSION[this.GK].ABONADO + PROP_IVA_CHAT)
+                                                                this.DISPERSION[this.GK].ABONADO = this.DISPERSION[this.GK].ABONADO + PROP_ISR_CHAT;
+                                                                this.DISPERSION[this.GK].MONSIVA = Math.round(x.MEFALTA*x.PORNIVA);
+                                                        } else {
+                                                                this.DISPERSION[this.GK].ABONADO = Math.round(x.MEFALTA*x.PORCIVA/this.G_IVA);
+                                                                this.DISPERSION[this.GK].IVA = Math.round(x.MEFALTA *x.PORCIVA) - this.DISPERSION[this.GK].ABONADO
+                                                                this.DISPERSION[this.GK].MONSIVA = Math.round(x.MEFALTA*x.PORNIVA);
+                                                        }
+                                                }
+                                                this.DISPERSION[this.GK].GARATIA = x.GARATIA;
+                                                x.MEFALTA = 0;
+                                                this.DISPERSION[this.GK].TIPO = 'N';
+                                                x.PAGADO ='S'
+                                                d.RESTA = 0;
+                                        } else if(d.RESTA < x.MEFALTA && d.RESTA > 0){
+                                                this.GK = this.GK + 1;
+                                                this.DISPERSION[this.GK].CLIENTE = L_CLIENTE;
+                                                this.DISPERSION[this.GK].LOTE = x.LOTE;
+                                                this.DISPERSION[this.GK].MANDATO = x.MANDATO;
+                                                this.DISPERSION[this.GK].PRECIO = x.PRECIO;
+                                                this.DISPERSION[this.GK].ID_PAGO = d.ID_PAGO;
+                                                if(x.ESCHATA == 'S'){
+                                                        this.DISPERSION[this.GK].MONCHATA = Math.round((d.RESTA* x.PORCIVA)*(this.G_PCTCHATARRA/100));
+                                                        PROP_ISR_CHAT = Math.round(this.DISPERSION[this.GK].MONCHATA/this.G_IVA)
+                                                        PROP_IVA_CHAT = Math.round(this.DISPERSION[this.GK].MONCHATA - PROP_ISR_CHAT)
+                                                        this.DISPERSION[this.GK].ABONADO = Math.round(d.RESTA*x.PORCIVA/this.G_IVA);
+                                                        this.DISPERSION[this.GK].IVA = Math.round(d.RESTA * x.PORNIVA) -this.DISPERSION[this.GK].ABONADO + PROP_IVA_CHAT;
+                                                        this.DISPERSION[this.GK].MONSIVA = Math.round(d.RESTA*x.PORNIVA);
+                                                        this.DISPERSION[this.GK].ABONADO = this.DISPERSION[this.GK].ABONADO + PROP_ISR_CHAT;
+
+                                                } else {
+                                                        this.DISPERSION[this.GK].ABONADO = Math.round(d.RESTA*x.PORCIVA)/this.G_IVA;
+                                                        this.DISPERSION[this.GK].IVA = Math.round(d.RESTA*x.PORCIVA) - this.DISPERSION[this.GK].ABONADO
+                                                        this.DISPERSION[this.GK].MONSIVA = Math.round(d.RESTA * x.PORNIVA);
+                                                }
+                                                this.DISPERSION[this.GK].GARATIA = x.GARATIA;
+                                                x.MEFALTA = x.MEFALTA-d.RESTA;
+                                                this.DISPERSION[this.GK].TIPO = 'N';
+                                                d.RESTA = 0;
+                                                x.PAGADO = 'N'
+                                        } else if(d.RESTA > x.MEFALTA && d.RESTA> 0){
+                                                this.GK = this.GK + 1;
+                                                this.DISPERSION[this.GK].CLIENTE = L_CLIENTE;
+                                                this.DISPERSION[this.GK].LOTE = x.LOTE;
+                                                this.DISPERSION[this.GK].MANDATO = x.MANDATO;
+                                                this.DISPERSION[this.GK].PRECIO = x.PRECIO;
+                                                this.DISPERSION[this.GK].ID_PAGO = d.ID_PAGO
+                                                if(x.ESCHATA == 'S'){
+                                                        this.DISPERSION[this.GK].MONCHATA = Math.round((x.MEFALTA * x.PORCIVA)*(this.G_PCTCHATARRA/100));
+                                                        PROP_ISR_CHAT = Math.round(this.DISPERSION[this.GK].MONCHATA/this.G_IVA);
+                                                        PROP_IVA_CHAT = Math.round(this.DISPERSION[this.GK].MONCHATA-PROP_ISR_CHAT);
+                                                        this.DISPERSION[this.GK].ABONADO = Math.round(x.MEFALTA *x.PORCIVA) - this.DISPERSION[this.GK].ABONADO+PROP_IVA_CHAT;
+                                                        this.DISPERSION[this.GK].MONSIVA = Math.round(x.MEFALTA*x.PORNIVA);
+                                                        this.DISPERSION[this.GK].ABONADO = this.DISPERSION[this.GK].ABONADO+PROP_ISR_CHAT;
+                                                } else {
+                                                        this.DISPERSION[this.GK].ABONADO = Math.round((x.MEFALTA*x.PORCIVA)/this.G_IVA);
+                                                        this.DISPERSION[this.GK].IVA = Math.round(x.MEFALTA * x.PORCIVA) - this.DISPERSION[this.GK].ABONADO;
+                                                        this.DISPERSION[this.GK].MONSIVA = Math.round(x.MEFALTA*x.PORNIVA);
+                                                }
+                                                this.DISPERSION[this.GK].GARATIA = x.GARATIA;
+                                                d.RESTA = d.RESTA - x.MEFALTA;
+                                                x.MEFALTA = 0;
+                                                this.DISPERSION[this.GK].TIPO = 'N';
+                                                x.PAGADO = 'S';
+                                        }
+                                }
+                               }
+                        }
+
+                        for(let i = firstIndex; i<= lastIndex; i++){
+                                const d = this.DEPOSITOS[i];
+                                if(d.RESTA > 0){
+                                        this.GK = this.GK +1;
+                                        this.DISPERSION[this.GK].CLIENTE = L_CLIENTE;
+                                        this.DISPERSION[this.GK].MANDATO = d.MANDATO;
+                                        this.DISPERSION[this.GK].PRECIO = d.RESTA;
+                                        this.DISPERSION[this.GK].ID_PAGO = d.ID_PAGO;
+                                        this.DISPERSION[this.GK].ABONADO = d.RESTA;
+                                        this.DISPERSION[this.GK].GARATIA = d.RESTA;
+                                        this.DISPERSION[this.GK].TIPO = 'D';
+                                        this.DISPERSION[this.GK].LOTE = d.LOTE
+                                }
+                        }
+                        await this.insDispBm(L_CLIENTE,6,event);
+
+                }
+                await this.actPagosMue(event);
+                await this.actRefesMue(event)
+
+                return {
+                        statusCode: 200,
+                        message: ["OK"],
+                        data: {
+                                dispersion: this.DISPERSION,
+                                depositos: this.DEPOSITOS
+                        }
+                }
+
         }//
 
         async appPenaSiste(buy: number, payment: number, client: number) {
