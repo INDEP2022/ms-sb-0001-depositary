@@ -10,6 +10,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import InternalServerErrorException from 'src/shared/exceptions/internal-server-error.exception';
 import { XXSAE_INV_DISPONIBLE_OS } from 'src/core/interfaces/services/common';
 import { LocalDate } from 'src/shared/utils/local-date';
+import BadRequestException from 'src/shared/exceptions/bad-request.exception';
 
 @Injectable()
 export class ApplicationService {
@@ -56,6 +57,11 @@ export class ApplicationService {
                     and CP.LISTA_NEGRA = 'S'
                     limit 1`,
       );
+
+        if(!consulta.length) {
+          return new BadRequestException('No se encontraron registros')
+        }
+
       return {
         statusCode: HttpStatus.OK,
         message: 'OK',
