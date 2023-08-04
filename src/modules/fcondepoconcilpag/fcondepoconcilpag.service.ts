@@ -81,6 +81,14 @@ export class FcondepoconcilpagService {
                 )
                 LIMIT 1;
             `);
+
+            if(!result.length){
+                return {
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    message: ['No se encontro data'],
+                    data: result
+                }
+            }
             return {
                 statusCode: HttpStatus.OK,
                 message: ['Procedimiento ejecutado'],

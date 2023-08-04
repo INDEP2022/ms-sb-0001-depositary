@@ -2577,25 +2577,63 @@ export class ValidatePaymentsRefService {
         async borraMuebles(event: number, lot: number, phase: number) {
                 var BM_ACUMULADO = 0;
 
-                const result = await this.entity.query(`DELETE    sera.COMER_PAGOSREFGENS 
-                        WHERE    EXISTS (SELECT    1
-                                        FROM     sera.COMER_LOTES
-                                        WHERE    sera.COMER_LOTES.ID_EVENTO = ${event} 
-                                        AND        sera.COMER_LOTES.ID_EVENTO = sera.COMER_PAGOSREFGENS.ID_EVENTO
-                                        AND        sera.COMER_LOTES.ID_LOTE = coalesce(${lot}, sera.COMER_LOTES.ID_LOTE)
-                                        AND        sera.COMER_LOTES.ID_LOTE = sera.COMER_PAGOSREFGENS.ID_LOTE
-                                        AND        EXISTS (SELECT    1
-                                                        FROM    sera.COMER_CLIENTESXEVENTO 
-                                                        WHERE    sera.COMER_CLIENTESXEVENTO.ID_EVENTO = ${event} 
-                                                        AND        sera.COMER_CLIENTESXEVENTO.ID_CLIENTE = sera.COMER_LOTES.ID_CLIENTE
-                                                        AND        sera.COMER_CLIENTESXEVENTO.PROCESAR = 'S'
-                                                        )
-                                        )
-                        AND        EXISTS (SELECT    1
-                                        FROM    sera.COMER_PAGOREF PAG
-                                        WHERE    sera.COMER_PAGOREF.ID_PAGO = sera.COMER_PAGOSREFGENS.ID_PAGO
-                                        AND        sera.COMER_PAGOREF.IDORDENINGRESO IS NULL
-                                        )`)
+                // const result = await this.entity.query(`DELETE from sera.COMER_PAGOSREFGENS 
+                //         WHERE    EXISTS (SELECT    1
+                //                         FROM     sera.COMER_LOTES
+                //                         WHERE    sera.COMER_LOTES.ID_EVENTO = ${event} 
+                //                         AND        sera.COMER_LOTES.ID_EVENTO = sera.COMER_PAGOSREFGENS.ID_EVENTO
+                //                         AND        sera.COMER_LOTES.ID_LOTE = coalesce(${lot}, sera.COMER_LOTES.ID_LOTE)
+                //                         AND        sera.COMER_LOTES.ID_LOTE = sera.COMER_PAGOSREFGENS.ID_LOTE
+                //                         AND        EXISTS (SELECT    1
+                //                                         FROM    sera.COMER_CLIENTESXEVENTO 
+                //                                         WHERE    sera.COMER_CLIENTESXEVENTO.ID_EVENTO = ${event} 
+                //                                         AND        sera.COMER_CLIENTESXEVENTO.ID_CLIENTE = sera.COMER_LOTES.ID_CLIENTE
+                //                                         AND        sera.COMER_CLIENTESXEVENTO.PROCESAR = 'S'
+                //                                         )
+                //                         )
+                //         AND        EXISTS (SELECT    1
+                //                         FROM    sera.COMER_PAGOREF PAG
+                //                         WHERE    sera.COMER_PAGOREF.ID_PAGO = sera.COMER_PAGOSREFGENS.ID_PAGO
+                //                         AND        sera.COMER_PAGOREF.IDORDENINGRESO IS NULL
+                //                         )`);
+
+                                        const result = await this.entity.query(`
+                                        delete
+                                        from
+                                                sera.comer_pagosrefgens
+                                        where
+                                                exists (
+                                                select
+                                                        1
+                                                from
+                                                        sera.comer_lotes
+                                                where
+                                                        sera.comer_lotes.id_evento = ${event}
+                                                        and sera.comer_lotes.id_evento = sera.comer_pagosrefgens.id_evento
+                                                        and sera.comer_lotes.id_lote = coalesce(${lot},
+                                                        sera.comer_lotes.id_lote)
+                                                                and sera.comer_lotes.id_lote = sera.comer_pagosrefgens.id_lote
+                                                                and exists (
+                                                                select
+                                                                        1
+                                                                from
+                                                                        sera.comer_clientesxevento
+                                                                where
+                                                                        sera.comer_clientesxevento.id_evento = ${event}
+                                                                        and sera.comer_clientesxevento.id_cliente = sera.comer_lotes.id_cliente
+                                                                        and sera.comer_clientesxevento.procesar = 'S'
+                                                                                    )
+                                                                                )
+                                                and exists (
+                                                select
+                                                        1
+                                                from
+                                                        sera.comer_pagoref pag
+                                                where
+                                                        pag.id_pago = sera.comer_pagosrefgens.id_pago
+                                                        and pag.idordeningreso is null
+                                                                                );
+                                        `)
                 const result2 = await this.entity.query(` UPDATE    sera.COMER_PAGOREF 
                         SET    VALIDO_SISTEMA = 'A'
                         WHERE    EXISTS (SELECT    1
@@ -2616,7 +2654,7 @@ export class ValidatePaymentsRefService {
                 
                         
                                `)
-                const result3: any[] = await this.entity.query(`coalesce(SUM(coalesce(MONTO_NOAPP_IVA,0)+coalesce(IVA,0)+coalesce(MONTO_APP_IVA,0)),0.0) as total 
+                const result3: any[] = await this.entity.query(`select coalesce(SUM(coalesce(MONTO_NOAPP_IVA,0)+coalesce(IVA,0)+coalesce(MONTO_APP_IVA,0)),0.0) as total 
                 FROM    sera.COMER_PAGOSREFGENS 
                 WHERE    ID_EVENTO =${event}
                 AND        ID_LOTE = coalesce(${lot}, ID_LOTE)
@@ -2647,7 +2685,7 @@ export class ValidatePaymentsRefService {
                                         );
                 
                         `)
-                const result5 = await this.entity.query(`DELETE    sera.COMER_BIENESRECHAZADOS 
+                const result5 = await this.entity.query(`DELETE  from  sera.COMER_BIENESRECHAZADOS 
                 WHERE    ID_EVENTO = ${event}`)
                 return result5
         }
@@ -3528,19 +3566,55 @@ export class ValidatePaymentsRefService {
                 V_TPEVENTO = result[0].id_tpevento || 0
                 if (V_TPEVENTO != 2 && V_TPEVENTO != 3) {
                         if (type == 'M') {
-                                await this.entity.query(` UPDATE    sera.COMER_LOTES
-                                SET        (MONTO_APP_IVA,     MONTO_NOAPP_IVA,      PORC_APP_IVA,
-                                     IVA_LOTE,         MONTO_SIN_IVA,     PORC_NOAPP_IVA) =
-                                (SELECT    SUM(BXL.PRECIO_FINAL), SUM(BXL.MONTO_NOAPP_IVA), ( SUM(BXL.PRECIO_FINAL)/sera.COMER_LOTES.PRECIO_FINAL, 2),
-                                    SUM(BXL.IVA_FINAL),     SUM(BXL.PRECIO_SIN_IVA), ( SUM(BXL.MONTO_NOAPP_IVA)/sera.COMER_LOTES.PRECIO_FINAL ,2)
-                                  FROM    sera.COMER_BIENESXLOTE BXL
-                                     WHERE    BXL.ID_LOTE = sera.COMER_LOTES.ID_LOTE
-                                AND    BXL.PRECIO_FINAL > 0
-                                )
-                                WHERE    ID_EVENTO = ${event}
-                                AND    LOTE_PUBLICO != 0
-                                AND    (PRECIO_FINAL > 0 OR PRECIO_FINAL IS NOT NULL)
-                                AND    ID_CLIENTE IS NOT NULL`)
+                                // await this.entity.query(` UPDATE    sera.COMER_LOTES
+                                // SET        (MONTO_APP_IVA,     MONTO_NOAPP_IVA,      PORC_APP_IVA,
+                                //      IVA_LOTE,         MONTO_SIN_IVA,     PORC_NOAPP_IVA) =
+                                // (SELECT    SUM(BXL.PRECIO_FINAL), SUM(BXL.MONTO_NOAPP_IVA), ( SUM(BXL.PRECIO_FINAL)/sera.COMER_LOTES.PRECIO_FINAL, 2),
+                                //     SUM(BXL.IVA_FINAL),     SUM(BXL.PRECIO_SIN_IVA), ( SUM(BXL.MONTO_NOAPP_IVA)/sera.COMER_LOTES.PRECIO_FINAL ,2)
+                                //   FROM    sera.COMER_BIENESXLOTE BXL
+                                //      WHERE    BXL.ID_LOTE = sera.COMER_LOTES.ID_LOTE
+                                // AND    BXL.PRECIO_FINAL > 0
+                                // )
+                                // WHERE    ID_EVENTO = ${event}
+                                // AND    LOTE_PUBLICO != 0
+                                // AND    (PRECIO_FINAL > 0 OR PRECIO_FINAL IS NOT NULL)
+                                // AND    ID_CLIENTE IS NOT NULL`)
+
+                                await this.entity.query(`
+                                update
+                                sera.COMER_LOTES
+                        set
+                                (MONTO_APP_IVA,
+                                MONTO_NOAPP_IVA,
+                                PORC_APP_IVA,
+                                IVA_LOTE,
+                                MONTO_SIN_IVA,
+                                PORC_NOAPP_IVA) =
+                                                        (
+                        SELECT
+                            SUM(BXL.PRECIO_FINAL),
+                            SUM(BXL.MONTO_NOAPP_IVA),
+                            ROUND(SUM(BXL.PRECIO_FINAL) / sera.COMER_LOTES.PRECIO_FINAL, 2) AS computed_value_1,
+                            SUM(BXL.IVA_FINAL),
+                            SUM(BXL.PRECIO_SIN_IVA),
+                            ROUND(SUM(BXL.MONTO_NOAPP_IVA) / sera.COMER_LOTES.PRECIO_FINAL, 2) AS computed_value_2
+                        FROM
+                            sera.COMER_BIENESXLOTE BXL
+                        JOIN
+                            sera.COMER_LOTES ON BXL.ID_LOTE = sera.COMER_LOTES.ID_LOTE
+                        WHERE
+                            BXL.PRECIO_FINAL > 0
+                        GROUP BY
+                            sera.COMER_LOTES.PRECIO_FINAL limit 1
+                        
+                                                        )
+                        where
+                                ID_EVENTO =13
+                                and LOTE_PUBLICO != 0
+                                and (PRECIO_FINAL > 0
+                                        or PRECIO_FINAL is not null)
+                                and ID_CLIENTE is not null
+                                `)
                         } else if (type == "I") {
                                 await this.entity.query(`UPDATE    sera.COMER_LOTES 
                                 SET        (MONTO_APP_IVA,     MONTO_NOAPP_IVA,      PORC_APP_IVA,
@@ -9029,6 +9103,16 @@ export class ValidatePaymentsRefService {
 
                 await this.actPagosMue(event)
                 await this.actRefesMue(event)
+
+                return {
+                        statusCode: 200,
+                        message: ["OK"],
+                        data:{
+                                COMPRA_TOT,
+                                PAGADO_TOT,
+                                L7
+                        }
+                }
         }
 
         async actLotes(event: number) {
