@@ -18,6 +18,7 @@ import { ComerParameterModEntity } from './entity/comer-parameter-mod.entity';
 import { LocalDate } from 'src/shared/utils/local-date';
 import { UpdateCurrentGeneralStatus } from './dto/update-current-general-status.dto';
 import { ACUMDETALLESOI } from './dto/prep-oi.dto';
+import InternalServerErrorException from 'src/shared/exceptions/internal-server-error.exception';
 
 @Injectable()
 export class ValidatePaymentsRefService {
@@ -10014,12 +10015,14 @@ export class ValidatePaymentsRefService {
                                 AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
                                 AND CXE.PROCESADO = 'S'
                                 AND CXE.PROCESAR = 'S'
+                                LIMIT 1
                         )
                                 AND EXISTS (
                                         SELECT 1
                                         FROM sera.COMER_EVENTOS EVE
                                         WHERE EVE.ID_EVENTO = ${event}
                                         AND EVE.ID_EVENTO = LOT.ID_EVENTO
+                                        LIMIT 1
                                 )
                         );
                         
@@ -10029,7 +10032,7 @@ export class ValidatePaymentsRefService {
                         SET    NO_TRANSFERENTE = (    SELECT    NO_TRANSFERENTE
                                         FROM    sera.COMER_BIENESXLOTE BXL
                                         WHERE    BXL.ID_LOTE = LOT.ID_LOTE
-                                        AND    ROWNUM      = 1
+                                        LIMIT 1
                                 )
                         WHERE    EXISTS (SELECT    1
                                 FROM    sera.COMER_CLIENTESXEVENTO CXE
@@ -10037,6 +10040,7 @@ export class ValidatePaymentsRefService {
                                 AND    CXE.ID_CLIENTE = LOT.ID_CLIENTE
                                 AND    CXE.PROCESADO = 'S'
                                 AND    CXE.PROCESAR = 'S'
+                                LIMIT 1
                         )
                 `)
                 return {
@@ -10511,6 +10515,7 @@ export class ValidatePaymentsRefService {
          * @procedure PREP_OI
          */
         async prepOi(event: number, description: string,user:string) {
+               try {
                 var P_IDPAGO: number
                 var P_RFC: string
                 var P_CONCEP: string
@@ -10601,6 +10606,7 @@ export class ValidatePaymentsRefService {
                                 AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
                                 AND CXE.PROCESADO = 'S'
                                 AND CXE.PROCESAR = 'S'
+                                LIMIT 1
                         )
                         AND REF.CVE_BANCO = MOD.PARAMETRO
                         AND MOD.DIRECCION = 'C'
@@ -10653,6 +10659,7 @@ export class ValidatePaymentsRefService {
                                         AND CXE.PROCESADO = 'S'
                                         AND CXE.ENVIADO_SIRSAE = 'N'
                                         AND CXE.PROCESAR = 'S'
+                                        LIMIT 1
                                 )
                         `)
                 }
@@ -10680,8 +10687,8 @@ export class ValidatePaymentsRefService {
                         SELECT TO_CHAR(BXL.NO_BIEN) as no_bien
                         FROM sera.COMER_BIENESXLOTE BXL
                         WHERE BXL.ID_LOTE = ${lote}
-                        AND ROWNUM < 300
                         ORDER BY BXL.NO_BIEN
+                        LIMIT 300
                 `)
                 await this.getParameters({eventId:event,address:"M"})
                 await this.updateMandateGoodLot(event)
@@ -10707,7 +10714,9 @@ export class ValidatePaymentsRefService {
                                         AND LOTS.ID_CLIENTE = CXE.ID_CLIENTE
                                         AND CXE.PROCESADO = 'S'
                                         AND CXE.PROCESAR = 'S'
+                                        LIMIT 1
                                 )
+                                LIMIT 1
                         )      
                 `)
                 await this.entity.query(`
@@ -10734,6 +10743,7 @@ export class ValidatePaymentsRefService {
                                 AND CXE.PROCESADO = 'S'
                                 AND CXE.PROCESAR = 'S'
                                 AND DET.ID_LOTE = LOT.ID_LOTE
+                                LIMIT 1
                         );
                 
                 `)
@@ -10906,6 +10916,10 @@ export class ValidatePaymentsRefService {
                         statusCode:200,
                         message:["OK"]
                 }
+               } catch (error) {
+                console.log(error);
+                return new InternalServerErrorException(error.message);
+               }
         }
 
 }
