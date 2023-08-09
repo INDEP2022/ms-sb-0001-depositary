@@ -7187,7 +7187,7 @@ export class ValidatePaymentsRefService {
                                                 AND CE.ID_EVENTO = ${params.event}
                                                 AND CL.ID_LOTE = ${params.lot}
                                                 AND CLOT.ID_ESTATUSVTA NOT IN ('PAG')
-                                                AND CP.VALIDO_SISTEMA = 'S'  )
+                                                AND CP.VALIDO_SISTEMA = 'S'  )  as query
                                                 GROUP BY ID_ESTATUSVTA, PRECIO_FINAL`);
           for (var element of C_GARC) {
             V_ID_ESTATUSVTA = element.id_estatusvta;
@@ -11561,15 +11561,22 @@ export class ValidatePaymentsRefService {
    * @procedure ACT_EST_GRAL_ACT
    */
   async updateCurrentGeneralStatus(data: UpdateCurrentGeneralStatus) {
-    data.address = 'M';
-    await this.actLotAct(data);
-    await this.remittancesCurrentGoods(data);
-    await this.currentHistoric(data);
-    await this.currentBlackList(data);
-    return {
-      statusCode: 200,
-      message: ['OK'],
-    };
+    try {
+      data.address = 'M';
+      await this.actLotAct(data);
+      await this.remittancesCurrentGoods(data);
+      await this.currentHistoric(data);
+      await this.currentBlackList(data);
+      return {
+        statusCode: 200,
+        message: ['OK'],
+      };
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: [error.message]
+      }
+    }
   }
 
   /**
