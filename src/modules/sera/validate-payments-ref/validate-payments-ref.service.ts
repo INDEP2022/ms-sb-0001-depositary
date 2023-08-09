@@ -5938,8 +5938,11 @@ export class ValidatePaymentsRefService {
                                                 AND CCXE.ID_CLIENTE = CLOT.ID_CLIENTE
                                                 AND CCXE.PROCESAR = 'S'
                                         )`);
-
-        V_ID_LOTE = LOTBRSP[0].id_lote;
+        if (LOTBRSP.length > 0) {
+          V_ID_LOTE = LOTBRSP[0].id_lote;
+        } else {
+          V_ID_LOTE = null
+        }
         LOTBRSP.forEach(async (element) => {
           await this.entity.query(` UPDATE sera.COMER_PAGOREF 
                                         SET VALIDO_SISTEMA = 'A'
@@ -6375,8 +6378,11 @@ export class ValidatePaymentsRefService {
                                                 AND CCXE.ID_CLIENTE = CLOT.ID_CLIENTE
                                                 AND CCXE.PROCESAR = 'S'
                                         )`);
-
-      V_ID_LOTE = LOTBRSP[0].id_lote;
+      if (LOTBRSP.length > 0) {
+        V_ID_LOTE = LOTBRSP[0].id_lote;
+      } else {
+        V_ID_LOTE = null
+      }
       for (var item of LOTBRSP) {
         await this.entity.query(` UPDATE sera.COMER_PAGOREF 
                                         SET VALIDO_SISTEMA = 'A'
