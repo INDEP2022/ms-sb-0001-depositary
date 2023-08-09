@@ -11589,14 +11589,21 @@ export class ValidatePaymentsRefService {
    * @procedure ACT_EST_GRAL
    */
   async updateGeneralStatus(event: number, user: string) {
-    await this.actLotes(event);
-    await this.remittancesGoods(event);
-    await this.historic({ event: event, address: 'M', user: user });
-    await this.blackList(event);
-    return {
-      statusCode: 200,
-      message: ['OK'],
-    };
+    try {
+      await this.actLotes(event);
+      await this.remittancesGoods(event);
+      await this.historic({ event: event, address: 'M', user: user });
+      await this.blackList(event);
+      return {
+        statusCode: 200,
+        message: ['OK'],
+      };
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: [error.message]
+      }
+    }
   }
 
   /**
