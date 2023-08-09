@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { of } from 'rxjs';
 import { Repository } from 'typeorm';
@@ -105,7 +105,7 @@ export class ValidatePaymentsRefService {
     private entity: Repository<ComerEventEntity>,
     @InjectRepository(ComerParameterModEntity)
     private entity2: Repository<ComerParameterModEntity>,
-  ) {}
+  ) { }
 
   /**
    *
@@ -150,9 +150,8 @@ export class ValidatePaymentsRefService {
             WHERE    ID_CLIENTE = ${element.id_cliente}`);
     });
 
-    return `Clientes en la lista negra ${
-      LNS.length || 0
-    }, clientes sacados de la lista negra ${LNN.length || 0}`;
+    return `Clientes en la lista negra ${LNS.length || 0
+      }, clientes sacados de la lista negra ${LNN.length || 0}`;
   }
 
   /**
@@ -203,8 +202,7 @@ export class ValidatePaymentsRefService {
     return {
       statusCode: 200,
       message: [
-        `Clientes en la lista negra ${
-          LNS.length || 0
+        `Clientes en la lista negra ${LNS.length || 0
         }, clientes sacados de la lista negra ${LNN.length || 0}`,
       ],
     };
@@ -2212,7 +2210,7 @@ export class ValidatePaymentsRefService {
                                                     C_IVA = parseFloat(
                                                       (
                                                         TMP_MONTO_FIN *
-                                                          V3_PCIVA -
+                                                        V3_PCIVA -
                                                         C_MONTOIVA
                                                       ).toFixed(2),
                                                     );
@@ -4579,7 +4577,7 @@ export class ValidatePaymentsRefService {
               if (lote.ESCHATA == 'S') {
                 dispersion.MONCHATA =
                   (deposito.RESTA * lote.PORCIVA * (this.G_PCTCHATARRA / 100),
-                  2);
+                    2);
                 PROP_ISR_CHAT = (dispersion.MONCHATA / this.G_IVA, 2);
                 PROP_IVA_CHAT = (dispersion.MONCHATA - PROP_ISR_CHAT, 2);
                 dispersion.ABONADO =
@@ -5910,13 +5908,450 @@ export class ValidatePaymentsRefService {
     var V_ID_LOTE = 0;
     var V_ID_TPEVENTO = 0;
     const dateNow = LocalDate.getNow();
+    try {
+      const result: any[] = await this.entity.query(
+        `SELECT ID_TPEVENTO FROM sera.COMER_EVENTOS WHERE ID_EVENTO = ${params.event}`,
+      );
+      V_ID_TPEVENTO = result[0].id_tpevento;
 
-    const result: any[] = await this.entity.query(
-      `SELECT ID_TPEVENTO FROM sera.COMER_EVENTOS WHERE ID_EVENTO = ${params.event}`,
-    );
-    V_ID_TPEVENTO = result[0].id_tpevento;
+      if (V_ID_TPEVENTO == 1) {
+        const LOTBRSP: any[] = await this.entity.query(` 
+                                SELECT DISTINCT CLOT.ID_LOTE
+                                FROM sera.COMER_LOTES CLOT, sera.COMER_PAGOREF CPAG
+                                WHERE CLOT.ID_EVENTO = ${params.event}
+                                AND CLOT.ID_LOTE = CPAG.ID_LOTE
+                                AND CLOT.ID_CLIENTE IS NOT NULL
+                                AND CLOT.ID_LOTE = coalesce(${params.lot}, CLOT.ID_LOTE)
+                                AND CPAG.CONCILIADO IS NULL
+                                AND CPAG.IDORDENINGRESO IS NULL
+                                AND EXISTS (SELECT 1
+                                                FROM sera.COMER_BIENESXLOTE CBXL, sera.bien BNS
+                                                WHERE CBXL.ID_LOTE = CLOT.ID_LOTE
+                                                AND CBXL.NO_BIEN = BNS.NO_BIEN
+                                                AND BNS.ESTATUS IN ('VEN','VPP','VPT','CXR','VTR') )
+                                        AND EXISTS (SELECT 1
+                                                        FROM sera.COMER_PAGOSREFGENS CGEN
+                                                        WHERE CGEN.ID_LOTE = CLOT.ID_LOTE )
+                                        AND EXISTS (SELECT 1
+                                                FROM sera.COMER_CLIENTESXEVENTO CCXE
+                                                WHERE CCXE.ID_EVENTO = ${params.event}
+                                                AND CCXE.ID_CLIENTE = CLOT.ID_CLIENTE
+                                                AND CCXE.PROCESAR = 'S'
+                                        )`);
 
-    if (V_ID_TPEVENTO == 1) {
+        V_ID_LOTE = LOTBRSP[0].id_lote;
+        LOTBRSP.forEach(async (element) => {
+          await this.entity.query(` UPDATE sera.COMER_PAGOREF 
+                                        SET VALIDO_SISTEMA = 'A'
+                                        WHERE EXISTS (SELECT 1
+                                                FROM sera.COMER_LOTES LOT
+                                                WHERE LOT.ID_EVENTO = ${params.event}
+                                                AND LOT.ID_LOTE = ${V_ID_LOTE}
+                                                AND EXISTS (SELECT 1
+                                                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                                WHERE CXE.ID_EVENTO  = ${params.event}
+                                                                AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                                                AND CXE.PROCESAR   = 'S'
+                                                                )
+                                                )
+                                        AND VALIDO_SISTEMA = 'S'
+                                        AND IDORDENINGRESO IS  NULL`);
+          await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
+                                        SELECT NO_BIEN, ESTATUS, CAST('${dateNow}' AS DATE)+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
+                                        FROM sera.bien BIE
+                                        WHERE ESTATUS IN ('VPP','VPT')
+                                        AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
+                                                        WHERE BXL.NO_BIEN = BIE.NO_BIEN
+                                                        AND BXL.ID_LOTE = coalesce(${V_ID_LOTE},BXL.ID_LOTE)
+                                                        AND EXISTS (SELECT 1 FROM sera.COMER_LOTES LOT
+                                                                WHERE LOT.ID_EVENTO = ${params.event}
+                                                                        AND LOT.ID_LOTE   = BXL.ID_LOTE
+                                                                        AND LOT.ID_LOTE   = coalesce(${V_ID_LOTE},BXL.ID_LOTE)
+                                                                        AND EXISTS (SELECT 1
+                                                                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                                                WHERE CXE.ID_EVENTO   = ${params.event}
+                                                                                        AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
+                                                                                        AND CXE.PROCESAR    = 'S'
+                                                                                )
+                                                                )
+                                                )`);
+
+          await this.entity.query(`UPDATE sera.bien 
+                                        SET ESTATUS = 'VEN'
+                                        WHERE ESTATUS IN ('VPP','VPT')
+                                        AND EXISTS (SELECT 1
+                                                        FROM sera.COMER_BIENESXLOTE BXL
+                                                        WHERE BXL.NO_BIEN = sera.bien.NO_BIEN
+                                                        AND BXL.ID_LOTE = ${V_ID_LOTE}
+                                                        AND EXISTS (SELECT 1
+                                                                        FROM sera.COMER_LOTES LOT
+                                                                        WHERE LOT.ID_EVENTO = ${params.event}
+                                                                        AND LOT.ID_LOTE = BXL.ID_LOTE
+                                                                        AND LOT.ID_LOTE = ${V_ID_LOTE}
+                                                                        AND EXISTS (SELECT 1
+                                                                                        FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                                                        WHERE CXE.ID_EVENTO   = ${params.event}
+                                                                                        AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
+                                                                                        AND CXE.PROCESAR    = 'S'
+                                                                        )
+                                                         )
+                                          )
+                                `);
+          await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
+                                        SELECT NO_BIEN, ESTATUS, SYSDATE+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
+                                        FROM sera.bien BIE
+                                        WHERE ESTATUS IN ('VTR')
+                                        AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
+                                                        WHERE BXL.NO_BIEN = BIE.NO_BIEN
+                                                        AND BXL.ID_LOTE =${V_ID_LOTE}
+                                                        AND EXISTS (SELECT 1 FROM sera.COMER_LOTES LOT
+                                                                WHERE LOT.ID_EVENTO = ${params.event}
+                                                                        AND LOT.ID_LOTE   = BXL.ID_LOTE
+                                                                        AND LOT.ID_LOTE   = ${V_ID_LOTE}
+                                                                        AND EXISTS (SELECT 1 FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                                                WHERE CXE.ID_EVENTO   = ${params.event}
+                                                                                        AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
+                                                                                        AND CXE.PROCESAR    = 'S'
+                                                                                )
+                                                                )
+                                                );
+                                `);
+
+          await this.entity.query(`UPDATE sera.bien
+                                        SET ESTATUS = 'CXR'
+                                        WHERE ESTATUS IN ('VTR')
+                                        AND EXISTS (SELECT 1
+                                                FROM sera.COMER_BIENESXLOTE BXL
+                                                WHERE BXL.NO_BIEN = sera.bien.NO_BIEN
+                                                AND BXL.ID_LOTE = ${V_ID_LOTE}
+                                                AND EXISTS (SELECT 1
+                                                                FROM sera.COMER_LOTES LOT
+                                                                WHERE LOT.ID_EVENTO = ${params.event}
+                                                                AND LOT.ID_LOTE = BXL.ID_LOTE
+                                                                AND LOT.ID_LOTE = ${V_ID_LOTE}
+                                                                AND EXISTS (SELECT 1
+                                                                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                                                WHERE CXE.ID_EVENTO   = ${params.event}
+                                                                                AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
+                                                                                AND CXE.PROCESAR    = 'S'
+                                                                                )
+                                                          )
+                                           )`);
+          await this.entity.query(`UPDATE sera.COMER_BIENESXLOTE
+                                SET ESTATUS_ANT = 'ADM',
+                                    ESTATUS_COMER = 'VEN',
+                                    ID_LOTE_COMER = NULL,
+                                    ID_EVENTO_COMER = NULL
+                              WHERE ID_LOTE = ${V_ID_LOTE}
+                                AND EXISTS (SELECT 1
+                                              FROM sera.COMER_BIENESXLOTE BXL
+                                             WHERE BXL.ID_LOTE = ${V_ID_LOTE}
+                                               AND EXISTS (SELECT 1
+                                                             FROM sera.COMER_LOTES LOT
+                                                            WHERE LOT.ID_EVENTO = ${params.event}
+                                                              AND LOT.ID_LOTE = BXL.ID_LOTE
+                                                              AND LOT.ID_LOTE = ${V_ID_LOTE}
+                                                              AND EXISTS (SELECT 1
+                                                                            FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                                           WHERE CXE.ID_EVENTO   = ${params.event}
+                                                                             AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
+                                                                             AND CXE.PROCESAR    = 'S'
+                                                                         )
+                                                          )
+                                           );`);
+          var dPhase = (params.phase || 1) == 1 ? null : 'G';
+          await this.entity.query(` UPDATE sera.COMER_LOTES
+                                                SET ID_ESTATUSVTA  =  case coalesce(${params.phase}, 1) when 1 then 'VEN' when 2 then 'VEN' when 3 then 'GARA' when 4 then 'GARA' when 5 then 'PAG' when 9 then 'PAGE' end,
+                                                VALIDO_SISTEMA = '${dPhase}',
+                                                ACUMULADO = (SELECT SUM(coalesce(RGE.MONTO_NOAPP_IVA,0) + coalesce(RGE.IVA,0) + coalesce(RGE.MONTO_APP_IVA,0) )
+                                                                FROM sera.COMER_PAGOSREFGENS RGE, sera.COMER_LOTES LOT2
+                                                                WHERE LOT2.ID_EVENTO = ${params.event}
+                                                                AND LOT2.ID_LOTE = LOT.ID_LOTE
+                                                                AND LOT2.ID_LOTE = RGE.ID_LOTE
+                                                                AND RGE.TIPO = 'N'
+                                                                AND LOT2.ID_LOTE = ${V_ID_LOTE}
+                                                                AND EXISTS (SELECT 1
+                                                                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                                                WHERE CXE.ID_EVENTO = ${params.event}
+                                                                                AND CXE.ID_CLIENTE = LOT2.ID_CLIENTE
+                                                                                AND CXE.PROCESAR = 'S'
+                                                                        )
+                                                                )
+                                        WHERE LOT.ID_EVENTO = ${params.event}
+                                                AND LOT.ID_LOTE = ${V_ID_LOTE}
+                                                AND EXISTS (SELECT 1
+                                                        FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                        WHERE CXE.ID_EVENTO = ${params.event}
+                                                        AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                                        AND CXE.PROCESAR = 'S'
+                                                        )`);
+
+          await this.entity.query(` DELETE sera.COMER_PAGOSREFGENS 
+                                WHERE ID_LOTE = ${V_ID_LOTE}
+                                  AND EXISTS (SELECT 1
+                                                FROM sera.COMER_LOTES LOT
+                                               WHERE LOT.ID_EVENTO = ${params.event}
+                                                 AND LOT.ID_EVENTO = sera.COMER_PAGOSREFGENS.ID_EVENTO
+                                                 AND LOT.ID_LOTE = sera.COMER_PAGOSREFGENS.ID_LOTE
+                                                 AND LOT.ID_LOTE = ${V_ID_LOTE}
+                                                 AND EXISTS (SELECT 1
+                                                               FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                              WHERE CXE.ID_EVENTO  = ${params.event}
+                                                                AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                                                AND CXE.PROCESAR   = 'S'
+                                                            )
+                                             )
+                                  AND NOT EXISTS (SELECT 1
+                                                    FROM sera.COMER_PAGOREF PRE
+                                                   WHERE PRE.ID_PAGO = sera.COMER_PAGOSREFGENS.ID_PAGO
+                                                     AND PRE.IDORDENINGRESO IS NOT NULL
+                                                 );`);
+        });
+      } else {
+        const LOTBR: any[] = await this.entity.query(`
+                                SELECT DISTINCT CLOT.ID_LOTE as id_lote 
+                                FROM sera.COMER_LOTES CLOT, sera.COMER_PAGOREF CPAG
+                                WHERE CLOT.ID_EVENTO = ${params.event}
+                                AND CLOT.ID_LOTE = CPAG.ID_LOTE
+                                AND CLOT.ID_CLIENTE IS NOT NULL
+                                AND CLOT.ID_LOTE = coalesce(${params.lot}, CLOT.ID_LOTE)
+                                AND CPAG.VALIDO_SISTEMA = 'S'
+                                AND CPAG.CONCILIADO IS NULL
+                                AND CPAG.IDORDENINGRESO IS NULL
+                                AND EXISTS (SELECT 1
+                                                FROM sera.COMER_BIENESXLOTE CBXL, sera.bien BNS
+                                                WHERE CBXL.ID_LOTE = CLOT.ID_LOTE
+                                                AND CBXL.NO_BIEN = BNS.NO_BIEN
+                                                
+                                                AND BNS.ESTATUS IN ('VEN','VPP','VPT','CXR','VTR') )
+                                AND EXISTS (SELECT 1
+                                                FROM sera.COMER_PAGOSREFGENS CGEN
+                                                WHERE CGEN.ID_LOTE = CLOT.ID_LOTE )
+                                AND EXISTS (SELECT 1
+                                                FROM sera.COMER_CLIENTESXEVENTO CCXE
+                                                WHERE CCXE.ID_EVENTO = ${params.event}
+                                                AND CCXE.ID_CLIENTE = CLOT.ID_CLIENTE
+                                                AND CCXE.PROCESAR = 'S'
+                                        )`);
+        V_ID_LOTE = LOTBR[0]?.id_lote || 0;
+        LOTBR.forEach(async (element) => {
+          await this.entity.query(` UPDATE sera.COMER_PAGOREF 
+                                        SET VALIDO_SISTEMA = 'A'
+                                        WHERE EXISTS (SELECT 1
+                                                FROM sera.COMER_LOTES LOT
+                                                WHERE LOT.ID_EVENTO = ${params.event}
+                                                AND LOT.ID_LOTE = ${V_ID_LOTE}
+                                                AND EXISTS (SELECT 1
+                                                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                                WHERE CXE.ID_EVENTO  = ${params.event}
+                                                                AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                                                AND CXE.PROCESAR   = 'S'
+                                                                )
+                                                )
+                                        AND VALIDO_SISTEMA = 'S'
+                                        AND IDORDENINGRESO IS  NULL`);
+          await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
+                                        SELECT NO_BIEN, ESTATUS, CAST('${dateNow}' AS DATE)+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
+                                        FROM sera.bien BIE
+                                        WHERE ESTATUS IN ('VPP','VPT')
+                                        AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
+                                                        WHERE BXL.NO_BIEN = BIE.NO_BIEN
+                                                        AND BXL.ID_LOTE = coalesce(${V_ID_LOTE},BXL.ID_LOTE)
+                                                        AND EXISTS (SELECT 1 FROM sera.COMER_LOTES LOT
+                                                                WHERE LOT.ID_EVENTO = ${params.event}
+                                                                        AND LOT.ID_LOTE   = BXL.ID_LOTE
+                                                                        AND LOT.ID_LOTE   = coalesce(${V_ID_LOTE},BXL.ID_LOTE)
+                                                                        AND EXISTS (SELECT 1
+                                                                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                                                WHERE CXE.ID_EVENTO   = ${params.event}
+                                                                                        AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
+                                                                                        AND CXE.PROCESAR    = 'S'
+                                                                                )
+                                                                )
+                                                )`);
+
+          await this.entity.query(`UPDATE sera.bien 
+                                        SET ESTATUS = 'VEN'
+                                        WHERE ESTATUS IN ('VPP','VPT')
+                                        AND EXISTS (SELECT 1
+                                                        FROM sera.COMER_BIENESXLOTE BXL
+                                                        WHERE BXL.NO_BIEN = sera.bien.NO_BIEN
+                                                        AND BXL.ID_LOTE = ${V_ID_LOTE}
+                                                        AND EXISTS (SELECT 1
+                                                                        FROM sera.COMER_LOTES LOT
+                                                                        WHERE LOT.ID_EVENTO = ${params.event}
+                                                                        AND LOT.ID_LOTE = BXL.ID_LOTE
+                                                                        AND LOT.ID_LOTE = ${V_ID_LOTE}
+                                                                        AND EXISTS (SELECT 1
+                                                                                        FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                                                        WHERE CXE.ID_EVENTO   = ${params.event}
+                                                                                        AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
+                                                                                        AND CXE.PROCESAR    = 'S'
+                                                                        )
+                                                                )
+                                                )
+                                        `);
+
+          await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
+                                        SELECT NO_BIEN, ESTATUS, SYSDATE+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
+                                        FROM sera.bien BIE
+                                        WHERE ESTATUS IN ('VTR')
+                                        AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
+                                                        WHERE BXL.NO_BIEN = BIE.NO_BIEN
+                                                        AND BXL.ID_LOTE =${V_ID_LOTE}
+                                                        AND EXISTS (SELECT 1 FROM sera.COMER_LOTES LOT
+                                                                WHERE LOT.ID_EVENTO = ${params.event}
+                                                                        AND LOT.ID_LOTE   = BXL.ID_LOTE
+                                                                        AND LOT.ID_LOTE   = ${V_ID_LOTE}
+                                                                        AND EXISTS (SELECT 1 FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                                                WHERE CXE.ID_EVENTO   = ${params.event}
+                                                                                        AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
+                                                                                        AND CXE.PROCESAR    = 'S'
+                                                                                )
+                                                                )
+                                                );
+                                `);
+
+          await this.entity.query(`UPDATE sera.bien
+                                        SET ESTATUS = 'CXR'
+                                        WHERE ESTATUS IN ('VTR')
+                                        AND EXISTS (SELECT 1
+                                                FROM sera.COMER_BIENESXLOTE BXL
+                                                WHERE BXL.NO_BIEN = sera.bien.NO_BIEN
+                                                AND BXL.ID_LOTE = ${V_ID_LOTE}
+                                                AND EXISTS (SELECT 1
+                                                                FROM sera.COMER_LOTES LOT
+                                                                WHERE LOT.ID_EVENTO = ${params.event}
+                                                                AND LOT.ID_LOTE = BXL.ID_LOTE
+                                                                AND LOT.ID_LOTE = ${V_ID_LOTE}
+                                                                AND EXISTS (SELECT 1
+                                                                                FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                                                WHERE CXE.ID_EVENTO   = ${params.event}
+                                                                                AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
+                                                                                AND CXE.PROCESAR    = 'S'
+                                                                                )
+                                                        )
+                                        )`);
+          await this.entity.query(`UPDATE sera.COMER_BIENESXLOTE
+                                        SET ESTATUS_ANT = 'ADM',
+                                            ESTATUS_COMER = 'VEN',
+                                            ID_LOTE_COMER = NULL,
+                                            ID_EVENTO_COMER = NULL
+                                      WHERE ID_LOTE = ${V_ID_LOTE}
+                                        AND EXISTS (SELECT 1
+                                                      FROM sera.COMER_BIENESXLOTE BXL
+                                                     WHERE BXL.ID_LOTE = ${V_ID_LOTE}
+                                                       AND EXISTS (SELECT 1
+                                                                     FROM sera.COMER_LOTES LOT
+                                                                    WHERE LOT.ID_EVENTO = ${params.event}
+                                                                      AND LOT.ID_LOTE = BXL.ID_LOTE
+                                                                      AND LOT.ID_LOTE = ${V_ID_LOTE}
+                                                                      AND EXISTS (SELECT 1
+                                                                                    FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                                                   WHERE CXE.ID_EVENTO   = ${params.event}
+                                                                                     AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
+                                                                                     AND CXE.PROCESAR    = 'S'
+                                                                                 )
+                                                                  )
+                                                   );`);
+          var dPhase = (params.phase || 1) == 1 ? null : 'G';
+          await this.entity.query(` UPDATE sera.COMER_LOTES
+                                                   SET ID_ESTATUSVTA  =  case coalesce(${params.phase}, 1) when 1 then 'VEN' when 2 then 'VEN' when 3 then 'GARA' when 4 then 'GARA' when 5 then 'PAG' when 9 then 'PAGE' end,
+                                                   VALIDO_SISTEMA = '${dPhase}',
+                                                   ACUMULADO = (SELECT SUM(coalesce(RGE.MONTO_NOAPP_IVA,0) + coalesce(RGE.IVA,0) + coalesce(RGE.MONTO_APP_IVA,0) )
+                                                                   FROM sera.COMER_PAGOSREFGENS RGE, sera.COMER_LOTES LOT2
+                                                                   WHERE LOT2.ID_EVENTO = ${params.event}
+                                                                   AND LOT2.ID_LOTE = LOT.ID_LOTE
+                                                                   AND LOT2.ID_LOTE = RGE.ID_LOTE
+                                                                   AND RGE.TIPO = 'N'
+                                                                   AND LOT2.ID_LOTE = ${V_ID_LOTE}
+                                                                   AND EXISTS (SELECT 1
+                                                                                   FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                                                   WHERE CXE.ID_EVENTO = ${params.event}
+                                                                                   AND CXE.ID_CLIENTE = LOT2.ID_CLIENTE
+                                                                                   AND CXE.PROCESAR = 'S'
+                                                                           )
+                                                                   )
+                                           WHERE LOT.ID_EVENTO = ${params.event}
+                                                   AND LOT.ID_LOTE = ${V_ID_LOTE}
+                                                   AND EXISTS (SELECT 1
+                                                           FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                           WHERE CXE.ID_EVENTO = ${params.event}
+                                                           AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                                           AND CXE.PROCESAR = 'S'
+                                                           )`);
+          await this.entity.query(` DELETE sera.COMER_PAGOSREFGENS 
+                                        WHERE ID_LOTE = ${V_ID_LOTE}
+                                        AND EXISTS (SELECT 1
+                                                        FROM sera.COMER_LOTES LOT
+                                                        WHERE LOT.ID_EVENTO = ${params.event}
+                                                        AND LOT.ID_EVENTO = sera.COMER_PAGOSREFGENS.ID_EVENTO
+                                                        AND LOT.ID_LOTE = sera.COMER_PAGOSREFGENS.ID_LOTE
+                                                        AND LOT.ID_LOTE = ${V_ID_LOTE}
+                                                        AND EXISTS (SELECT 1
+                                                                        FROM sera.COMER_CLIENTESXEVENTO CXE
+                                                                        WHERE CXE.ID_EVENTO  = ${params.event}
+                                                                        AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                                                                        AND CXE.PROCESAR   = 'S'
+                                                                )
+                                                )
+                                        AND NOT EXISTS (SELECT 1
+                                                        FROM sera.COMER_PAGOREF PRE
+                                                        WHERE PRE.ID_PAGO = sera.COMER_PAGOSREFGENS.ID_PAGO
+                                                        AND PRE.IDORDENINGRESO IS NOT NULL
+                                                        );`);
+        });
+      }
+
+      await this.entity.query(` UPDATE  sera.COMER_CLIENTESXEVENTO
+                        SET  PROCESADO=NULL
+                WHERE  ID_EVENTO =${params.event}
+                AND  ENVIADO_SIRSAE ='N'`);
+      await this.entity.query(` DELETE FROM   sera.COMER_BIENESRECHAZADOS 
+                WHERE    ID_EVENTO = ${params.event}`);
+
+      await this.entity.query(` UPDATE sera.COMER_CLIENTES
+                SET LISTA_NEGRA = 'N'
+                WHERE ID_CLIENTE IN (
+                    SELECT DISTINCT ID_CLIENTE
+                      FROM sera.COMER_CLIENTESXEVENTO CXE
+                     WHERE CXE.ID_EVENTO = ${params.event})
+                AND EXISTS (SELECT 1
+                              FROM sera.COMER_CLIENTESXEVENTO CXE
+                             WHERE CXE.ID_EVENTO = ${params.event}
+                               AND CXE.PROCESAR = 'S'
+                             );`);
+      return {
+        statusCode: HttpStatus.OK,
+        message: ['OK'],
+        data: true
+      }
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: [error.message]
+      }
+    }
+  }
+  /**
+   * @procedure BORRA_COMPLETO
+   * @param params
+   * @returns
+   */
+  async fullErase(params: CurrentFullErase) {
+    var BR_IDLOTE = 0;
+    var BR_IDBXL = 0;
+    var BR_IDBXL2 = 0;
+    var BR_ACUMULADO = 0;
+    var V_ID_LOTE = 0;
+    var V_ID_TPEVENTO = 0;
+    const dateNow = LocalDate.getNow();
+    try {
+      const result: any[] = await this.entity.query(
+        `SELECT ID_TPEVENTO FROM sera.COMER_EVENTOS WHERE ID_EVENTO = ${params.event}`,
+      );
+      V_ID_TPEVENTO = result[0].id_tpevento;
+
       const LOTBRSP: any[] = await this.entity.query(` 
                                 SELECT DISTINCT CLOT.ID_LOTE
                                 FROM sera.COMER_LOTES CLOT, sera.COMER_PAGOREF CPAG
@@ -5942,7 +6377,7 @@ export class ValidatePaymentsRefService {
                                         )`);
 
       V_ID_LOTE = LOTBRSP[0].id_lote;
-      LOTBRSP.forEach(async (element) => {
+      for (var item of LOTBRSP) {
         await this.entity.query(` UPDATE sera.COMER_PAGOREF 
                                         SET VALIDO_SISTEMA = 'A'
                                         WHERE EXISTS (SELECT 1
@@ -6108,454 +6543,37 @@ export class ValidatePaymentsRefService {
                                                    WHERE PRE.ID_PAGO = sera.COMER_PAGOSREFGENS.ID_PAGO
                                                      AND PRE.IDORDENINGRESO IS NOT NULL
                                                  );`);
-      });
-    } else {
-      const LOTBR: any[] = await this.entity.query(`
-                                SELECT DISTINCT CLOT.ID_LOTE as id_lote 
-                                FROM sera.COMER_LOTES CLOT, sera.COMER_PAGOREF CPAG
-                                WHERE CLOT.ID_EVENTO = ${params.event}
-                                AND CLOT.ID_LOTE = CPAG.ID_LOTE
-                                AND CLOT.ID_CLIENTE IS NOT NULL
-                                AND CLOT.ID_LOTE = coalesce(${params.lot}, CLOT.ID_LOTE)
-                                AND CPAG.VALIDO_SISTEMA = 'S'
-                                AND CPAG.CONCILIADO IS NULL
-                                AND CPAG.IDORDENINGRESO IS NULL
-                                AND EXISTS (SELECT 1
-                                                FROM sera.COMER_BIENESXLOTE CBXL, sera.bien BNS
-                                                WHERE CBXL.ID_LOTE = CLOT.ID_LOTE
-                                                AND CBXL.NO_BIEN = BNS.NO_BIEN
-                                                
-                                                AND BNS.ESTATUS IN ('VEN','VPP','VPT','CXR','VTR') )
-                                AND EXISTS (SELECT 1
-                                                FROM sera.COMER_PAGOSREFGENS CGEN
-                                                WHERE CGEN.ID_LOTE = CLOT.ID_LOTE )
-                                AND EXISTS (SELECT 1
-                                                FROM sera.COMER_CLIENTESXEVENTO CCXE
-                                                WHERE CCXE.ID_EVENTO = ${params.event}
-                                                AND CCXE.ID_CLIENTE = CLOT.ID_CLIENTE
-                                                AND CCXE.PROCESAR = 'S'
-                                        )`);
-      V_ID_LOTE = LOTBR[0]?.id_lote || 0;
-      LOTBR.forEach(async (element) => {
-        await this.entity.query(` UPDATE sera.COMER_PAGOREF 
-                                        SET VALIDO_SISTEMA = 'A'
-                                        WHERE EXISTS (SELECT 1
-                                                FROM sera.COMER_LOTES LOT
-                                                WHERE LOT.ID_EVENTO = ${params.event}
-                                                AND LOT.ID_LOTE = ${V_ID_LOTE}
-                                                AND EXISTS (SELECT 1
-                                                                FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                                WHERE CXE.ID_EVENTO  = ${params.event}
-                                                                AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
-                                                                AND CXE.PROCESAR   = 'S'
-                                                                )
-                                                )
-                                        AND VALIDO_SISTEMA = 'S'
-                                        AND IDORDENINGRESO IS  NULL`);
-        await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
-                                        SELECT NO_BIEN, ESTATUS, CAST('${dateNow}' AS DATE)+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
-                                        FROM sera.bien BIE
-                                        WHERE ESTATUS IN ('VPP','VPT')
-                                        AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
-                                                        WHERE BXL.NO_BIEN = BIE.NO_BIEN
-                                                        AND BXL.ID_LOTE = coalesce(${V_ID_LOTE},BXL.ID_LOTE)
-                                                        AND EXISTS (SELECT 1 FROM sera.COMER_LOTES LOT
-                                                                WHERE LOT.ID_EVENTO = ${params.event}
-                                                                        AND LOT.ID_LOTE   = BXL.ID_LOTE
-                                                                        AND LOT.ID_LOTE   = coalesce(${V_ID_LOTE},BXL.ID_LOTE)
-                                                                        AND EXISTS (SELECT 1
-                                                                                FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                                                WHERE CXE.ID_EVENTO   = ${params.event}
-                                                                                        AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
-                                                                                        AND CXE.PROCESAR    = 'S'
-                                                                                )
-                                                                )
-                                                )`);
+      }
 
-        await this.entity.query(`UPDATE sera.bien 
-                                        SET ESTATUS = 'VEN'
-                                        WHERE ESTATUS IN ('VPP','VPT')
-                                        AND EXISTS (SELECT 1
-                                                        FROM sera.COMER_BIENESXLOTE BXL
-                                                        WHERE BXL.NO_BIEN = sera.bien.NO_BIEN
-                                                        AND BXL.ID_LOTE = ${V_ID_LOTE}
-                                                        AND EXISTS (SELECT 1
-                                                                        FROM sera.COMER_LOTES LOT
-                                                                        WHERE LOT.ID_EVENTO = ${params.event}
-                                                                        AND LOT.ID_LOTE = BXL.ID_LOTE
-                                                                        AND LOT.ID_LOTE = ${V_ID_LOTE}
-                                                                        AND EXISTS (SELECT 1
-                                                                                        FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                                                        WHERE CXE.ID_EVENTO   = ${params.event}
-                                                                                        AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
-                                                                                        AND CXE.PROCESAR    = 'S'
-                                                                        )
-                                                                )
-                                                )
-                                        `);
-
-        await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
-                                        SELECT NO_BIEN, ESTATUS, SYSDATE+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
-                                        FROM sera.bien BIE
-                                        WHERE ESTATUS IN ('VTR')
-                                        AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
-                                                        WHERE BXL.NO_BIEN = BIE.NO_BIEN
-                                                        AND BXL.ID_LOTE =${V_ID_LOTE}
-                                                        AND EXISTS (SELECT 1 FROM sera.COMER_LOTES LOT
-                                                                WHERE LOT.ID_EVENTO = ${params.event}
-                                                                        AND LOT.ID_LOTE   = BXL.ID_LOTE
-                                                                        AND LOT.ID_LOTE   = ${V_ID_LOTE}
-                                                                        AND EXISTS (SELECT 1 FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                                                WHERE CXE.ID_EVENTO   = ${params.event}
-                                                                                        AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
-                                                                                        AND CXE.PROCESAR    = 'S'
-                                                                                )
-                                                                )
-                                                );
-                                `);
-
-        await this.entity.query(`UPDATE sera.bien
-                                        SET ESTATUS = 'CXR'
-                                        WHERE ESTATUS IN ('VTR')
-                                        AND EXISTS (SELECT 1
-                                                FROM sera.COMER_BIENESXLOTE BXL
-                                                WHERE BXL.NO_BIEN = sera.bien.NO_BIEN
-                                                AND BXL.ID_LOTE = ${V_ID_LOTE}
-                                                AND EXISTS (SELECT 1
-                                                                FROM sera.COMER_LOTES LOT
-                                                                WHERE LOT.ID_EVENTO = ${params.event}
-                                                                AND LOT.ID_LOTE = BXL.ID_LOTE
-                                                                AND LOT.ID_LOTE = ${V_ID_LOTE}
-                                                                AND EXISTS (SELECT 1
-                                                                                FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                                                WHERE CXE.ID_EVENTO   = ${params.event}
-                                                                                AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
-                                                                                AND CXE.PROCESAR    = 'S'
-                                                                                )
-                                                        )
-                                        )`);
-        await this.entity.query(`UPDATE sera.COMER_BIENESXLOTE
-                                        SET ESTATUS_ANT = 'ADM',
-                                            ESTATUS_COMER = 'VEN',
-                                            ID_LOTE_COMER = NULL,
-                                            ID_EVENTO_COMER = NULL
-                                      WHERE ID_LOTE = ${V_ID_LOTE}
-                                        AND EXISTS (SELECT 1
-                                                      FROM sera.COMER_BIENESXLOTE BXL
-                                                     WHERE BXL.ID_LOTE = ${V_ID_LOTE}
-                                                       AND EXISTS (SELECT 1
-                                                                     FROM sera.COMER_LOTES LOT
-                                                                    WHERE LOT.ID_EVENTO = ${params.event}
-                                                                      AND LOT.ID_LOTE = BXL.ID_LOTE
-                                                                      AND LOT.ID_LOTE = ${V_ID_LOTE}
-                                                                      AND EXISTS (SELECT 1
-                                                                                    FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                                                   WHERE CXE.ID_EVENTO   = ${params.event}
-                                                                                     AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
-                                                                                     AND CXE.PROCESAR    = 'S'
-                                                                                 )
-                                                                  )
-                                                   );`);
-        var dPhase = (params.phase || 1) == 1 ? null : 'G';
-        await this.entity.query(` UPDATE sera.COMER_LOTES
-                                                   SET ID_ESTATUSVTA  =  case coalesce(${params.phase}, 1) when 1 then 'VEN' when 2 then 'VEN' when 3 then 'GARA' when 4 then 'GARA' when 5 then 'PAG' when 9 then 'PAGE' end,
-                                                   VALIDO_SISTEMA = '${dPhase}',
-                                                   ACUMULADO = (SELECT SUM(coalesce(RGE.MONTO_NOAPP_IVA,0) + coalesce(RGE.IVA,0) + coalesce(RGE.MONTO_APP_IVA,0) )
-                                                                   FROM sera.COMER_PAGOSREFGENS RGE, sera.COMER_LOTES LOT2
-                                                                   WHERE LOT2.ID_EVENTO = ${params.event}
-                                                                   AND LOT2.ID_LOTE = LOT.ID_LOTE
-                                                                   AND LOT2.ID_LOTE = RGE.ID_LOTE
-                                                                   AND RGE.TIPO = 'N'
-                                                                   AND LOT2.ID_LOTE = ${V_ID_LOTE}
-                                                                   AND EXISTS (SELECT 1
-                                                                                   FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                                                   WHERE CXE.ID_EVENTO = ${params.event}
-                                                                                   AND CXE.ID_CLIENTE = LOT2.ID_CLIENTE
-                                                                                   AND CXE.PROCESAR = 'S'
-                                                                           )
-                                                                   )
-                                           WHERE LOT.ID_EVENTO = ${params.event}
-                                                   AND LOT.ID_LOTE = ${V_ID_LOTE}
-                                                   AND EXISTS (SELECT 1
-                                                           FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                           WHERE CXE.ID_EVENTO = ${params.event}
-                                                           AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
-                                                           AND CXE.PROCESAR = 'S'
-                                                           )`);
-        await this.entity.query(` DELETE sera.COMER_PAGOSREFGENS 
-                                        WHERE ID_LOTE = ${V_ID_LOTE}
-                                        AND EXISTS (SELECT 1
-                                                        FROM sera.COMER_LOTES LOT
-                                                        WHERE LOT.ID_EVENTO = ${params.event}
-                                                        AND LOT.ID_EVENTO = sera.COMER_PAGOSREFGENS.ID_EVENTO
-                                                        AND LOT.ID_LOTE = sera.COMER_PAGOSREFGENS.ID_LOTE
-                                                        AND LOT.ID_LOTE = ${V_ID_LOTE}
-                                                        AND EXISTS (SELECT 1
-                                                                        FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                                        WHERE CXE.ID_EVENTO  = ${params.event}
-                                                                        AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
-                                                                        AND CXE.PROCESAR   = 'S'
-                                                                )
-                                                )
-                                        AND NOT EXISTS (SELECT 1
-                                                        FROM sera.COMER_PAGOREF PRE
-                                                        WHERE PRE.ID_PAGO = sera.COMER_PAGOSREFGENS.ID_PAGO
-                                                        AND PRE.IDORDENINGRESO IS NOT NULL
-                                                        );`);
-      });
-    }
-
-    await this.entity.query(` UPDATE  sera.COMER_CLIENTESXEVENTO
+      await this.entity.query(` UPDATE  sera.COMER_CLIENTESXEVENTO
                         SET  PROCESADO=NULL
                 WHERE  ID_EVENTO =${params.event}
                 AND  ENVIADO_SIRSAE ='N'`);
-    await this.entity.query(` DELETE    sera.COMER_BIENESRECHAZADOS 
+      await this.entity.query(` DELETE FROM sera.COMER_BIENESRECHAZADOS 
                 WHERE    ID_EVENTO = ${params.event}`);
 
-    await this.entity.query(` UPDATE sera.COMER_CLIENTES
+      await this.entity.query(` UPDATE sera.COMER_CLIENTES
                 SET LISTA_NEGRA = 'N'
                 WHERE ID_CLIENTE IN (
                     SELECT DISTINCT ID_CLIENTE
-                      FROM sera.OMER_CLIENTESXEVENTO CXE
+                      FROM sera.COMER_CLIENTESXEVENTO CXE
                      WHERE CXE.ID_EVENTO = ${params.event})
                 AND EXISTS (SELECT 1
                               FROM sera.COMER_CLIENTESXEVENTO CXE
                              WHERE CXE.ID_EVENTO = ${params.event}
                                AND CXE.PROCESAR = 'S'
                              );`);
-    return;
-  }
-  /**
-   * @procedure BORRA_COMPLETO
-   * @param params
-   * @returns
-   */
-  async fullErase(params: CurrentFullErase) {
-    var BR_IDLOTE = 0;
-    var BR_IDBXL = 0;
-    var BR_IDBXL2 = 0;
-    var BR_ACUMULADO = 0;
-    var V_ID_LOTE = 0;
-    var V_ID_TPEVENTO = 0;
-    const dateNow = LocalDate.getNow();
-
-    const result: any[] = await this.entity.query(
-      `SELECT ID_TPEVENTO FROM sera.COMER_EVENTOS WHERE ID_EVENTO = ${params.event}`,
-    );
-    V_ID_TPEVENTO = result[0].id_tpevento;
-
-    const LOTBRSP: any[] = await this.entity.query(` 
-                                SELECT DISTINCT CLOT.ID_LOTE
-                                FROM sera.COMER_LOTES CLOT, sera.COMER_PAGOREF CPAG
-                                WHERE CLOT.ID_EVENTO = ${params.event}
-                                AND CLOT.ID_LOTE = CPAG.ID_LOTE
-                                AND CLOT.ID_CLIENTE IS NOT NULL
-                                AND CLOT.ID_LOTE = coalesce(${params.lot}, CLOT.ID_LOTE)
-                                AND CPAG.CONCILIADO IS NULL
-                                AND CPAG.IDORDENINGRESO IS NULL
-                                AND EXISTS (SELECT 1
-                                                FROM sera.COMER_BIENESXLOTE CBXL, sera.bien BNS
-                                                WHERE CBXL.ID_LOTE = CLOT.ID_LOTE
-                                                AND CBXL.NO_BIEN = BNS.NO_BIEN
-                                                AND BNS.ESTATUS IN ('VEN','VPP','VPT','CXR','VTR') )
-                                        AND EXISTS (SELECT 1
-                                                        FROM sera.COMER_PAGOSREFGENS CGEN
-                                                        WHERE CGEN.ID_LOTE = CLOT.ID_LOTE )
-                                        AND EXISTS (SELECT 1
-                                                FROM sera.COMER_CLIENTESXEVENTO CCXE
-                                                WHERE CCXE.ID_EVENTO = ${params.event}
-                                                AND CCXE.ID_CLIENTE = CLOT.ID_CLIENTE
-                                                AND CCXE.PROCESAR = 'S'
-                                        )`);
-
-    V_ID_LOTE = LOTBRSP[0].id_lote;
-    for (var item of LOTBRSP) {
-      await this.entity.query(` UPDATE sera.COMER_PAGOREF 
-                                        SET VALIDO_SISTEMA = 'A'
-                                        WHERE EXISTS (SELECT 1
-                                                FROM sera.COMER_LOTES LOT
-                                                WHERE LOT.ID_EVENTO = ${params.event}
-                                                AND LOT.ID_LOTE = ${V_ID_LOTE}
-                                                AND EXISTS (SELECT 1
-                                                                FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                                WHERE CXE.ID_EVENTO  = ${params.event}
-                                                                AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
-                                                                AND CXE.PROCESAR   = 'S'
-                                                                )
-                                                )
-                                        AND VALIDO_SISTEMA = 'S'
-                                        AND IDORDENINGRESO IS  NULL`);
-      await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
-                                        SELECT NO_BIEN, ESTATUS, CAST('${dateNow}' AS DATE)+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
-                                        FROM sera.bien BIE
-                                        WHERE ESTATUS IN ('VPP','VPT')
-                                        AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
-                                                        WHERE BXL.NO_BIEN = BIE.NO_BIEN
-                                                        AND BXL.ID_LOTE = coalesce(${V_ID_LOTE},BXL.ID_LOTE)
-                                                        AND EXISTS (SELECT 1 FROM sera.COMER_LOTES LOT
-                                                                WHERE LOT.ID_EVENTO = ${params.event}
-                                                                        AND LOT.ID_LOTE   = BXL.ID_LOTE
-                                                                        AND LOT.ID_LOTE   = coalesce(${V_ID_LOTE},BXL.ID_LOTE)
-                                                                        AND EXISTS (SELECT 1
-                                                                                FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                                                WHERE CXE.ID_EVENTO   = ${params.event}
-                                                                                        AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
-                                                                                        AND CXE.PROCESAR    = 'S'
-                                                                                )
-                                                                )
-                                                )`);
-
-      await this.entity.query(`UPDATE sera.bien 
-                                        SET ESTATUS = 'VEN'
-                                        WHERE ESTATUS IN ('VPP','VPT')
-                                        AND EXISTS (SELECT 1
-                                                        FROM sera.COMER_BIENESXLOTE BXL
-                                                        WHERE BXL.NO_BIEN = sera.bien.NO_BIEN
-                                                        AND BXL.ID_LOTE = ${V_ID_LOTE}
-                                                        AND EXISTS (SELECT 1
-                                                                        FROM sera.COMER_LOTES LOT
-                                                                        WHERE LOT.ID_EVENTO = ${params.event}
-                                                                        AND LOT.ID_LOTE = BXL.ID_LOTE
-                                                                        AND LOT.ID_LOTE = ${V_ID_LOTE}
-                                                                        AND EXISTS (SELECT 1
-                                                                                        FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                                                        WHERE CXE.ID_EVENTO   = ${params.event}
-                                                                                        AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
-                                                                                        AND CXE.PROCESAR    = 'S'
-                                                                        )
-                                                         )
-                                          )
-                                `);
-      await this.entity.query(`INSERT INTO sera.HISTORICO_ESTATUS_BIEN
-                                        SELECT NO_BIEN, ESTATUS, SYSDATE+1/1440/60, 'USER', 'FCOMER612', 'CAMBIO POR REVERSO DE DISPERSION DE PAGOS ACT',(select last_value+1 from  sera.SEQ_BITACORA),PROCESO_EXT_DOM
-                                        FROM sera.bien BIE
-                                        WHERE ESTATUS IN ('VTR')
-                                        AND EXISTS (SELECT 1 FROM sera.COMER_BIENESXLOTE BXL
-                                                        WHERE BXL.NO_BIEN = BIE.NO_BIEN
-                                                        AND BXL.ID_LOTE =${V_ID_LOTE}
-                                                        AND EXISTS (SELECT 1 FROM sera.COMER_LOTES LOT
-                                                                WHERE LOT.ID_EVENTO = ${params.event}
-                                                                        AND LOT.ID_LOTE   = BXL.ID_LOTE
-                                                                        AND LOT.ID_LOTE   = ${V_ID_LOTE}
-                                                                        AND EXISTS (SELECT 1 FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                                                WHERE CXE.ID_EVENTO   = ${params.event}
-                                                                                        AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
-                                                                                        AND CXE.PROCESAR    = 'S'
-                                                                                )
-                                                                )
-                                                );
-                                `);
-
-      await this.entity.query(`UPDATE sera.bien
-                                        SET ESTATUS = 'CXR'
-                                        WHERE ESTATUS IN ('VTR')
-                                        AND EXISTS (SELECT 1
-                                                FROM sera.COMER_BIENESXLOTE BXL
-                                                WHERE BXL.NO_BIEN = sera.bien.NO_BIEN
-                                                AND BXL.ID_LOTE = ${V_ID_LOTE}
-                                                AND EXISTS (SELECT 1
-                                                                FROM sera.COMER_LOTES LOT
-                                                                WHERE LOT.ID_EVENTO = ${params.event}
-                                                                AND LOT.ID_LOTE = BXL.ID_LOTE
-                                                                AND LOT.ID_LOTE = ${V_ID_LOTE}
-                                                                AND EXISTS (SELECT 1
-                                                                                FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                                                WHERE CXE.ID_EVENTO   = ${params.event}
-                                                                                AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
-                                                                                AND CXE.PROCESAR    = 'S'
-                                                                                )
-                                                          )
-                                           )`);
-      await this.entity.query(`UPDATE sera.COMER_BIENESXLOTE
-                                SET ESTATUS_ANT = 'ADM',
-                                    ESTATUS_COMER = 'VEN',
-                                    ID_LOTE_COMER = NULL,
-                                    ID_EVENTO_COMER = NULL
-                              WHERE ID_LOTE = ${V_ID_LOTE}
-                                AND EXISTS (SELECT 1
-                                              FROM sera.COMER_BIENESXLOTE BXL
-                                             WHERE BXL.ID_LOTE = ${V_ID_LOTE}
-                                               AND EXISTS (SELECT 1
-                                                             FROM sera.COMER_LOTES LOT
-                                                            WHERE LOT.ID_EVENTO = ${params.event}
-                                                              AND LOT.ID_LOTE = BXL.ID_LOTE
-                                                              AND LOT.ID_LOTE = ${V_ID_LOTE}
-                                                              AND EXISTS (SELECT 1
-                                                                            FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                                           WHERE CXE.ID_EVENTO   = ${params.event}
-                                                                             AND CXE.ID_CLIENTE  = LOT.ID_CLIENTE
-                                                                             AND CXE.PROCESAR    = 'S'
-                                                                         )
-                                                          )
-                                           );`);
-      var dPhase = (params.phase || 1) == 1 ? null : 'G';
-      await this.entity.query(` UPDATE sera.COMER_LOTES
-                                                SET ID_ESTATUSVTA  =  case coalesce(${params.phase}, 1) when 1 then 'VEN' when 2 then 'VEN' when 3 then 'GARA' when 4 then 'GARA' when 5 then 'PAG' when 9 then 'PAGE' end,
-                                                VALIDO_SISTEMA = '${dPhase}',
-                                                ACUMULADO = (SELECT SUM(coalesce(RGE.MONTO_NOAPP_IVA,0) + coalesce(RGE.IVA,0) + coalesce(RGE.MONTO_APP_IVA,0) )
-                                                                FROM sera.COMER_PAGOSREFGENS RGE, sera.COMER_LOTES LOT2
-                                                                WHERE LOT2.ID_EVENTO = ${params.event}
-                                                                AND LOT2.ID_LOTE = LOT.ID_LOTE
-                                                                AND LOT2.ID_LOTE = RGE.ID_LOTE
-                                                                AND RGE.TIPO = 'N'
-                                                                AND LOT2.ID_LOTE = ${V_ID_LOTE}
-                                                                AND EXISTS (SELECT 1
-                                                                                FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                                                WHERE CXE.ID_EVENTO = ${params.event}
-                                                                                AND CXE.ID_CLIENTE = LOT2.ID_CLIENTE
-                                                                                AND CXE.PROCESAR = 'S'
-                                                                        )
-                                                                )
-                                        WHERE LOT.ID_EVENTO = ${params.event}
-                                                AND LOT.ID_LOTE = ${V_ID_LOTE}
-                                                AND EXISTS (SELECT 1
-                                                        FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                        WHERE CXE.ID_EVENTO = ${params.event}
-                                                        AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
-                                                        AND CXE.PROCESAR = 'S'
-                                                        )`);
-
-      await this.entity.query(` DELETE sera.COMER_PAGOSREFGENS 
-                                WHERE ID_LOTE = ${V_ID_LOTE}
-                                  AND EXISTS (SELECT 1
-                                                FROM sera.COMER_LOTES LOT
-                                               WHERE LOT.ID_EVENTO = ${params.event}
-                                                 AND LOT.ID_EVENTO = sera.COMER_PAGOSREFGENS.ID_EVENTO
-                                                 AND LOT.ID_LOTE = sera.COMER_PAGOSREFGENS.ID_LOTE
-                                                 AND LOT.ID_LOTE = ${V_ID_LOTE}
-                                                 AND EXISTS (SELECT 1
-                                                               FROM sera.COMER_CLIENTESXEVENTO CXE
-                                                              WHERE CXE.ID_EVENTO  = ${params.event}
-                                                                AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
-                                                                AND CXE.PROCESAR   = 'S'
-                                                            )
-                                             )
-                                  AND NOT EXISTS (SELECT 1
-                                                    FROM sera.COMER_PAGOREF PRE
-                                                   WHERE PRE.ID_PAGO = sera.COMER_PAGOSREFGENS.ID_PAGO
-                                                     AND PRE.IDORDENINGRESO IS NOT NULL
-                                                 );`);
+      return {
+        statusCode: HttpStatus.OK,
+        message: ['OK'],
+        data: true
+      }
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: [error.message]
+      }
     }
-
-    await this.entity.query(` UPDATE  sera.COMER_CLIENTESXEVENTO
-                        SET  PROCESADO=NULL
-                WHERE  ID_EVENTO =${params.event}
-                AND  ENVIADO_SIRSAE ='N'`);
-    await this.entity.query(` DELETE    sera.COMER_BIENESRECHAZADOS 
-                WHERE    ID_EVENTO = ${params.event}`);
-
-    await this.entity.query(` UPDATE sera.COMER_CLIENTES
-                SET LISTA_NEGRA = 'N'
-                WHERE ID_CLIENTE IN (
-                    SELECT DISTINCT ID_CLIENTE
-                      FROM sera.OMER_CLIENTESXEVENTO CXE
-                     WHERE CXE.ID_EVENTO = ${params.event})
-                AND EXISTS (SELECT 1
-                              FROM sera.COMER_CLIENTESXEVENTO CXE
-                             WHERE CXE.ID_EVENTO = ${params.event}
-                               AND CXE.PROCESAR = 'S'
-                             );`);
-    return {};
   }
   /**
    *
@@ -8753,8 +8771,8 @@ export class ValidatePaymentsRefService {
                   );
                   this.DISPERSION[this.GK].IVA = Math.round(
                     x.MEFALTA * x.PORCIVA -
-                      this.DISPERSION[this.GK].ABONADO +
-                      PROP_IVA_CHAT,
+                    this.DISPERSION[this.GK].ABONADO +
+                    PROP_IVA_CHAT,
                   );
                   this.DISPERSION[this.GK].ABONADO =
                     this.DISPERSION[this.GK].ABONADO + PROP_ISR_CHAT;
