@@ -10731,7 +10731,7 @@ export class ValidatePaymentsRefService {
                         AND        EXISTS (SELECT    1
                                         FROM    sera.COMER_CLIENTESXEVENTO CXE
                                         WHERE    CXE.ID_EVENTO = ${event}
-                                        AND        CXE.ID_CLIENTE = sera.COMER_LOTES.ID_CLIENTE
+                                        AND        CXE.ID_CLIENTE = LOT.ID_CLIENTE
                                         AND        CXE.PROCESAR = 'S'
                                         AND     CXE.ENVIADO_SIRSAE = 'N'
                                         )
@@ -10741,14 +10741,14 @@ export class ValidatePaymentsRefService {
                                         FROM    sera.COMER_PAGOSREFGENS GEN
                                         WHERE    GEN.ID_EVENTO = ${event}
                                         AND        GEN.TIPO = 'N'
-                                        AND        GEN.ID_LOTE = sera.COMER_LOTES.ID_LOTE
+                                        AND        GEN.ID_LOTE =LOT.ID_LOTE
                                         )`);
-    await this.entity.query(`UPDATE sera.bien  
+    await this.entity.query(`UPDATE sera.bien  BIE
                                 SET    ESTATUS = (    SELECT    ESP.ESTATUS_FINAL
                                                 FROM    sera.ESTATUS_X_PANTALLA ESP
                                                 WHERE    CVE_PANTALLA = 'VTAMUETOT'
-                                                AND        ESP.ESTATUS = sera.bien.ESTATUS
-                                AND ESP.PROCESO_EXT_DOM = sera.bien.PROCESO_EXT_DOM
+                                                AND        ESP.ESTATUS = BIE.ESTATUS
+                                AND ESP.PROCESO_EXT_DOM = BIE.PROCESO_EXT_DOM
                                                         )
                                 WHERE    EXISTS (SELECT    BXL.NO_BIEN
                                         FROM    sera.COMER_BIENESXLOTE BXL
@@ -10765,30 +10765,30 @@ export class ValidatePaymentsRefService {
                                                                         AND     CXE.ENVIADO_SIRSAE = 'N'
                                                                         )
                                                         )
-                                        AND        BXL.NO_BIEN = sera.bien.NO_BIEN
+                                        AND        BXL.NO_BIEN = BIE.NO_BIEN
                                         )`);
-    await this.entity.query(`UPDATE    sera.COMER_LOTES
+    await this.entity.query(`UPDATE    sera.COMER_LOTES LOT
                                 SET    VALIDO_SISTEMA = 'S', ID_ESTATUSVTA = 'CAN'
                                 WHERE    ID_EVENTO     = ${event}
                                 AND        EXISTS (SELECT    1
-                                                FROM    COMER_CLIENTESXEVENTO CXE
+                                                FROM    sera.COMER_CLIENTESXEVENTO CXE
                                                 WHERE    CXE.ID_EVENTO = ${event}
-                                                AND        CXE.ID_CLIENTE = sera.COMER_LOTES.ID_CLIENTE
+                                                AND        CXE.ID_CLIENTE = LOT.ID_CLIENTE
                                                 AND        CXE.PROCESAR = 'S'
                                                 AND     CXE.ENVIADO_SIRSAE = 'N'
                                                 )
                                 AND        VALIDO_SISTEMA IS NULL
                                 AND        LOTE_PUBLICO != 0
                                 AND        EXISTS (SELECT    1
-                                        FROM    COMER_PAGOSREFGENS GEN
+                                        FROM    sera.COMER_PAGOSREFGENS GEN
                                         WHERE    GEN.ID_EVENTO = ${event}
                                         AND        GEN.TIPO = 'P'
-                                        AND        GEN.ID_LOTE = sera.COMER_LOTES.ID_LOTE
+                                        AND        GEN.ID_LOTE = LOT.ID_LOTE
                             )`);
-    await this.entity.query(`UPDATE    sera.bien 
+    await this.entity.query(`UPDATE    sera.bien BIE
                         SET    ESTATUS = ( SELECT    ESTATUS_ANT
                          FROM     sera.COMER_BIENESXLOTE BXL2
-                            WHERE    BXL2.NO_BIEN = sera.bien .NO_BIEN
+                            WHERE    BXL2.NO_BIEN = BIE.NO_BIEN
                             AND    EXISTS (SELECT    1
                                     FROM    sera.COMER_LOTES LOT
                                     WHERE    LOT.ID_EVENTO = ${event}
@@ -10819,14 +10819,14 @@ export class ValidatePaymentsRefService {
                                                 AND     CXE.ENVIADO_SIRSAE = 'N'
                                                 )
                                         )
-                                AND    sera.bien .NO_BIEN = BXL.NO_BIEN
+                                AND    BIE.NO_BIEN = BXL.NO_BIEN
                                 AND    BXL.ID_EVENTO_REMESA IS NULL
                      )`);
-    await this.entity.query(` UPDATE    sera.COMER_BIENESXLOTE  
+    await this.entity.query(` UPDATE    sera.COMER_BIENESXLOTE  BXL
                         SET    ID_EVENTO_COMER = NULL, ID_LOTE_COMER = NULL, VENDIDO = NULL, SELECCIONADO = NULL
                         WHERE    EXISTS (SELECT    1
                                 FROM    sera.COMER_BIENESXLOTE BXL2
-                                WHERE    BXL2.NO_BIEN = sera.COMER_BIENESXLOTE.NO_BIEN
+                                WHERE    BXL2.NO_BIEN = BXL.NO_BIEN
                                 AND    EXISTS (SELECT    1
                                         FROM    sera.COMER_LOTES LOT
                                         WHERE    LOT.ID_EVENTO = ${event}
@@ -10843,38 +10843,38 @@ export class ValidatePaymentsRefService {
                                 AND    BXL2.ID_EVENTO_REMESA IS NOT NULL
                                 )
                         AND    ID_EVENTO_COMER IS NOT NULL`);
-    await this.entity.query(`UPDATE    sera.COMER_LOTES  
+    await this.entity.query(`UPDATE    sera.COMER_LOTES  LOT
                         SET    VALIDO_SISTEMA = 'S', ID_ESTATUSVTA = 'DES'
                         WHERE    NOT EXISTS (    SELECT    1
                                 FROM    sera.COMER_PAGOSREFGENS GEN
                                 WHERE    GEN.ID_EVENTO = ${event}
-                                AND    sera.COMER_LOTES.ID_LOTE = GEN.ID_LOTE
+                                AND    LOT.ID_LOTE = GEN.ID_LOTE
                                 )
                         AND    EXISTS (SELECT    1
                                 FROM    sera.COMER_CLIENTESXEVENTO CXE
                                 WHERE    CXE.ID_EVENTO = ${event}
-                                AND    CXE.ID_CLIENTE = sera.COMER_LOTES.ID_CLIENTE
+                                AND    CXE.ID_CLIENTE = LOT.ID_CLIENTE
                                 AND    CXE.PROCESAR = 'S'
                                 AND     CXE.ENVIADO_SIRSAE = 'N'
                                 )
                         AND    ID_EVENTO = ${event}
                         AND    LOTE_PUBLICO != 0`);
-    await this.entity.query(` UPDATE    sera.COMER_LOTES 
+    await this.entity.query(` UPDATE    sera.COMER_LOTES LOT
                         SET    VALIDO_SISTEMA = 'S', ID_ESTATUSVTA = 'DES'
                         WHERE    NOT EXISTS (    SELECT    1
                                 FROM    sera.COMER_PAGOSREFGENS GEN
                                 WHERE    GEN.ID_EVENTO = ${event}
-                                AND    sera.COMER_LOTES.ID_LOTE = GEN.ID_LOTE
+                                AND   LOT.ID_LOTE = GEN.ID_LOTE
                                 )
                         AND    ID_EVENTO = ${event}
                         AND    LOTE_PUBLICO != 0
                         AND    ID_CLIENTE IS NULL
                         AND    ID_ESTATUSVTA != 'DES'`);
-    await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE 
+    await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE BXL
                         SET    ID_EVENTO_COMER = NULL, ID_LOTE_COMER = NULL, VENDIDO = NULL, SELECCIONADO = NULL
                         WHERE    EXISTS (SELECT    1
                                 FROM    sera.COMER_BIENESXLOTE BXL2
-                                WHERE    BXL2.NO_BIEN = sera.COMER_BIENESXLOTE.NO_BIEN
+                                WHERE    BXL2.NO_BIEN = BXL.NO_BIEN
                                 AND    EXISTS (SELECT    1
                                         FROM    sera.COMER_LOTES LOT
                                         WHERE    LOT.ID_EVENTO = ${event}
@@ -10891,11 +10891,11 @@ export class ValidatePaymentsRefService {
                                 AND    BXL2.ID_EVENTO_REMESA IS NOT NULL
                                 )
                         AND    ID_EVENTO_COMER IS NOT NULL`);
-    await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE 
+    await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE BXL
                         SET    ID_EVENTO_COMER = NULL, ID_LOTE_COMER = NULL, VENDIDO = NULL, SELECCIONADO = NULL
                         WHERE    EXISTS (SELECT    1
                                 FROM    sera.COMER_BIENESXLOTE BXL2
-                                WHERE    BXL2.NO_BIEN = sera.COMER_BIENESXLOTE.NO_BIEN
+                                WHERE    BXL2.NO_BIEN = BXL.NO_BIEN
                                 AND    EXISTS (SELECT    1
                                         FROM    sera.COMER_LOTES LOT
                                         WHERE    LOT.ID_EVENTO = ${event}
@@ -10906,11 +10906,11 @@ export class ValidatePaymentsRefService {
                                 AND    BXL2.ID_EVENTO_REMESA IS NOT NULL
                                 )
                         AND    ID_EVENTO_COMER IS NOT NULL`);
-    await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE 
+    await this.entity.query(`UPDATE    sera.COMER_BIENESXLOTE BXL
                         SET    ID_EVENTO_COMER = NULL, ID_LOTE_COMER = NULL, VENDIDO = NULL, SELECCIONADO = NULL
                         WHERE    EXISTS (SELECT    1
                                 FROM    sera.COMER_BIENESXLOTE BXL2
-                                WHERE    BXL2.NO_BIEN = sera.COMER_BIENESXLOTE.NO_BIEN
+                                WHERE    BXL2.NO_BIEN = BXL.NO_BIEN
                                 AND    EXISTS (SELECT    1
                                         FROM    sera.COMER_LOTES LOT
                                         WHERE    LOT.ID_EVENTO = ${event}
@@ -10921,10 +10921,10 @@ export class ValidatePaymentsRefService {
                                 AND    BXL2.ID_EVENTO_REMESA IS NOT NULL
                                 )
                         AND    ID_EVENTO_COMER IS NULL`);
-    await this.entity.query(`UPDATE    sera.bien 
+    await this.entity.query(`UPDATE    sera.bien BIE
                 SET    ESTATUS = ( SELECT    ESTATUS_ANT
                          FROM     sera.COMER_BIENESXLOTE BXL2
-                            WHERE    BXL2.NO_BIEN = sera.bien.NO_BIEN
+                            WHERE    BXL2.NO_BIEN = BIE.NO_BIEN
                             AND    EXISTS (SELECT    1
                                     FROM    sera.COMER_LOTES LOT2
                                     WHERE    LOT2.ID_EVENTO = ${event}
@@ -10955,14 +10955,14 @@ export class ValidatePaymentsRefService {
                                         AND     CXE.ENVIADO_SIRSAE = 'N'
                                         )
                                 )
-                        AND    sera.bien.NO_BIEN = BXL.NO_BIEN
+                        AND    BIE.NO_BIEN = BXL.NO_BIEN
                         AND    BXL.ID_EVENTO_REMESA IS NULL
                      )`);
     await this.entity.query(`
-                        UPDATE    sera.bien 
+                        UPDATE    sera.bien BIE
                         SET    ESTATUS = ( SELECT    ESTATUS_ANT
                                 FROM     sera.COMER_BIENESXLOTE BXL2
-                                WHERE    BXL2.NO_BIEN = sera.bien.NO_BIEN
+                                WHERE    BXL2.NO_BIEN = BIE.NO_BIEN
                                 AND    EXISTS (SELECT    1
                                         FROM    sera.COMER_LOTES LOT2
                                         WHERE    LOT2.ID_EVENTO = ${event}
@@ -10981,7 +10981,7 @@ export class ValidatePaymentsRefService {
                                         AND    BXL.ID_LOTE = LOT.ID_LOTE
                                         AND    LOT.ID_CLIENTE IS NULL
                                         )
-                                AND    sera.bien.NO_BIEN = BXL.NO_BIEN
+                                AND   BIE.NO_BIEN = BXL.NO_BIEN
                                 AND    BXL.ID_EVENTO_REMESA IS NULL
              )`);
   }
