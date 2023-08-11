@@ -3276,7 +3276,7 @@ export class ValidatePaymentsRefService {
   }
 
   async actPagosMue(event: number) {
-    const result = await this.entity.query(`UPDATE  sera.COMER_PAGOREF
+    const result = await this.entity.query(`UPDATE  sera.COMER_PAGOREF CPR
                 SET  VALIDO_SISTEMA = 'S'
               WHERE  EXISTS (SELECT  LOT.ID_LOTE
                              FROM    sera.COMER_LOTES LOT
@@ -3294,7 +3294,7 @@ export class ValidatePaymentsRefService {
                 AND  EXISTS (SELECT  GEN.ID_LOTE
                              FROM    sera.COMER_PAGOSREFGENS GEN
                              WHERE   GEN.ID_EVENTO = ${event} 
-                             AND     GEN.ID_PAGO = sera.COMER_PAGOREF.ID_PAGO
+                             AND     GEN.ID_PAGO = CPR.ID_PAGO
                              )
                 AND  VALIDO_SISTEMA = 'A'`);
     return result;
@@ -3334,14 +3334,14 @@ export class ValidatePaymentsRefService {
     //                         )
     //         AND        EXISTS (SELECT    1
     //                         FROM    sera.COMER_PAGOREF PAG
-    //                         WHERE    sera.COMER_PAGOREF.ID_PAGO = sera.COMER_PAGOSREFGENS.ID_PAGO
-    //                         AND        sera.COMER_PAGOREF.IDORDENINGRESO IS NULL
+    //                         WHERE    CPR.ID_PAGO = sera.COMER_PAGOSREFGENS.ID_PAGO
+    //                         AND        CPR.IDORDENINGRESO IS NULL
     //                         )`);
 
     const result = await this.entity.query(`
                                         delete
                                         from
-                                                sera.comer_pagosrefgens
+                                                sera.comer_pagosrefgens GEN
                                         where
                                                 exists (
                                                 select
@@ -3350,19 +3350,19 @@ export class ValidatePaymentsRefService {
                                                         sera.comer_lotes LOT
                                                 where
                                                         LOT.id_evento = ${event}
-                                                        and LOT.id_evento = sera.comer_pagosrefgens.id_evento
+                                                        and LOT.id_evento = GEN.id_evento
                                                         and LOT.id_lote = coalesce(${lot},
                                                         LOT.id_lote)
-                                                                and LOT.id_lote = sera.comer_pagosrefgens.id_lote
+                                                                and LOT.id_lote =GEN.id_lote
                                                                 and exists (
                                                                 select
                                                                         1
                                                                 from
-                                                                        sera.comer_clientesxevento
+                                                                        sera.comer_clientesxevento CXE
                                                                 where
-                                                                        sera.comer_clientesxevento.id_evento = ${event}
-                                                                        and sera.comer_clientesxevento.id_cliente = LOT.id_cliente
-                                                                        and sera.comer_clientesxevento.procesar = 'S'
+                                                                CXE.id_evento = ${event}
+                                                                        and CXE.id_cliente = LOT.id_cliente
+                                                                        and CXE.procesar = 'S'
                                                                                     )
                                                                                 )
                                                 and exists (
@@ -3371,7 +3371,7 @@ export class ValidatePaymentsRefService {
                                                 from
                                                         sera.comer_pagoref pag
                                                 where
-                                                        pag.id_pago = sera.comer_pagosrefgens.id_pago
+                                                        pag.id_pago = GEN.id_pago
                                                         and pag.idordeningreso is null
                                                                                 );
                                         `);
@@ -3384,10 +3384,10 @@ export class ValidatePaymentsRefService {
                                         AND        LOT.ID_LOTE = CPR.ID_LOTE
                                         AND        LOT.ID_LOTE      = coalesce(${lot}, LOT.ID_LOTE)
                                         AND        EXISTS (SELECT    1
-                                                        FROM    sera.COMER_CLIENTESXEVENTO 
-                                                        WHERE    sera.COMER_CLIENTESXEVENTO.ID_EVENTO    = ${event}
-                                                        AND        sera.COMER_CLIENTESXEVENTO.ID_CLIENTE    = LOT.ID_CLIENTE
-                                                        AND        sera.COMER_CLIENTESXEVENTO.PROCESAR    = 'S'
+                                                        FROM    sera.COMER_CLIENTESXEVENTO CXE
+                                                        WHERE    CXE.ID_EVENTO    = ${event}
+                                                        AND       CXE.ID_CLIENTE    = LOT.ID_CLIENTE
+                                                        AND       CXE.PROCESAR    = 'S'
                                                         )
                                         )
                         AND        CPR.VALIDO_SISTEMA = 'S'
@@ -3397,14 +3397,14 @@ export class ValidatePaymentsRefService {
                                `);
     const result3: any[] = await this.entity
       .query(`select coalesce(SUM(coalesce(MONTO_NOAPP_IVA,0)+coalesce(IVA,0)+coalesce(MONTO_APP_IVA,0)),0.0) as total 
-                FROM    sera.COMER_PAGOSREFGENS 
+                FROM    sera.COMER_PAGOSREFGENS CPRG
                 WHERE    ID_EVENTO =${event}
                 AND        ID_LOTE = coalesce(${lot}, ID_LOTE)
                 AND        1             = case coalesce(${phase},0) when 1 then 0 when 2 then 1 when 3 then 1 when 0 then 0 end
                 AND        EXISTS (SELECT    1
-                                FROM    sera.COMER_PAGOREF
-                                WHERE    sera.COMER_PAGOREF.ID_PAGO = sera.COMER_PAGOSREFGENS.ID_PAGO
-                                AND        sera.COMER_PAGOREF.IDORDENINGRESO IS NOT NULL
+                                FROM    sera.COMER_PAGOREF CPR
+                                WHERE    CPR.ID_PAGO = CPRG.ID_PAGO
+                                AND        CPR.IDORDENINGRESO IS NOT NULL
                                 )`);
     BM_ACUMULADO = result3[0].total || 0.0;
 
@@ -6089,13 +6089,13 @@ export class ValidatePaymentsRefService {
                                                         AND CXE.PROCESAR = 'S'
                                                         )`);
 
-          await this.entity.query(` DELETE sera.COMER_PAGOSREFGENS 
+          await this.entity.query(` DELETE sera.COMER_PAGOSREFGENS CPRG
                                 WHERE ID_LOTE = ${V_ID_LOTE}
                                   AND EXISTS (SELECT 1
                                                 FROM sera.COMER_LOTES LOT
                                                WHERE LOT.ID_EVENTO = ${params.event}
-                                                 AND LOT.ID_EVENTO = sera.COMER_PAGOSREFGENS.ID_EVENTO
-                                                 AND LOT.ID_LOTE = sera.COMER_PAGOSREFGENS.ID_LOTE
+                                                 AND LOT.ID_EVENTO = CPRG.ID_EVENTO
+                                                 AND LOT.ID_LOTE = CPRG.ID_LOTE
                                                  AND LOT.ID_LOTE = ${V_ID_LOTE}
                                                  AND EXISTS (SELECT 1
                                                                FROM sera.COMER_CLIENTESXEVENTO CXE
@@ -6106,7 +6106,7 @@ export class ValidatePaymentsRefService {
                                              )
                                   AND NOT EXISTS (SELECT 1
                                                     FROM sera.COMER_PAGOREF PRE
-                                                   WHERE PRE.ID_PAGO = sera.COMER_PAGOSREFGENS.ID_PAGO
+                                                   WHERE PRE.ID_PAGO = CPRG.ID_PAGO
                                                      AND PRE.IDORDENINGRESO IS NOT NULL
                                                  );`);
         });
@@ -6283,13 +6283,13 @@ export class ValidatePaymentsRefService {
                                                            AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
                                                            AND CXE.PROCESAR = 'S'
                                                            )`);
-          await this.entity.query(` DELETE sera.COMER_PAGOSREFGENS 
+          await this.entity.query(` DELETE sera.COMER_PAGOSREFGENS CPRG
                                         WHERE ID_LOTE = ${V_ID_LOTE}
                                         AND EXISTS (SELECT 1
                                                         FROM sera.COMER_LOTES LOT
                                                         WHERE LOT.ID_EVENTO = ${params.event}
-                                                        AND LOT.ID_EVENTO = sera.COMER_PAGOSREFGENS.ID_EVENTO
-                                                        AND LOT.ID_LOTE = sera.COMER_PAGOSREFGENS.ID_LOTE
+                                                        AND LOT.ID_EVENTO = CPRG.ID_EVENTO
+                                                        AND LOT.ID_LOTE = CPRG.ID_LOTE
                                                         AND LOT.ID_LOTE = ${V_ID_LOTE}
                                                         AND EXISTS (SELECT 1
                                                                         FROM sera.COMER_CLIENTESXEVENTO CXE
@@ -6300,7 +6300,7 @@ export class ValidatePaymentsRefService {
                                                 )
                                         AND NOT EXISTS (SELECT 1
                                                         FROM sera.COMER_PAGOREF PRE
-                                                        WHERE PRE.ID_PAGO = sera.COMER_PAGOSREFGENS.ID_PAGO
+                                                        WHERE PRE.ID_PAGO = CPRG.ID_PAGO
                                                         AND PRE.IDORDENINGRESO IS NOT NULL
                                                         );`);
         });
@@ -9527,13 +9527,13 @@ export class ValidatePaymentsRefService {
       await this.entity.query(` UPDATE    sera.COMER_PAGOSREFGENS GEN 
                         SET    REFERENCIA = (    SELECT    coalesce(REFERENCIAORI,REFERENCIA)
                                     FROM    sera.COMER_PAGOREF REF
-                                    WHERE    REF.ID_PAGO = sera.COMER_PAGOSREFGENS.ID_PAGO
+                                    WHERE    REF.ID_PAGO = GEN.ID_PAGO
                                   )
                         WHERE    EXISTS (SELECT    1
                                 FROM    sera.COMER_LOTES LOT
                                 WHERE    LOT.ID_EVENTO = ${event}
-                                AND    LOT.ID_EVENTO = sera.COMER_PAGOSREFGENS.ID_EVENTO
-                                AND    LOT.ID_LOTE = sera.COMER_PAGOSREFGENS.ID_LOTE
+                                AND    LOT.ID_EVENTO = GEN.ID_EVENTO
+                                AND    LOT.ID_LOTE = GEN.ID_LOTE
                                 AND    EXISTS (SELECT    1
                                         FROM    sera.COMER_CLIENTESXEVENTO CXE
                                         WHERE    CXE.ID_EVENTO = ${event}
@@ -9543,16 +9543,16 @@ export class ValidatePaymentsRefService {
                                         )
                                 )`);
     } else {
-      await this.entity.query(`UPDATE    sera.COMER_PAGOSREFGENS
+      await this.entity.query(`UPDATE    sera.COMER_PAGOSREFGENS GEN
                         SET    REFERENCIA = (    SELECT    coalesce(REFERENCIAORI,REFERENCIA)
                                     FROM    sera.COMER_PAGOREF REF
-                                    WHERE    REF.ID_PAGO = sera.COMER_PAGOSREFGENS.ID_PAGO
+                                    WHERE    REF.ID_PAGO = GEN.ID_PAGO
                                   )
                         WHERE    EXISTS (SELECT    1
                                 FROM    sera.COMER_LOTES LOT
                                 WHERE    LOT.ID_EVENTO = ${event}
-                                AND    LOT.ID_EVENTO = sera.COMER_PAGOSREFGENS.ID_EVENTO
-                                AND    LOT.ID_LOTE = sera.COMER_PAGOSREFGENS.ID_LOTE
+                                AND    LOT.ID_EVENTO = GEN.ID_EVENTO
+                                AND    LOT.ID_LOTE = GEN.ID_LOTE
                                 AND    LOT.ID_LOTE = coalesce(${lot}, LOT.ID_LOTE)
                                 )`);
     }
@@ -9690,12 +9690,12 @@ export class ValidatePaymentsRefService {
                 AND    EVE.ID_TPEVENTO = 6
                 AND    EVE.ID_EVENTO = LOT2.ID_EVENTO`);
 
-    await this.entity.query(` DELETE    sera.COMER_PAGOSREFGENS 
+    await this.entity.query(` DELETE    sera.COMER_PAGOSREFGENS GEN
                         WHERE    EXISTS (SELECT    1
                                 FROM     sera.COMER_LOTES LOT
                                 WHERE    LOT.ID_EVENTO = ${event}
-                                AND    LOT.ID_EVENTO = sera.COMER_PAGOSREFGENS.ID_EVENTO
-                                AND    LOT.ID_LOTE = sera.COMER_PAGOSREFGENS.ID_LOTE
+                                AND    LOT.ID_EVENTO = GEN.ID_EVENTO
+                                AND    LOT.ID_LOTE = GEN.ID_LOTE
                                 AND    EXISTS (SELECT    1
                                         FROM    sera.COMER_CLIENTESXEVENTO CXE
                                         WHERE    CXE.ID_EVENTO = ${event}
@@ -9704,12 +9704,12 @@ export class ValidatePaymentsRefService {
                                         AND     CXE.ENVIADO_SIRSAE = 'N'
                                         )
                                 )`);
-    await this.entity.query(`UPDATE    sera.COMER_PAGOREF
+    await this.entity.query(`UPDATE    sera.COMER_PAGOREF CPR
                         SET    VALIDO_SISTEMA = 'A'
                         WHERE    EXISTS (SELECT    1
                                 FROM     sera.COMER_LOTES LOT
                                 WHERE    LOT.ID_EVENTO = ${event}
-                                AND    LOT.ID_LOTE = sera.COMER_PAGOREF.ID_LOTE
+                                AND    LOT.ID_LOTE = CPR.ID_LOTE
                                 AND    EXISTS (SELECT    1
                                         FROM    sera.COMER_CLIENTESXEVENTO CXE
                                         WHERE    CXE.ID_EVENTO = ${event}
