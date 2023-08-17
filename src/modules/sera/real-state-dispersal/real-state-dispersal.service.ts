@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ACUMDETALLESOI } from './dto/acum-detalles.dto';
@@ -1335,6 +1335,7 @@ export class RealStateDispersalService {
     async PA_DEPURA() {
         var n_CUENTAREG: number = 0;
         if (this.n_CVE_EJEC == 1 || this.n_CVE_EJEC == 3) {
+            try {
             await this.entity.query(`UPDATE sera.COMER_PAGOREF
                 SET VALIDO_SISTEMA = 'A'
                 WHERE ID_LOTE IN (SELECT ID_LOTE
@@ -1427,6 +1428,13 @@ export class RealStateDispersalService {
                                         WHERE CLI.ID_CLIENTE = ${this.n_REL_CLIENTE})
                 AND IDORDENGRABADA IS NULL`);
             }
+        } catch (error){
+            return {
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: [error.message],
+                data: [],
+              };
+        }
         } else {
 
             await this.entity.query(`UPDATE sera.COMER_PAGOREF CP
