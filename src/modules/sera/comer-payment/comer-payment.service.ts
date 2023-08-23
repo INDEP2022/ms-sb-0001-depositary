@@ -5,6 +5,7 @@ import { SearchPayment } from './dto/search-payment.dto';
 import { ValidPayment } from './dto/valid-payment.dto';
 import { ComerLotsEntity } from './entity/comer-lots.entity';
 import { LocalDate } from 'src/shared/utils/local-date';
+import { PaPaymentEfeDupNrefDto } from './dto/pa-payment-efe-dup-nref.dto';
 
 @Injectable()
 export class ComerPaymentService {
@@ -544,226 +545,234 @@ export class ComerPaymentService {
 
     }
 
+    // procedure PA_PAGOS_VALIDA
     async validPayment(process: number) {
-        var params: ValidPayment = {}
-        var P_MSG_PROCESO: string
-        var P_EST_PROCESO: number
+        try {
+            var params: ValidPayment = {}
+            var P_MSG_PROCESO: string
+            var P_EST_PROCESO: number
 
-        var LV_VAL_TSAT: number;
-        var LV_VAL_VSIS: number;
-        var LV_VAL_SIS_ORG: string;
-        var LV_DESVALSIS: string
-        var LV_VAL_CBAN: number;
-        var LV_ID_LOTE: number;
-        var LV_PRECIO_FINAL: number
-        var LV_ID_CLIEPRO: number
-        var LV_ID_ESTATUSVTA: string
-        var LV_VAL_REFALT_GL: number;
-        var LV_VALPAGOS: number;
-        var LV_NUMPGOREF: number;
-        var LV_NUMPGOSSAE: number;
-        var LV_ID_CLIEORI: number;
-        var LV_REGVIRTUAL: number;
-        var LV_SUM_PAGOS: number;
-        var C_DATEFEC: any[] = await this.entity.query(`select REFERENCIA,ID_TIPO_SAT,VALIDO_SISTEMA,CVE_BANCO     ,IDORDENINGRESO,ID_PAGO,
-                    ID_EVENTO ,ID_LOTE    ,LOTE_PUBLICO  ,REFERENCIA_ALT,ID_PROCESO
-            from sera.BUSQUEDA_PAGOS_DET
-            where ID_PROCESO = ${process}`);
-        for (const element of C_DATEFEC) {
-            P_EST_PROCESO = 1;
-            P_MSG_PROCESO = 'Proceso finalizado';
+            var LV_VAL_TSAT: number;
+            var LV_VAL_VSIS: number;
+            var LV_VAL_SIS_ORG: string;
+            var LV_DESVALSIS: string
+            var LV_VAL_CBAN: number;
+            var LV_ID_LOTE: number;
+            var LV_PRECIO_FINAL: number
+            var LV_ID_CLIEPRO: number
+            var LV_ID_ESTATUSVTA: string
+            var LV_VAL_REFALT_GL: number;
+            var LV_VALPAGOS: number;
+            var LV_NUMPGOREF: number;
+            var LV_NUMPGOSSAE: number;
+            var LV_ID_CLIEORI: number;
+            var LV_REGVIRTUAL: number;
+            var LV_SUM_PAGOS: number;
+            var C_DATEFEC: any[] = await this.entity.query(`select REFERENCIA,ID_TIPO_SAT,VALIDO_SISTEMA,CVE_BANCO     ,IDORDENINGRESO,ID_PAGO,
+                        ID_EVENTO ,ID_LOTE    ,LOTE_PUBLICO  ,REFERENCIA_ALT,ID_PROCESO
+                from sera.BUSQUEDA_PAGOS_DET
+                where ID_PROCESO = ${process}`);
+            for (const element of C_DATEFEC) {
+                P_EST_PROCESO = 1;
+                P_MSG_PROCESO = 'Proceso finalizado';
 
-            if ((element.id_tipo_sat || 0) == 0) {
-                P_EST_PROCESO = 0;
-                P_MSG_PROCESO = 'La referencia no tiene un valor para el atributo Tipo SAT';
-            } else {
-                const r1 = await this.entity.query(` select count(0) as count 
-                from sera.COMER_CATTIPOPAGO_SAT
-                where ID_TIPO_SAT = '${element.id_tipo_sat}'`)
-                LV_VAL_TSAT = r1[0].count
-                if (LV_VAL_TSAT == 0) {
+                if ((element.id_tipo_sat || 0) == 0) {
                     P_EST_PROCESO = 0;
-                    P_MSG_PROCESO = 'El atributo Tipo SAT mp es valido';
-                }
-            }
-
-            if ((element.valido_sistema || "XX") == "XX") {
-                P_EST_PROCESO = 0;
-                P_MSG_PROCESO = 'El atributo Valido para Sistema no puede ser nulo.';
-            } else {
-                const r1: any[] = await this.entity.query(`select VALSIS_DESCRIPCION as val
-                    from sera.COMER_VALIDO_SISTEMA
-                    where VALSIS_CLAVE = '${element.valido_sistema}'`);
-                if (r1.length > 0) {
-                    LV_DESVALSIS = r1[0].val;
-                    LV_VAL_VSIS = 1;
+                    P_MSG_PROCESO = 'La referencia no tiene un valor para el atributo Tipo SAT';
                 } else {
-                    LV_DESVALSIS = '';
-                    LV_VAL_VSIS = 0;
+                    const r1 = await this.entity.query(` select count(0) as count 
+                    from sera.COMER_CATTIPOPAGO_SAT
+                    where ID_TIPO_SAT = '${element.id_tipo_sat}'`)
+                    LV_VAL_TSAT = r1[0].count
+                    if (LV_VAL_TSAT == 0) {
+                        P_EST_PROCESO = 0;
+                        P_MSG_PROCESO = 'El atributo Tipo SAT mp es valido';
+                    }
                 }
-                if (LV_VAL_VSIS == 0) {
+
+                if ((element.valido_sistema || "XX") == "XX") {
                     P_EST_PROCESO = 0;
-                    P_MSG_PROCESO = 'El atributo Valido para Sistema no es correcto.';
+                    P_MSG_PROCESO = 'El atributo Valido para Sistema no puede ser nulo.';
                 } else {
-                    const r2: any[] = await this.entity.query(` select coalesce(VALIDO_SISTEMA,'X') as val
-                        from sera.COMER_PAGOREF
-                        where REFERENCIA = '${element.referencia}'
-                        limit 1`);
-                    const LV_VAL_SIS_ORG = r2[0].val
+                    const r1: any[] = await this.entity.query(`select VALSIS_DESCRIPCION as val
+                        from sera.COMER_VALIDO_SISTEMA
+                        where VALSIS_CLAVE = '${element.valido_sistema}'`);
+                    if (r1.length > 0) {
+                        LV_DESVALSIS = r1[0].val;
+                        LV_VAL_VSIS = 1;
+                    } else {
+                        LV_DESVALSIS = '';
+                        LV_VAL_VSIS = 0;
+                    }
+                    if (LV_VAL_VSIS == 0) {
+                        P_EST_PROCESO = 0;
+                        P_MSG_PROCESO = 'El atributo Valido para Sistema no es correcto.';
+                    } else {
+                        const r2: any[] = await this.entity.query(` select coalesce(VALIDO_SISTEMA,'X') as val
+                            from sera.COMER_PAGOREF
+                            where REFERENCIA = '${element.referencia}'
+                            limit 1`);
+                        const LV_VAL_SIS_ORG = r2[0].val
 
-                    if (['A', 'R', 'D', 'B'].includes(LV_VAL_SIS_ORG)) {
-                        if (!['A', 'R', 'D', 'B'].includes(element.valido_sistema)) {
+                        if (['A', 'R', 'D', 'B'].includes(LV_VAL_SIS_ORG)) {
+                            if (!['A', 'R', 'D', 'B'].includes(element.valido_sistema)) {
+                                P_EST_PROCESO = 0;
+                                P_MSG_PROCESO = 'El valor del atributo valido para sistema es ' + element.VALIDO_SISTEMA + ' , por lo tanto no se puede hacer el cambio';
+                            }
+                        } else {
                             P_EST_PROCESO = 0;
-                            P_MSG_PROCESO = 'El valor del atributo valido para sistema es ' + element.VALIDO_SISTEMA + ' , por lo tanto no se puede hacer el cambio';
+                            P_MSG_PROCESO = 'El atributo Valido para Sistema ' + LV_VAL_VSIS + ' - ' + LV_DESVALSIS + ' , no se puede cambiar';
                         }
+
+                    }
+                }
+
+                if ((element.CVE_BANCO || 'SCVE') == "SCVE") {
+                    P_EST_PROCESO = 0;
+                    P_MSG_PROCESO = 'En algun registro no tiene un valor para el atributo Clave de Banco';
+                } else {
+                    var r1 = await this.entity.query(` select count(0) as count 
+                    from sera.CAT_BANCOS
+                where CVE_BANCO = '${element.cve_banco}'`)
+                    LV_VAL_CBAN = r1[0].count || 0
+                    if (LV_VAL_CBAN == 0) {
+                        P_EST_PROCESO = 0;
+                        P_MSG_PROCESO = 'La referencia tiene un valor no valido en el atributo Clave de Banco';
+                    }
+                }
+
+                if ((element.idordeningreso || 0) != 0) {
+                    P_EST_PROCESO = 0;
+                    P_MSG_PROCESO = 'Ya exiten orden de ingreso con el numero ' || element.idordeningreso;
+                }
+
+                if ((element.id_evento || 11111111111) == 11111111111) {
+                    P_EST_PROCESO = 0;
+                    P_MSG_PROCESO = 'El Evento es un valor requerido';
+                }
+                if ((element.lote_publico || 11111111111) == 11111111111) {
+                    P_EST_PROCESO = 0;
+                    P_MSG_PROCESO = 'El lote es un valor requerido';
+                }
+
+                var r3: any[] = await this.entity.query(`select coalesce(ID_LOTE,11111111111) as lot,coalesce(PRECIO_FINAL,0) as pfinal,coalesce(ID_CLIENTE,0) as client,ID_ESTATUSVTA  as vta
+                    from sera.COMER_LOTES
+                    where ID_EVENTO    = ${element.id_evento}
+                    and LOTE_PUBLICO = '${element.lote_publico}'`)
+                if (r3.length > 0) {
+                    LV_ID_LOTE = r3[0].lot;
+                    LV_PRECIO_FINAL = r3[0].pfinal;
+                    LV_ID_CLIEPRO = r3[0].client;
+                    LV_ID_ESTATUSVTA = r3[0].vta;
+                } else {
+                    LV_ID_LOTE = 11111111111;
+                    LV_PRECIO_FINAL = 0;
+                    LV_ID_CLIEPRO = 0;
+                    LV_ID_ESTATUSVTA = null;
+                }
+
+                if (LV_ID_LOTE == 11111111111) {
+                    P_EST_PROCESO = 0;
+                    P_MSG_PROCESO = 'El Lote ' + element.lote_publico + ' y Evento ' + element.id_evento + ' no son validos.';
+                }
+                if (LV_ID_CLIEPRO == 0) {
+                    P_EST_PROCESO = 0;
+                    P_MSG_PROCESO = 'No existe Cliente para el Evento ' + element.id_evento + ' y Lote ' + element.lote_publico;
+                }
+                if (LV_PRECIO_FINAL <= 0) {
+                    P_EST_PROCESO = 0;
+                    P_MSG_PROCESO = 'El Lote ' + element.lote_publico + ' y Evento ' + element.id_evento + ' sin precio de venta.';
+                }
+                params.lot = LV_ID_LOTE;
+                var r2 = await this.entity.query(` select count(*) as count
+                    from sera.V_COMER_PAGOS
+                    where REFERENCIA = '${element.referencia}'`)
+                LV_VALPAGOS = r2[0].count || 0
+                if (LV_VALPAGOS == 0) {
+                    params.client = LV_ID_CLIEPRO;
+                    params.reference = (element.referencia_alt || element.referencia);
+
+                    if ((element.referencia_alt || 0) != 0) {
+                        var r7: any[] = await this.entity.query(`select count(0) as count
+                            from (select REFERENCIAG 
+                                from sera.COMER_LOTES
+                            where LOTE_PUBLICO = '${element.lote_publico}'
+                                and ID_EVENTO    = ${element.id_evento}
+                            union
+                            select REFERENCIAL
+                                from sera.COMER_LOTES
+                            where LOTE_PUBLICO = '${element.lote_publico}'
+                                and ID_EVENTO    = ${element.id_evento})`)
+                        LV_VAL_REFALT_GL = r7[0].count || 0
+                        if (LV_VAL_REFALT_GL == 0) {
+                            P_EST_PROCESO = 0;
+                            P_MSG_PROCESO = 'La referencia asignada ' + element.referencia_alt + ' ya esta asiganda.';
+                        }
+                    }
+                } else {
+                    params.reference = element.referencia
+                    var r8 = await this.entity.query(`  select count(0) as c1, count(IDORDENINGRESO) as c2
+                    
+                    from sera.COMER_PAGOREF CP
+                where exists (select 1
+                                from sera.COMER_PAGOREF_VIRT VI
+                                where VI.ID_PAGO = CP.ID_PAGO
+                                    and ID_LOTE    = ${LV_ID_LOTE})`)
+                    LV_NUMPGOREF = r8[0].c1 || 0
+                    LV_NUMPGOSSAE = r8[0].c2 || 0
+
+                    var r9 = await this.entity.query(` select sum(IVA+MONTO_APP_IVA+MONTO_NOAPP_IVA) as sum 
+                        from sera.COMER_PAGOSREFGENS
+                        where ID_LOTE = ${LV_ID_LOTE}
+                        and TIPO = 'N'`)
+                    LV_SUM_PAGOS = r9[0].sum || 0
+
+                    if ((LV_NUMPGOREF > 0 && LV_NUMPGOREF == LV_NUMPGOSSAE && LV_SUM_PAGOS == LV_PRECIO_FINAL) ||
+                        ((LV_ID_ESTATUSVTA || 'VEN') == 'CAN' && LV_NUMPGOREF > 0 && LV_NUMPGOREF == LV_NUMPGOSSAE)) {
+                        P_EST_PROCESO = 0;
+                        P_MSG_PROCESO = 'Ya estan completas las ordenes de ingreso para esta Referencia.';
+                    }
+                    var r9 = await this.entity.query(` select coalesce(ID_CLIENTE,0) as client
+                    from sera.V_COMER_PAGOS
+                    where REFERENCIA ='${element.referencia}'
+                    limit 1`)
+                    LV_ID_CLIEORI = r9[0].client || 0
+
+                    if (LV_ID_CLIEORI == 0) {
+                        P_EST_PROCESO = 0;
+                        P_MSG_PROCESO = 'No existe cliente para el Evento : ' + element.id_evento + ' y Lote ' + element.id_lote + ' verifique sus datos';
+                    }
+                    if (LV_ID_CLIEPRO == LV_ID_CLIEORI) {
+                        params.client = LV_ID_CLIEPRO;
                     } else {
                         P_EST_PROCESO = 0;
-                        P_MSG_PROCESO = 'El atributo Valido para Sistema ' + LV_VAL_VSIS + ' - ' + LV_DESVALSIS + ' , no se puede cambiar';
+                        P_MSG_PROCESO = 'El numero de cliente no es igual al hacer el cambio de Lote o Evento, cliente original :' + LV_ID_CLIEORI + ' cliente al cambiar :' + LV_ID_CLIEPRO;
                     }
 
                 }
-            }
 
-            if ((element.CVE_BANCO || 'SCVE') == "SCVE") {
-                P_EST_PROCESO = 0;
-                P_MSG_PROCESO = 'En algun registro no tiene un valor para el atributo Clave de Banco';
-            } else {
-                var r1 = await this.entity.query(` select count(0) as count 
-                from sera.CAT_BANCOS
-               where CVE_BANCO = '${element.cve_banco}'`)
-                LV_VAL_CBAN = r1[0].count || 0
-                if (LV_VAL_CBAN == 0) {
+                if ((element.id_pago || 11111111111) == 11111111111) {
                     P_EST_PROCESO = 0;
-                    P_MSG_PROCESO = 'La referencia tiene un valor no valido en el atributo Clave de Banco';
-                }
-            }
-
-            if ((element.idordeningreso || 0) != 0) {
-                P_EST_PROCESO = 0;
-                P_MSG_PROCESO = 'Ya exiten orden de ingreso con el numero ' || element.idordeningreso;
-            }
-
-            if ((element.id_evento || 11111111111) == 11111111111) {
-                P_EST_PROCESO = 0;
-                P_MSG_PROCESO = 'El Evento es un valor requerido';
-            }
-            if ((element.lote_publico || 11111111111) == 11111111111) {
-                P_EST_PROCESO = 0;
-                P_MSG_PROCESO = 'El lote es un valor requerido';
-            }
-
-            var r3: any[] = await this.entity.query(`select coalesce(ID_LOTE,11111111111) as lot,coalesce(PRECIO_FINAL,0) as pfinal,coalesce(ID_CLIENTE,0) as client,ID_ESTATUSVTA  as vta
-                from sera.COMER_LOTES
-                where ID_EVENTO    = ${element.id_evento}
-                and LOTE_PUBLICO = '${element.lote_publico}'`)
-            if (r3.length > 0) {
-                LV_ID_LOTE = r3[0].lot;
-                LV_PRECIO_FINAL = r3[0].pfinal;
-                LV_ID_CLIEPRO = r3[0].client;
-                LV_ID_ESTATUSVTA = r3[0].vta;
-            } else {
-                LV_ID_LOTE = 11111111111;
-                LV_PRECIO_FINAL = 0;
-                LV_ID_CLIEPRO = 0;
-                LV_ID_ESTATUSVTA = null;
-            }
-
-            if (LV_ID_LOTE == 11111111111) {
-                P_EST_PROCESO = 0;
-                P_MSG_PROCESO = 'El Lote ' + element.lote_publico + ' y Evento ' + element.id_evento + ' no son validos.';
-            }
-            if (LV_ID_CLIEPRO == 0) {
-                P_EST_PROCESO = 0;
-                P_MSG_PROCESO = 'No existe Cliente para el Evento ' + element.id_evento + ' y Lote ' + element.lote_publico;
-            }
-            if (LV_PRECIO_FINAL <= 0) {
-                P_EST_PROCESO = 0;
-                P_MSG_PROCESO = 'El Lote ' + element.lote_publico + ' y Evento ' + element.id_evento + ' sin precio de venta.';
-            }
-            params.lot = LV_ID_LOTE;
-            var r2 = await this.entity.query(` select count(*) as count
-                from sera.V_COMER_PAGOS
-                where REFERENCIA = '${element.referencia}'`)
-            LV_VALPAGOS = r2[0].count || 0
-            if (LV_VALPAGOS == 0) {
-                params.client = LV_ID_CLIEPRO;
-                params.reference = (element.referencia_alt || element.referencia);
-
-                if ((element.referencia_alt || 0) != 0) {
-                    var r7: any[] = await this.entity.query(`select count(0) as count
-                        from (select REFERENCIAG 
-                            from sera.COMER_LOTES
-                           where LOTE_PUBLICO = '${element.lote_publico}'
-                             and ID_EVENTO    = ${element.id_evento}
-                           union
-                          select REFERENCIAL
-                            from sera.COMER_LOTES
-                           where LOTE_PUBLICO = '${element.lote_publico}'
-                             and ID_EVENTO    = ${element.id_evento})`)
-                    LV_VAL_REFALT_GL = r7[0].count || 0
-                    if (LV_VAL_REFALT_GL == 0) {
-                        P_EST_PROCESO = 0;
-                        P_MSG_PROCESO = 'La referencia asignada ' + element.referencia_alt + ' ya esta asiganda.';
-                    }
-                }
-            } else {
-                params.reference = element.referencia
-                var r8 = await this.entity.query(`  select count(0) as c1, count(IDORDENINGRESO) as c2
-                
-                from sera.COMER_PAGOREF CP
-               where exists (select 1
-                               from sera.COMER_PAGOREF_VIRT VI
-                              where VI.ID_PAGO = CP.ID_PAGO
-                                and ID_LOTE    = ${LV_ID_LOTE})`)
-                LV_NUMPGOREF = r8[0].c1 || 0
-                LV_NUMPGOSSAE = r8[0].c2 || 0
-
-                var r9 = await this.entity.query(` select sum(IVA+MONTO_APP_IVA+MONTO_NOAPP_IVA) as sum 
-                    from sera.COMER_PAGOSREFGENS
-                    where ID_LOTE = ${LV_ID_LOTE}
-                    and TIPO = 'N'`)
-                LV_SUM_PAGOS = r9[0].sum || 0
-
-                if ((LV_NUMPGOREF > 0 && LV_NUMPGOREF == LV_NUMPGOSSAE && LV_SUM_PAGOS == LV_PRECIO_FINAL) ||
-                    ((LV_ID_ESTATUSVTA || 'VEN') == 'CAN' && LV_NUMPGOREF > 0 && LV_NUMPGOREF == LV_NUMPGOSSAE)) {
-                    P_EST_PROCESO = 0;
-                    P_MSG_PROCESO = 'Ya estan completas las ordenes de ingreso para esta Referencia.';
-                }
-                var r9 = await this.entity.query(` select coalesce(ID_CLIENTE,0) as client
-                from sera.V_COMER_PAGOS
-                where REFERENCIA ='${element.referencia}'
-                 limit 1`)
-                LV_ID_CLIEORI = r9[0].client || 0
-
-                if (LV_ID_CLIEORI == 0) {
-                    P_EST_PROCESO = 0;
-                    P_MSG_PROCESO = 'No existe cliente para el Evento : ' + element.id_evento + ' y Lote ' + element.id_lote + ' verifique sus datos';
-                }
-                if (LV_ID_CLIEPRO == LV_ID_CLIEORI) {
-                    params.client = LV_ID_CLIEPRO;
+                    P_MSG_PROCESO = 'No existe identificador de pagos (ID_PAGO) en el Evento : ' + element.id_evento + ' , lote : ' + LV_ID_LOTE + ' y Referencia : ' + element.referencia;
                 } else {
-                    P_EST_PROCESO = 0;
-                    P_MSG_PROCESO = 'El numero de cliente no es igual al hacer el cambio de Lote o Evento, cliente original :' + LV_ID_CLIEORI + ' cliente al cambiar :' + LV_ID_CLIEPRO;
-                }
-
-            }
-
-            if ((element.id_pago || 11111111111) == 11111111111) {
-                P_EST_PROCESO = 0;
-                P_MSG_PROCESO = 'No existe identificador de pagos (ID_PAGO) en el Evento : ' + element.id_evento + ' , lote : ' + LV_ID_LOTE + ' y Referencia : ' + element.referencia;
-            } else {
-                var res = await this.entity.query(` select count(0)as count
-                from sera.COMER_PAGOREF_VIRT
-               where ID_PAGO = ${element.id_pago}`)
-                LV_REGVIRTUAL = res[0].count || 0
-                if (LV_REGVIRTUAL > 1) {
-                    P_EST_PROCESO = 0;
-                    P_MSG_PROCESO = 'La referencia ' + element.referencia + ' ya esta desagregada, revisar su información (COMER_PAGOREF_VIRT)';
+                    var res = await this.entity.query(` select count(0)as count
+                    from sera.COMER_PAGOREF_VIRT
+                where ID_PAGO = ${element.id_pago}`)
+                    LV_REGVIRTUAL = res[0].count || 0
+                    if (LV_REGVIRTUAL > 1) {
+                        P_EST_PROCESO = 0;
+                        P_MSG_PROCESO = 'La referencia ' + element.referencia + ' ya esta desagregada, revisar su información (COMER_PAGOREF_VIRT)';
+                    }
                 }
             }
+
+            return { messsage: P_MSG_PROCESO, status: P_EST_PROCESO, data: params }
+        } catch (error) {
+            return {
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: error.message,
+            };
         }
-
-        return { messsage: P_MSG_PROCESO, status: P_EST_PROCESO, data: params }
     }
 
 
@@ -986,6 +995,206 @@ export class ComerPaymentService {
                 data: {
                     P_EST_PROCESO,
                     P_MSG_PROCESO
+                }
+            }
+        } catch (error) {
+            return {
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: error.message,
+            };
+        }
+    }
+
+    async paPaymentEfeDupNref(dto: PaPaymentEfeDupNrefDto) {
+        let P_TIPO_INCONCI = dto.pTypeInconci;
+        let P_TIPO_ACCION = dto.pTypeAction;
+
+        let LV_TIPOOPERA: string = '';
+        let LV_DESTIPPAG: string = '';
+        let LV_ESTATUS = null; 
+        let LV_TOTREGIS: number = null; 
+        let LV_VALIDA: number = null;
+        let LV_ID_CLIENTE = null; 
+        let LV_REFERENCIA = null;
+        let LV_ID_LOTE = null;
+        let LV_MENSAJE: string = null; 
+        let LV_MSJVALIDO: string = null; 
+        let LV_NVA_REFER = null; 
+        let LV_ID_PAGO = null;  
+        let LV_REGISTRO = null; 
+        let LV_FREGISTRO = null; 
+        let lv_RESULTADO = 'Referencia Valida'; 
+        let LV_DES_INCONS = null;
+        let errors = [];
+
+        try {
+            const C_DATEFEC = await this.entity.query(`
+                select ID_PROCESO,REFERENCIA ,MONTO ,ID_EVENTO, ID_TIPO_SAT,TIPO_REFERENCIA,NO_MOVTO ,FECHA,
+                    CVE_BANCO ,DESCRIPCION,CODIGO,IDORDENINGRESO,CUENTA, TIPO, VALIDO_SISTEMA         
+                from sera.BUSQUEDA_PAGOS_DET
+                where ID_TBUSQUEDA = '${P_TIPO_INCONCI}'
+                    and ID_SELEC     = 1
+            `);
+            let P_EST_PROCESO = 1;
+            let P_MSG_PROCESO = 'Proceso finalizodo.';
+            if(P_TIPO_INCONCI == 1) {
+                LV_TIPOOPERA  = 'D';
+                LV_DESTIPPAG  = 'Duplicados';
+            } else if ([2,4].includes(P_TIPO_INCONCI)) {
+                LV_TIPOOPERA  = 'S';
+                LV_DESTIPPAG  = 'No referenciados';
+            } else if(P_TIPO_INCONCI == 3) {
+                LV_TIPOOPERA  = 'E';
+                LV_ESTATUS    = 'CAE';
+                LV_DESTIPPAG  = 'en Efectivo';
+            } else if(P_TIPO_INCONCI == 4) {
+                LV_TIPOOPERA  = 'S';
+                LV_DESTIPPAG  = 'con Inconsistencia';
+            }
+
+            const queryLvTotreg = await this.entity.query(`
+                select count(0) AS LV_TOTREGIS
+                from sera.BUSQUEDA_PAGOS_DET
+                where ID_TBUSQUEDA = '${P_TIPO_INCONCI}'
+                    and ID_SELEC = 1
+            `);
+            const LV_TOTREGIS = queryLvTotreg[0]?.lv_totregis || 0;
+
+            if(LV_TOTREGIS == 0) {
+                P_EST_PROCESO = 0;
+                P_MSG_PROCESO = 'No existen pagos '+LV_DESTIPPAG+' para procesar';
+            } else {
+                for(const dat of C_DATEFEC) {
+                    LV_VALIDA = 1;
+                    if(P_TIPO_INCONCI == 3 && P_TIPO_ACCION == 1) {
+                        await this.entity.query(`
+                            update sera.COMER_REF_GARANTIAS
+                            set ESTATUS = '${LV_ESTATUS}'
+                            where REF_GSAE||REF_GBANCO = '${dat.referencia}'
+                        `)
+
+                        await this.entity.query(`
+                            update sera.COMER_DET_LC
+                            set ESTATUS = '${LV_ESTATUS}'
+                            where LC_SAE||LC_BANCO = '${dat.referencia}'
+                        `)
+
+                        await this.entity.query(`
+                            delete sera.BUSQUEDA_PAGOS_DET 
+                            where ID_PROCESO = '${dat.id_proceso}'
+                        `);
+                    } else {
+                        if(dat.monto <= 0) {
+                            LV_VALIDA  = 0;
+                            LV_MENSAJE = 'El monto no puede ser menor o igual a cero.';
+                        } else {
+                            const validPaymentExe = await this.validPayment(dat.id_proceso);
+                            if(validPaymentExe.statusCode && validPaymentExe.statusCode == HttpStatus.INTERNAL_SERVER_ERROR) {
+                                errors.push({
+                                    validPayment : dat.id_proceso,
+                                    message: validPaymentExe.message
+                                })
+                            } else {
+                                LV_ID_CLIENTE = validPaymentExe.data.client;
+                                LV_REFERENCIA = validPaymentExe.data.reference;
+                                LV_ID_LOTE = validPaymentExe.data.lot;
+                                LV_MENSAJE = validPaymentExe.message;
+                                LV_VALIDA = validPaymentExe.status;
+                            }
+                        }
+                    }
+
+                    if(LV_VALIDA == 1) {
+                     /* TODO: llamada a procedimiento de BD
+                        P_ADM_PAG_EFE_DUPLICADOS(
+                            LV_REFERENCIA,
+                            LV_TIPOOPERA,
+                            LV_ID_LOTE,
+                            LV_ID_CLIENTE,
+                            dat.id_evento,
+                            dat.monto,
+                            dat.id_tipo_sat,
+                            dat.tipo_referencia,
+                            LV_MSJVALIDO,
+                            LV_NVA_REFER
+                        ); */
+
+                        if(LV_MSJVALIDO = 'OK') {
+                            const queryLvIdPago = await this.entity.query(`
+                                SELECT NEXTVAL('sera.SEQ_COMER_PAGOR') AS LV_ID_PAGO
+                            `);
+                            let LV_ID_PAGO = queryLvIdPago[0].lv_id_pago;
+
+                            const queryLvRegistro = await this.entity.query(`
+                                SELECT NEXTVAL('sera.SEQ_BITACORA') AS LV_REGISTRO
+                            `);
+                            let LV_REGISTRO = queryLvRegistro[0].lv_registro;
+
+                            try {
+                                await this.entity.query(`
+                                    insert into sera.COMER_PAGOREF(
+                                        ID_PAGO,REFERENCIA ,REFERENCIAORI ,NO_MOVIMIENTO ,FECHA      ,CVE_BANCO  ,
+                                        MONTO  ,DESCRIPCION,CODIGO        ,IDORDENINGRESO,CUENTA     ,ID_TIPO_SAT,
+                                        TIPO   ,RESULTADO  ,VALIDO_SISTEMA,FECHA_REGISTRO,NO_REGISTRO,ID_LOTE
+                                    )
+                                    values(
+                                        ${LV_ID_PAGO}, ${LV_NVA_REFER ? `'${LV_NVA_REFER}'`: null}, ${dat.referencia ? `'${dat.referencia}'`: null}, ${dat.no_movto}, 
+                                            CAST('${dat.fecha}' AS DATE), '${dat.cve_banco ? `'${dat.cve_banco}'`: null}',
+                                        ${dat.monto}, ${dat.descripcion ? `'${dat.descripcion}'` : null}, ${dat.codigo}, ${dat.idordeningreso}, 
+                                            ${dat.cuenta ? `'${dat.cuenta}'`: null}, ${dat.id_tipo_sat},
+                                        ${dat.tipo ? `'${dat.tipo}'` : null}, ${lv_RESULTADO ? `'${lv_RESULTADO}'` : null}, 
+                                            ${dat.valido_sistema ? `'${dat.valido_sistema}'` : null}, CAST('${LV_FREGISTRO}' AS DATE), ${LV_REGISTRO}, ${LV_ID_LOTE}
+                                    )
+                                `)
+
+                                await this.entity.query(`
+                                    delete sera.BUSQUEDA_PAGOS_DET where ID_PROCESO = '${dat.id_proceso}'
+                                `) 
+
+                                await this.entity.query(`
+                                    delete sera.COMER_PAGOS_INCONSISTENCIAS where ID_PROCESO = '${dat.id_proceso}'
+                                `)
+                            } catch (error) {
+                                LV_DES_INCONS = error.message;
+                                await this.entity.query(`
+                                    update sera.BUSQUEDA_PAGOS_DET
+                                    set ID_INCONSIS = 19,
+                                        DESC_INCONSIS = '${LV_DES_INCONS}'
+                                    where ID_PROCESO = '${dat.id_proceso}'
+                                `)
+                            }
+
+                        } else {
+                            await this.entity.query(`
+                                update sera.BUSQUEDA_PAGOS_DET
+                                set ID_INCONSIS = 19,
+                                    DESC_INCONSIS = '${LV_MSJVALIDO}'
+                                where ID_PROCESO = '${dat.id_proceso}'
+                            `)
+                        }
+                    } else {
+                        await this.entity.query(`
+                            update sera.BUSQUEDA_PAGOS_DET
+                            set ID_INCONSIS   = 19,
+                                DESC_INCONSIS = '${LV_MENSAJE}'
+                            where ID_PROCESO = '${dat.id_proceso}'
+                        `)
+                    }
+                }
+            }
+
+            return {
+                statusCode: HttpStatus.OK,
+                message: 'Proceso ejecutado correctamente.',
+                data: {
+                    P_EST_PROCESO,
+                    P_MSG_PROCESO,
+                    LV_ID_CLIENTE,
+                    LV_REFERENCIA,
+                    LV_ID_LOTE,
+                    LV_MENSAJE,
+                    LV_VALIDA,
+                    errors
                 }
             }
         } catch (error) {
