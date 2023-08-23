@@ -48,4 +48,9 @@ export class ComerPaymentController {
         return await this.service.changePayments(data.typeInconci,data.typeAction)
     }
 
+    @MessagePattern({ cmd: 'paPaymentEfeDupNref' })    
+    async paPaymentEfeDupNref(dto) {
+        return await this.service.paPaymentEfeDupNref(dto)
+    }
+
 }
