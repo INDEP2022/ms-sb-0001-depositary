@@ -53,4 +53,9 @@ export class ComerPaymentController {
         return await this.service.paPaymentEfeDupNref(dto)
     }
 
+    @MessagePattern({ cmd: 'pAdmPayEfeDuplicated' })    
+    async pAdmPayEfeDuplicated(dto) {
+        return await this.service.pAdmPayEfeDuplicated(dto)
+    }
+
 }

@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SearchPayment } from './dto/search-payment.dto';
@@ -6,10 +6,15 @@ import { ValidPayment } from './dto/valid-payment.dto';
 import { ComerLotsEntity } from './entity/comer-lots.entity';
 import { LocalDate } from 'src/shared/utils/local-date';
 import { PaPaymentEfeDupNrefDto } from './dto/pa-payment-efe-dup-nref.dto';
+import * as moment from 'moment-timezone';
+import { pAdmPayEfeDuplicatedDto } from './dto/p-adm-pay-efe-duplicate.dto';
+import { ClientProxy } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class ComerPaymentService {
-    constructor(@InjectRepository(ComerLotsEntity) private entity: Repository<ComerLotsEntity>) { }
+    constructor(@InjectRepository(ComerLotsEntity) private entity: Repository<ComerLotsEntity>,
+                @Inject('CAPTURELINE') private readonly captureline: ClientProxy) { }
 
     async bankDescription(bankKey: string, code: number): Promise<string> {
         var descripcion = ""
@@ -1105,19 +1110,17 @@ export class ComerPaymentService {
                     }
 
                     if(LV_VALIDA == 1) {
-                     /* TODO: llamada a procedimiento de BD
-                        P_ADM_PAG_EFE_DUPLICADOS(
-                            LV_REFERENCIA,
-                            LV_TIPOOPERA,
-                            LV_ID_LOTE,
-                            LV_ID_CLIENTE,
-                            dat.id_evento,
-                            dat.monto,
-                            dat.id_tipo_sat,
-                            dat.tipo_referencia,
-                            LV_MSJVALIDO,
-                            LV_NVA_REFER
-                        ); */
+
+                        const pAdmPaysEfeDuplicated = await this.pAdmPayEfeDuplicated({
+                            pLcOriginal: LV_REFERENCIA,
+                            pOperationType: LV_TIPOOPERA,
+                            pLotId: LV_ID_LOTE,
+                            pCustomerId: LV_ID_CLIENTE,
+                            pEventId: dat.id_evento,
+                            pLcAmount: dat.monto,
+                            pPaymentType: dat.id_tipo_sat,
+                            pLcType: dat.tipo_referencia
+                        });
 
                         if(LV_MSJVALIDO = 'OK') {
                             const queryLvIdPago = await this.entity.query(`
@@ -1203,6 +1206,1491 @@ export class ComerPaymentService {
                 message: error.message,
             };
         }
+    }
+
+    async pAdmPayEfeDuplicated({
+        pLcOriginal,
+        pOperationType,
+        pLotId,
+        pCustomerId,
+        pEventId,
+        pLcAmount,
+        pPaymentType,
+        pLcType
+    }: pAdmPayEfeDuplicatedDto) {
+
+    let pResult: string;
+    let pReference: string;
+    let n_TPEVENTO: number;
+    let n_ID_CLIENTE_GAN: number;
+    let n_DIRECCION: string;
+    let f_FEC_CIERRE: Date;
+    let f_FEC_FALLO: Date;
+    let f_FEC_NOTIFICACION: Date;
+    let V_DES_LC_TIPO: string;
+    let V_FECHA_HOY: any;
+    let V_TIPO_REF: number = 0;
+    let V_MONTO_FALTANTE: number;
+    let V_MONTO_FINAL: number;
+    let V_MONTO_PAG_GAR: number;
+    let V_MONTO_PAG_LIQ: number;
+    let V_MONTO_GARANTIA: number;
+    let V_MONTO_LIQUIDACION: number;
+    let V_MONTO_NEW_LC: number;
+    let n_GARANC: number = 0;
+    let n_LIQ: number = 0;
+    let e_EXCEPPROC
+    let c_RESUL: string;
+    let V_ULT_REF: number;
+    let V_2: string;
+    let V_FEC_FALLO: Date = null;
+    let V_NUM_REF_GAR: number;
+    let V_NUM_PAGADAS: number;
+    let V_ID_REF_GAR: number;
+    let V_ID_REF_GAR_GEN: number;
+    let V_IMONTO_GAR_GEN: number;
+    let V_ID_CLT_REF_GR: number;
+    let V_ID_CLT_REF_LC: number;
+    let V_ID_CLT_REF: number;
+    let V_MONTO_LC_ORI: number;
+    let v_fec_max_gar_ser: Date; 
+    let v_fec_max_gar_cum: Date;
+    let v_fec_max_gar_cum_ext: Date;
+    let v_fec_max_liq: Date;
+    let v_fec_max_liq_ext: Date; 
+    let v_PorcentajeGarantia: number;
+    let V_ID_DET_LC_7: number;
+    let V_ID_DET_LC_2: number;
+    let V_ID_DET_LC_4: number;
+    let V_ID_DET_LC_3: number;
+    let V_ID_DET_LC_S: number;
+    let V_TOTAL_LCS: number;
+    let V_MONTO_PENA_LC_7: number;
+    let V_MONTO_PENA_LC_4: number;
+    let V_MONTO_LC_7: number;
+    let V_MONTO_LC_4: number;
+    let V_ID_LC: number;
+    let V_FECHA_VIG_PENA_LC_7: Date;
+    let V_FECHA_VIG_PENA_LC_4: Date;
+    let V_DIF_MONTO_PENA: number;
+    let V_MONTO_TOTAL_LOTE: number;
+    let V_MONTO_GARANTIA_LOTE: number;
+    let V_MONTO_LIQUIDACION_LOTE: number;
+    let V_MONTOS_LCS_GENYPAG: number;
+    let V_MONTOS_LCS_GENYPAG_AUX: number;
+    let ID_LC_BUSCADA: number;
+    let DE: number;
+    let V_MONTO_NUEVA_LC: number;
+    let V_MONTO_AUX: number;
+    let V_MONTO_AUX2: number;
+    let V_MONTO_LC_ADMIN: number;
+    let V_FECHA_VIG_ADMIN: Date;
+    let V_MONTO_PENA_LC_ADMIN: number;
+    let V_ID_EVENTO: number; 
+    let V_ID_LOTE: number;
+    let V_CLIENTE: number;
+    let V_ID_LIN_MOD: number;
+    let V_MON: number;
+    let V_YA_OPERO: number;
+    
+    try{
+
+        V_FECHA_HOY = moment.utc(new Date()).tz('America/Mexico_City').format('DD-MM-YYYY')
+
+        V_YA_OPERO = 0;
+
+        const q1 = await this.entity.query(`SELECT ID_CLIENTE, MONTO
+            FROM SERA.COMER_REF_GARANTIAS
+            WHERE REF_GSAE || REF_GBANCO = '${pLcOriginal}';`)
+       
+            if (q1.length !== 0) {
+
+                V_ID_REF_GAR = q1[0].id_cliente
+                V_MONTO_LC_ORI = q1[0].monto
+
+            } else {
+
+
+                V_ID_REF_GAR = null
+
+            }
+
+        if (!V_ID_REF_GAR) {
+
+            const q2 = await this.entity.query(`SELECT ID_CLIENTE
+                FROM SERA.COMER_LC
+                WHERE ID_LC = (SELECT ID_LC
+                                FROM SERA.COMER_DET_LC
+                                WHERE LC_SAE || LC_BANCO = '${pLcOriginal}');`)
+
+            V_ID_CLT_REF_LC = q2[0].id_cliente
+
+            V_ID_CLT_REF = V_ID_CLT_REF_LC;
+
+            const q3 = await this.entity.query(`SELECT MONTO
+                FROM SERA.COMER_DET_LC
+                WHERE LC_SAE || LC_BANCO = '${pLcOriginal}'`)
+
+            V_MONTO_LC_ORI = q3[0].monto
+
+            V_ID_CLT_REF = V_ID_CLT_REF_LC;
+
+        } else {
+
+            V_ID_CLT_REF = V_ID_REF_GAR
+            
+        }
+
+        if (V_ID_CLT_REF) {
+
+            if (V_ID_CLT_REF == pCustomerId) {
+
+                if (pOperationType == 'D') {
+
+                    const q4 = await this.entity.query(`SELECT FEC_FALLO 
+                        FROM SERA.COMER_EVENTOS 
+                        WHERE ID_EVENTO = ${pEventId};`)
+
+                    V_FEC_FALLO = q4[0].fec_fallo
+
+                    if (!V_FEC_FALLO) {
+
+                        const q5 = await this.entity.query(`SELECT COUNT (ID_LCG)
+                            FROM SERA.COMER_REF_GARANTIAS
+                            WHERE ID_EVENTO = ${pEventId}
+                            AND ID_LOTE = ${pLotId}
+                            AND ID_CLIENTE = ${pCustomerId};`)
+
+                        V_NUM_REF_GAR = q5[0].count
+
+                        if (!V_NUM_REF_GAR || V_NUM_REF_GAR == 0) {
+
+                            c_RESUL = 'No se permite crear garantia de seriedad, ya que el cliente no no esta participando en el evento ' + pEventId +'.'
+
+                        } else {
+
+                            const q6 = await this.entity.query(`SELECT COUNT (ID_LCG)
+                                FROM SERA.COMER_REF_GARANTIAS
+                                WHERE ID_EVENTO = ${pEventId}
+                                AND ID_LOTE = ${pLotId}
+                                AND ID_CLIENTE = ${pCustomerId}
+                                AND ESTATUS IN ('PAG,VAL')`)
+
+                            V_NUM_PAGADAS = q6[0].count
+
+                            if (V_NUM_PAGADAS == 0 || !V_NUM_PAGADAS) {
+
+                                const q7 = await this.entity.query(`SELECT ID_LCG, MONTO
+                                    FROM SERA.COMER_REF_GARANTIAS
+                                    WHERE ID_EVENTO = ${pEventId}
+                                    AND ID_LOTE = ${pLotId}
+                                    AND ID_CLIENTE = ${pCustomerId}
+                                    AND ESTATUS IN ('GEN'); `)
+
+                                V_ID_REF_GAR_GEN = q7[0].id_lcg
+                                V_IMONTO_GAR_GEN = q7[0].monto
+
+                                if (V_MONTO_LC_ORI < V_IMONTO_GAR_GEN) {
+
+                                    c_RESUL = 'No se permite crear garantia de seriedad, ya que el monto de la lc es menor al de la garantia asignada ' + pEventId +'.'
+
+                                } else if (V_MONTO_LC_ORI == V_IMONTO_GAR_GEN) {
+
+                                    await this.entity.query(`UPDATE SERA.COMER_REF_GARANTIAS 
+                                        SET ESTATUS = 'PAG' 
+                                        WHERE ID_LCG = ${V_ID_REF_GAR_GEN};
+                                    `)
+
+                                    const q01 = await this.entity.query(`SELECT REF_GSAE || REF_GBANCO AS P_REFERENCIA_OUT
+                                        FROM SERA.COMER_REF_GARANTIAS
+                                        WHERE ID_LCG = ${V_ID_REF_GAR_GEN};
+                                    `)
+
+                                    pReference = q01[0].p_referencia_out
+
+                                    pResult = 'OK'
+
+                                } else if (V_MONTO_LC_ORI > V_IMONTO_GAR_GEN) {
+
+                                    const spGen01 = await this.captureline.send({ cmd: 'spGenRg' }, 
+                                        {
+                                            P_ID_LOTE: pLotId, 
+                                            P_ID_CLIENTE: pCustomerId, 
+                                            P_PARAMETRO: 'GSE',
+                                            P_MONTO: pLcAmount,
+                                            P_IND_MOV: 'C',
+                                            P_FECVIGENCIA: V_FECHA_HOY,
+                                            P_NO_CHEQUE: null,
+                                            P_EXC_CHEQUE: null,
+                                            P_NO_PLAETA: null
+                                        });
+
+                                    const q02 = await this.entity.query(`SELECT REF_GSAE || REF_GBANCO AS P_REFERENCIA_OUT
+                                        FROM SERA.COMER_REF_GARANTIAS
+                                        WHERE ID_LCG =
+                                            (SELECT MAX (ID_LCG)
+                                                FROM SERA.COMER_REF_GARANTIAS
+                                                WHERE MONTO = ${pLcAmount}
+                                                AND ID_CLIENTE = ${pCustomerId}
+                                                AND ID_LOTE = ${pLotId}
+                                                AND ID_EVENTO = ${pEventId})
+                                    `)
+
+                                    pReference = q02[0].p_referencia_out
+
+                                    await this.entity.query(`UPDATE COMER_REF_GARANTIAS
+                                        SET ESTATUS = 'PAG'
+                                        WHERE REF_GSAE || REF_GBANCO = '${pReference}'
+                                    `)
+
+                                    c_RESUL = 'No se permite crear garantia de seriedad, ya que el cliente ya pago su garantia de seriedad del evento ' + pEventId +'.'
+                                }
+
+                            }
+
+                        }
+
+                    } else {
+
+                        const q3 = await this.entity.query(`SELECT 
+                                                            CL.ID_CLIENTE,
+                                                            CE.ID_TPEVENTO,
+                                                            CE.DIRECCION,
+                                                            CE.FECHA_CIERRE_EVENTO,
+                                                            CE.FEC_FALLO,
+                                                            CE.FECHA_NOTIFICACION,
+                                                            COALESCE (CL.GARANTIA_ASIG, 0) AS GARANTIA,
+                                                            COALESCE (CL.MONTO_LIQ, 0) AS MONTO
+                                                            FROM SERA.COMER_EVENTOS CE, SERA.COMER_LOTES CL
+                                                            WHERE CE.ID_EVENTO = ${pEventId}
+                                                            AND CL.ID_LOTE = ${pLotId};`)
+
+                        n_ID_CLIENTE_GAN = q3[0].id_cliente
+                        n_TPEVENTO = q3[0].id_tpevento
+                        n_DIRECCION = q3[0].direccion
+                        f_FEC_CIERRE = q3[0].fecha_cierre_evento
+                        f_FEC_FALLO = q3[0].fec_fallo
+                        f_FEC_NOTIFICACION = q3[0].fecha_notificacion
+                        n_GARANC = q3[0].garantia
+                        n_LIQ = q3[0].monto
+
+                        const getData = await lastValueFrom(this.captureline.send({ cmd: 'spObtainDateEvent' }, {
+                            pTpEvent: n_TPEVENTO,
+                            pDirection: n_DIRECCION,
+                            pEventId: pEventId
+                        }));
+
+                        v_fec_max_gar_ser = getData.data.V_FEC_MAX_GAR_SER
+                        v_fec_max_gar_cum = getData.data.V_FEC_MAX_GAR_CUM
+                        v_fec_max_gar_cum_ext = getData.data.V_FEC_MAX_GAR_CUM_EXT
+                        v_fec_max_liq = getData.data.V_FEC_MAX_LIQ
+                        v_fec_max_gar_cum_ext = getData.data.V_FEC_MAX_GAR_CUM_EXT
+                        v_fec_max_liq_ext = getData.data.V_FEC_MAX_LIQ_EXT
+                        v_PorcentajeGarantia = getData.data.v_PorcentajeGarantia
+
+                        if (n_ID_CLIENTE_GAN !== pCustomerId) {
+
+                            c_RESUL = 'El cliente: ' + pCustomerId + ' es diferente al ganador del lote: ' + pLotId + ' cliente ganador: ' + n_ID_CLIENTE_GAN +'.'
+
+                        } else {
+
+                            if ((n_DIRECCION == 'M' || n_DIRECCION == 'I') && n_TPEVENTO == 4) {
+
+                                const q4 = await this.entity.query(`SELECT PRECIO_FINAL
+                                    FROM SERA.COMER_LOTES
+                                    WHERE ID_LOTE = ${pLotId}
+                                    AND ID_CLIENTE = ${pCustomerId}
+                                    AND ID_EVENTO = ${pEventId};
+                                `)
+
+                                V_MONTO_TOTAL_LOTE = q4[0].precio_final
+
+                                if (V_MONTO_TOTAL_LOTE == null) {
+
+                                    c_RESUL = 'No se puede obtener el monto final del lote : ' + pLotId + ', cliente : '+ pCustomerId + ', evento : ' + n_ID_CLIENTE_GAN +'.'
+
+                                }
+
+                                if (V_MONTO_TOTAL_LOTE = 0) {
+
+                                    V_MONTO_TOTAL_LOTE = 0
+
+                                } else {
+
+                                    const q4 = await this.entity.query(`SELECT SUM (MONTO)
+                                        FROM SERA.COMER_REF_GARANTIAS
+                                        WHERE ID_CLIENTE = ${pCustomerId}
+                                        AND ID_LOTE = ${pLotId}
+                                        AND ID_EVENTO = ${pEventId}
+                                        AND ESTATUS IN ('VAL', 'PAG');
+                                    `)
+
+                                    V_MONTO_PAG_GAR = q4[0].sum
+
+                                    V_MONTO_GARANTIA_LOTE = (V_MONTO_TOTAL_LOTE *  v_PorcentajeGarantia) - V_MONTO_PAG_GAR;
+                                    V_MONTO_LIQUIDACION_LOTE = (V_MONTO_TOTAL_LOTE *  v_PorcentajeGarantia);
+                                }
+
+                            } else {
+
+                                const q5 = await this.entity.query(`SELECT SUM (MONTO)
+                                        FROM SERA.COMER_REF_GARANTIAS
+                                        WHERE ID_CLIENTE = ${pCustomerId}
+                                        AND ID_LOTE = ${pLotId}
+                                        AND ID_EVENTO = ${pEventId}
+                                        AND ESTATUS IN ('VAL', 'PAG');
+                                    `)
+
+                                    V_MONTO_PAG_GAR = q5[0].sum
+
+                                const q6 = await this.entity.query(`SELECT SUM (MONTO)
+                                    FROM SERA.COMER_DET_LC
+                                    WHERE ID_LC = ${V_ID_LC} 
+                                    AND ESTATUS IN ('VAL', 'PAG');
+                                `)
+
+                                V_MONTO_PAG_LIQ = q6[0].sum
+
+                                const q7 = await this.entity.query(`SELECT COALESCE(${V_MONTO_PAG_GAR},0) + COALESCE(${n_GARANC},0) + COALESCE(${n_LIQ},0) AS V_MONTO_TOTAL_LOTE`)
+
+                                V_MONTO_TOTAL_LOTE = q7[0].v_monto_total_lote
+
+                                const q8 = await this.entity.query(`SELECT COALESCE(${n_GARANC},0) AS n_GARANC`)
+
+                                V_MONTO_GARANTIA_LOTE = q8[0].n_garanc
+
+                                const q9 = await this.entity.query(`SELECT COALESCE(${n_LIQ},0) AS n_LIQ`)
+
+                                V_MONTO_LIQUIDACION_LOTE = q9[0].n_liq
+
+                            }
+
+                        }
+                    }
+
+                const q10 = await this.entity.query(`SELECT COUNT(ID_DET_LC)
+                    FROM SERA.COMER_DET_LC
+                    WHERE  ID_LC =
+                            (SELECT ID_LC
+                            FROM SERA.COMER_LC
+                            WHERE ID_LOTE = ${pLotId}
+                            AND ID_CLIENTE = ${pCustomerId}
+                            AND ID_EVENTO = ${pEventId});
+                `)
+
+                V_TOTAL_LCS = q10[0].count
+
+                if (V_TOTAL_LCS !== 0) {
+
+                    const q11 = await this.entity.query(`SELECT ID_DET_LC 
+                        FROM SERA.COMER_DET_LC
+                        WHERE ESTATUS = 'GEN' 
+                        AND TIPO_REF = 7
+                        AND ID_LC =
+                                (SELECT ID_LC
+                                FROM SERA.COMER_LC
+                                WHERE ID_LOTE = ${pLotId}
+                                AND ID_CLIENTE = ${pCustomerId}
+                                AND ID_EVENTO = ${pEventId});
+                    `)
+
+                    if (q11.length !== 0 ) {
+                        V_ID_DET_LC_7 = q11[0].id_det_lc
+                    } else {
+                        V_ID_DET_LC_7 = 0
+                    }
+
+                    if (V_ID_DET_LC_7 == 0) {
+
+                        const q12 = await this.entity.query(`SELECT ID_DET_LC 
+                            FROM SERA.COMER_DET_LC
+                            WHERE ESTATUS = 'GEN' 
+                            AND TIPO_REF = 2
+                            AND ID_LC =
+                                    (SELECT ID_LC
+                                        FROM SERA.COMER_LC
+                                        WHERE ID_LOTE = ${pLotId}
+                                            AND ID_CLIENTE = ${pCustomerId}
+                                            AND ID_EVENTO = ${pEventId});
+                        `)
+
+                        if (q12.length !== 0 ) {
+                            V_ID_DET_LC_2 = q12[0].id_det_lc
+                        } else {
+                            V_ID_DET_LC_2 = 0
+                        }
+
+                        if (V_ID_DET_LC_2 == 0) {
+
+                            const q13 = await this.entity.query(`SELECT ID_DET_LC
+                                FROM SERA.COMER_DET_LC
+                                WHERE ESTATUS = 'GEN' 
+                                AND TIPO_REF = 4
+                                AND ID_LC =
+                                        (SELECT ID_LC
+                                        FROM SERA.COMER_LC
+                                        WHERE ID_LOTE = ${pLotId}
+                                        AND ID_CLIENTE = ${pCustomerId}
+                                        AND ID_EVENTO = ${pEventId});
+                            `)
+
+                            if (q13.length !== 0 ) {
+                                V_ID_DET_LC_4 = q13[0].id_det_lc
+                            } else {
+                                V_ID_DET_LC_4 = 0
+                            }
+
+                            if (V_ID_DET_LC_4 == 0) {
+
+                                const q14 = await this.entity.query(`SELECT ID_DET_LC
+                                    FROM SERA.COMER_DET_LC
+                                    WHERE ESTATUS = 'GEN' 
+                                    AND TIPO_REF = 3
+                                    AND ID_LC =
+                                            (SELECT ID_LC
+                                            FROM SERA.COMER_LC
+                                            WHERE ID_LOTE = ${pLotId}
+                                            AND ID_CLIENTE = ${pCustomerId}
+                                            AND ID_EVENTO = ${pEventId});
+                                `)
+
+                                if (q14.length !== 0 ) {
+                                    V_ID_DET_LC_3 = q14[0].id_det_lc
+                                } else {
+                                    V_ID_DET_LC_3 = 0
+                                }
+
+                                if (V_ID_DET_LC_3 == 0) {
+
+                                    c_RESUL = 'VER POR QUE NO TIENE UNA 3'
+
+                                } else {
+
+                                    const q15 = await this.entity.query(`SELECT 
+                                            MONTO, 
+                                            MONTO_PENA,
+                                            FEC_VIGENCIA, 
+                                            ID_LC, 
+                                            LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
+                                        FROM SERA.COMER_DET_LC 
+                                        WHERE ID_DET_LC = ${V_ID_DET_LC_3};
+                                    `)
+
+                                    V_MONTO_LC_ADMIN = q15[0].monto
+                                    V_MONTO_PENA_LC_ADMIN = q15[0].monto_pena
+                                    V_FECHA_VIG_ADMIN = q15[0].fec_vigencia
+                                    V_ID_LC = q15[0].id_lc
+                                    pReference = q15[0].p_referencia_out
+
+                                    if (V_MONTO_LC_ADMIN == pLcAmount) {
+
+                                        await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                            SET ESTATUS = 'PAG' 
+                                            WHERE ID_DET_LC = ${V_ID_DET_LC_3};
+                                        `)
+
+                                        const q16 = await this.entity.query(`SELECT LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
+                                            FROM SERA.COMER_DET_LC
+                                            WHERE ID_DET_LC = ${V_ID_DET_LC_3}; 
+                                        `)
+
+                                        pReference = q16[0].p_referencia_out
+                                        pResult = 'OK'
+
+                                    } else if (V_MONTO_LC_ADMIN > pLcAmount) {
+
+                                        await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                            SET ESTATUS = 'CAN' 
+                                            WHERE ESTATUS = 'GEN' 
+                                            AND TIPO_REF = 3
+                                            AND ID_DET_LC = ${V_ID_LC};
+                                        `)
+
+                                        const spGen02 = await this.captureline.send({ cmd: 'spGenLc' }, // SE HACE LA NUEVA REFERENCIA CON SOLO UNA PARTE DE LA PENA QUE FALTA POR PAGAR
+                                        {
+                                            P_ID_LOTE: pLotId, 
+                                            P_ID_CLIENTE: pCustomerId, 
+                                            P_PARAMETRO: 'LIQN',
+                                            P_MONTO_LC: pLcAmount,
+                                            P_IND_MOV: 'C',
+                                            P_FECVIGENCIA: V_FECHA_HOY
+                                        });                                        
+
+                                        const q17 = await this.entity.query(`SELECT LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
+                                        FROM SERA.COMER_DET_LC
+                                        WHERE ESTATUS = 'GEN' 
+                                        AND TIPO_REF = 3
+                                        AND ID_LC = (SELECT ID_LC
+                                                    FROM COMER_LC
+                                                    WHERE ID_LOTE = ${pLotId}
+                                                    AND ID_CLIENTE = ${pCustomerId}
+                                                    AND ID_EVENTO = ${pEventId}); 
+                                        `)
+
+                                        pReference = q17[0].p_referencia_out
+
+                                        await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                            SET ESTATUS = 'PAG' 
+                                            WHERE LC_SAE || LC_BANCO = '${pReference}';
+                                        `)
+
+                                        const spGen03 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                        {
+                                            P_ID_LOTE: pLotId, 
+                                            P_ID_CLIENTE: pCustomerId, 
+                                            P_PARAMETRO: 'LIQN',
+                                            P_MONTO_LC: V_MONTO_LC_ADMIN - pLcAmount,
+                                            P_IND_MOV: 'C',
+                                            P_FECVIGENCIA: moment.utc(V_FECHA_VIG_ADMIN).tz('America/Mexico_City').format('DD-MM-YYYY')
+                                        });
+
+                                        pResult = 'OK'
+
+                                    } else if (V_MONTO_LC_ADMIN < pLcAmount) {
+
+                                        await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                            SET ESTATUS ='CAN' 
+                                            WHERE ESTATUS = 'GEN'  
+                                            AND ID_LC = ${V_ID_LC};
+                                        `)
+
+                                        // SE HACE LA NUEVA REFERENCIA CON SOLO UNA PARTE DE LA PENA QUE FALTA POR PAGAR
+                                        const spGen04 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                        {
+                                            P_ID_LOTE: pLotId, 
+                                            P_ID_CLIENTE: pCustomerId, 
+                                            P_PARAMETRO: 'LIQN',
+                                            P_MONTO_LC: pLcAmount,
+                                            P_IND_MOV: 'C',
+                                            P_FECVIGENCIA: moment.utc(V_FECHA_VIG_ADMIN).tz('America/Mexico_City').format('DD-MM-YYYY')
+                                        });                                        
+
+                                        const q18 = await this.entity.query(`SELECT LC_SAE || LC_BANCO
+                                            FROM COMER_DET_LC
+                                            WHERE ESTATUS = 'GEN' 
+                                            AND TIPO_REF = 3
+                                            AND ID_LC = (SELECT ID_LC
+                                                        FROM SERA.COMER_LC
+                                                        WHERE ID_LOTE = ${pLotId}
+                                                        AND ID_CLIENTE = ${pCustomerId}
+                                                        AND ID_EVENTO = ${pEventId}); 
+                                        `)
+
+                                        pReference = q18[0].p_referencia_out
+
+                                        await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                            SET ESTATUS = 'PAG' 
+                                            WHERE LC_SAE || LC_BANCO = '${pReference}';   
+                                        `)
+
+                                        pResult = 'OK'
+
+                                    }
+
+                                }
+
+                            } else {
+
+                                const q19 = await this.entity.query(`SELECT MONTO, 
+                                        MONTO_PENA,
+                                        FEC_VIGENCIA, 
+                                        ID_LC 
+                                    FROM SERA.COMER_DET_LC 
+                                    WHERE ID_DET_LC = ${V_ID_DET_LC_4};
+                                `)
+
+                                V_MONTO_LC_4 = q19[0].monto
+                                V_MONTO_PENA_LC_4 = q19[0].monto_pena
+                                V_FECHA_VIG_PENA_LC_4 = q19[0].fec_vigencia
+                                V_ID_LC = q19[0].id_lc
+
+                                if (V_MONTO_PENA_LC_4 > pLcAmount) {
+
+                                    await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                        SET ESTATUS ='CAN' 
+                                        WHERE ESTATUS = 'GEN' 
+                                        AND TIPO_REF = 4 
+                                        AND ID_LC = ${V_ID_LC};   
+                                    `)
+
+                                    // SE COBRA UNA PARTE DE LA PENA
+                                    const spGen05 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                        {
+                                            P_ID_LOTE: pLotId, 
+                                            P_ID_CLIENTE: pCustomerId, 
+                                            P_PARAMETRO: 'GCE',
+                                            P_MONTO_LC: 1,
+                                            P_IND_MOV: 'C',
+                                            P_FECVIGENCIA: moment.utc(V_FECHA_VIG_PENA_LC_4).tz('America/Mexico_City').format('DD-MM-YYYY')
+                                        });
+
+                                    const q20 = await this.entity.query(`SELECT LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
+                                        FROM SERA.COMER_DET_LC
+                                        WHERE ESTATUS = 'GEN' 
+                                        AND MONTO = 1
+                                        AND ID_LC = (SELECT ID_LC
+                                                    FROM SERA.COMER_LC
+                                                    WHERE ID_LOTE = ${pLotId}
+                                                    AND ID_CLIENTE = ${pCustomerId}
+                                                    AND ID_EVENTO = ${pEventId});
+                                    `)
+
+                                    pReference = q20[0].p_referencia_out
+
+                                    await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                        SET ESTATUS = 'PAG', 
+                                            MONTO = 0, 
+                                            MONTO_PENA = ${pLcAmount} 
+                                        WHERE LC_SAE || LC_BANCO = '${pReference}';   
+                                    `)
+
+                                    // SE HACE LA NUEVA REFERENCIA CON SOLO UNA PARTE DE LA PENA QUE FALTA POR PAGAR
+                                    const spGen06 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                        {
+                                            P_ID_LOTE: pLotId, 
+                                            P_ID_CLIENTE: pCustomerId, 
+                                            P_PARAMETRO: 'GCE',
+                                            P_MONTO_LC: V_MONTO_LC_4,
+                                            P_IND_MOV: 'C',
+                                            P_FECVIGENCIA: moment.utc(V_FECHA_VIG_PENA_LC_4).tz('America/Mexico_City').format('DD-MM-YYYY')
+                                        });
+
+                                    const q21 = await this.entity.query(`SELECT LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
+                                        FROM SERA.COMER_DET_LC
+                                        WHERE ESTATUS = 'GEN'
+                                        AND ID_LC = (SELECT MAX (ID_LC)
+                                                        FROM SERA.COMER_LC
+                                                        WHERE ID_LOTE = ${pLotId}
+                                                        AND ID_CLIENTE = ${pCustomerId}
+                                                        AND ID_EVENTO = ${pEventId});
+                                    `)
+
+                                    pReference = q21[0].p_referencia_out
+
+                                    await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                        SET MONTO_PENA = (MONTO_PENA  - ${pLcAmount}) 
+                                        WHERE LC_SAE || LC_BANCO = '${pReference}';   
+                                    `)
+
+                                } else {
+
+                                    V_MON = (V_MONTO_PENA_LC_4 + V_MONTO_LC_4)
+
+                                    if (pLcAmount <  V_MON) {
+
+                                        V_YA_OPERO = 1;
+
+                                        await this.entity.query(`UPDATE sera.COMER_DET_LC
+                                            SET ESTATUS = 'PAG'
+                                            WHERE ID_DET_LC = ${V_ID_DET_LC_4};   
+                                        `)
+
+                                        V_MONTO_NUEVA_LC =  V_MON - pLcAmount;
+
+                                        const spGen07 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                        {
+                                            P_ID_LOTE: pLotId, 
+                                            P_ID_CLIENTE: pCustomerId, 
+                                            P_PARAMETRO: 'GCE',
+                                            P_MONTO_LC: V_MONTO_NUEVA_LC,
+                                            P_IND_MOV: 'C',
+                                            P_FECVIGENCIA: moment.utc(V_FECHA_VIG_PENA_LC_4).tz('America/Mexico_City').format('DD-MM-YYYY')
+                                        });
+
+                                        const q22 = await this.entity.query(`SELECT LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
+                                            FROM SERA.COMER_DET_LC
+                                            WHERE ESTATUS = 'GEN'
+                                            AND ID_LC = (SELECT MAX (ID_LC)
+                                                        FROM SERA.COMER_LC
+                                                        WHERE ID_LOTE = ${pLotId}
+                                                        AND ID_CLIENTE = ${pCustomerId}
+                                                        AND ID_EVENTO = ${pEventId});
+                                        `)
+
+                                        pReference = q22[0].p_referencia_out
+
+                                        await this.entity.query(`UPDATE SERA.COMER_DET_LC
+                                            SET MONTO_PENA = 0
+                                            WHERE LC_SAE || LC_BANCO = '${pReference}';   
+                                        `)
+
+                                    }
+
+                                    if (V_MONTO_PENA_LC_4 > pLcAmount) {
+
+                                        if (V_YA_OPERO == 0) {
+
+                                            V_YA_OPERO = 1;
+
+                                            await this.entity.query(`UPDATE SERA.COMER_DET_LC
+                                                SET ESTATUS = 'CAS'
+                                                WHERE ID_DET_LC = ${V_ID_DET_LC_4};  
+                                            `)
+
+                                            const spGen08 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: 'GCE',
+                                                P_MONTO_LC: V_MONTO_NUEVA_LC,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: moment.utc(V_FECHA_VIG_PENA_LC_4).tz('America/Mexico_City').format('DD-MM-YYYY')
+                                            });
+
+                                            const q23 = await this.entity.query(`SELECT MAX (ID_DET_LC)
+                                                FROM COMER_DET_LC
+                                                WHERE  ID_LC = (SELECT MAX (ID_LC)
+                                                                FROM SERA.COMER_LC
+                                                                WHERE ID_LOTE = ${pLotId}
+                                                                AND ID_CLIENTE = ${pCustomerId}
+                                                                AND ID_EVENTO = ${pEventId}) 
+                                                AND ESTATUS = 'GEN';
+                                            `)
+
+                                            V_ID_LIN_MOD = q23[0].max
+
+                                            await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                                SET ESTATUS = 'PAG', 
+                                                    MONTO_PENA = ( ${V_MONTO_PENA_LC_4} - ${pLcAmount}), 
+                                                    MONTO = 0 
+                                                WHERE ID_DET_LC = ${V_ID_LIN_MOD};  
+                                            `)
+
+                                            const spGen09 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: 'GCE',
+                                                P_MONTO_LC: V_MONTO_LC_4,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: moment.utc(V_FECHA_VIG_PENA_LC_4).tz('America/Mexico_City').format('DD-MM-YYYY')
+                                            });
+
+                                            const q24 = await this.entity.query(`SELECT MAX(ID_DET_LC),
+                                                    LC_SAE || LC_BANCO AS P_REFERENCIA_OUT 
+                                                FROM SERA.COMER_DET_LC
+                                                WHERE  ID_LC = (SELECT MAX (ID_LC)
+                                                                FROM SERA.COMER_LC
+                                                                WHERE ID_LOTE = ${pLotId}
+                                                                AND ID_CLIENTE = ${pCustomerId}
+                                                                AND ID_EVENTO = ${pEventId}) 
+                                                AND ESTATUS = 'GEN';
+                                            `)
+
+                                            V_ID_LIN_MOD = q24[0].max
+                                            pReference = q24[0].p_referencia_out
+
+                                            await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                                SET  MONTO_PENA = (${V_MONTO_PENA_LC_4} - ${pLcAmount}), 
+                                                    MONTO = ${V_MONTO_LC_4} 
+                                                WHERE ID_DET_LC = ${V_ID_LIN_MOD};                              
+                                            `)
+                                        }
+
+                                    } else {
+
+                                        V_YA_OPERO = 1;
+
+                                    }
+
+                                }
+
+                            }
+
+                        } else {
+                            // ('SI TIENE UNA 2 VER QUE SE HARA');
+                            const q25 = await this.entity.query(`SELECT MONTO, 
+                                    MONTO_PENA,
+                                    FEC_VIGENCIA, 
+                                    ID_LC, 
+                                    LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
+                                FROM SERA.COMER_DET_LC 
+                                WHERE ID_DET_LC = ${V_ID_DET_LC_2};
+
+                            `)
+
+                            V_MONTO_LC_ADMIN = q25[0].monto
+                            V_MONTO_PENA_LC_ADMIN = q25[0].monto_pena
+                            V_FECHA_VIG_ADMIN = q25[0].fec_vigencia
+                            V_ID_LC = q25[0].id_lc
+                            pReference = q25[0].p_referencia_out
+
+                            if (V_MONTO_LC_ADMIN = pLcAmount) { // LOS MONTOS SON IGUALES SOLO SE REMPLAZA
+
+                                await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                    SET ESTATUS = 'PAG' 
+                                    WHERE ID_DET_LC = ${V_ID_DET_LC_2};                            
+                                `)
+
+                                const q26 = await this.entity.query(`SELECT LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
+                                    FROM SERA.COMER_DET_LC
+                                    WHERE ID_DET_LC = ${V_ID_DET_LC_2}; 
+                                `)
+
+                                pReference = q26[0].p_referencia_out
+                                pResult = 'OK'
+
+                            } else if (V_MONTO_LC_ADMIN > pLcAmount) { // LA LC NUEVA ES MENOR SOLO SE CREA NUEVA Y LA DIFERENCIA
+
+                                await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                    SET ESTATUS ='CAN' 
+                                    WHERE ESTATUS = 'GEN' 
+                                    AND TIPO_REF = 2 
+                                    AND ID_LC = ${V_ID_LC};                           
+                                `)
+
+                                const spGen10 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: 'GCN',
+                                                P_MONTO_LC: pLcAmount,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: moment.utc(V_FECHA_VIG_ADMIN).tz('America/Mexico_City').format('DD-MM-YYYY')
+                                            });
+
+                                const q27 = await this.entity.query(`SELECT LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
+                                    FROM SERA.COMER_DET_LC
+                                    WHERE ESTATUS = 'GEN' 
+                                    AND TIPO_REF = 2
+                                    AND ID_LC = (SELECT ID_LC
+                                                FROM SERA.COMER_LC
+                                                WHERE ID_LOTE = ${pLotId}
+                                                AND ID_CLIENTE = ${pCustomerId}
+                                                AND ID_EVENTO = ${pEventId}); 
+                                `)
+
+                                pReference = q27[0].p_referencia_out
+
+                                await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                    SET ESTATUS = 'PAG' 
+                                    WHERE LC_SAE || LC_BANCO = '${pReference}';                           
+                                `)
+
+                                const spGen11 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: 'GCN',
+                                                P_MONTO_LC: V_MONTO_LC_ADMIN - pLcAmount,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: moment.utc(V_FECHA_VIG_ADMIN).tz('America/Mexico_City').format('DD-MM-YYYY')
+                                            });
+
+                                pResult = 'OK'
+
+                            } else if (V_MONTO_LC_ADMIN < pLcAmount) { // SE CREA UNA DE TIPO 2 Y LA DIFERENCIA DE LA 3 
+
+                                await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                    SET ESTATUS ='CAN' 
+                                    WHERE ESTATUS = 'GEN'  
+                                    AND ID_LC = ${V_ID_LC};                          
+                                `)
+
+                                // SE HACE LA NUEVA REFERENCIA CON SOLO UNA PARTE DE LA PENA QUE FALTA POR PAGAR
+                                const spGen12 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: 'GCN',
+                                                P_MONTO_LC: pLcAmount,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: moment.utc(V_FECHA_VIG_ADMIN).tz('America/Mexico_City').format('DD-MM-YYYY')
+                                            });
+
+                                const q28 = await this.entity.query(`SELECT LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
+                                    FROM SERA.COMER_DET_LC
+                                    WHERE ESTATUS = 'GEN' 
+                                    AND TIPO_REF = 2
+                                    AND ID_LC = (SELECT ID_LC
+                                                    FROM COMER_LC
+                                                    WHERE ID_LOTE = ${pLotId}
+                                                    AND ID_CLIENTE = ${pCustomerId}
+                                                    AND ID_EVENTO = ${pEventId});
+                                `)
+
+                                pReference = q28[0].p_referencia_out
+
+                                await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                    SET ESTATUS = 'PAG' 
+                                    WHERE LC_SAE || LC_BANCO = '${pReference}';                         
+                                `)
+
+                                V_MONTO_NUEVA_LC = V_MONTO_TOTAL_LOTE - (V_MONTO_PAG_LIQ + V_MONTO_PAG_GAR);
+
+                                if (v_fec_max_liq > V_FECHA_HOY) { // SE GENERA 4
+
+                                    const spGen13 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: 'LIQE',
+                                                P_MONTO_LC: V_MONTO_NUEVA_LC,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: null
+                                            });
+                                    pResult = 'OK';
+
+                                } else { // SE GENERA 3
+
+                                    const spGen14 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: 'LIQN',
+                                                P_MONTO_LC: V_MONTO_NUEVA_LC,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: null
+                                            });
+                                    pResult = 'OK';
+
+                                }
+
+                            }
+
+                        }
+
+                    } else { // ('SI TIENE UNA 7 VER QUE SE HARA');
+
+                        const q29 = await this.entity.query(`SELECT 
+                            MONTO, 
+                            MONTO_PENA,
+                            FEC_VIGENCIA, 
+                            ID_LC
+                        FROM SERA.COMER_DET_LC 
+                        WHERE ID_DET_LC = ${V_ID_DET_LC_7};
+                        `)
+
+                        V_MONTO_LC_7 = q29[0].monto
+                        V_MONTO_PENA_LC_7 = q29[0].monto_pena
+                        V_FECHA_VIG_PENA_LC_7 = q29[0].fec_vigencia
+                        V_ID_LC = q29[0].id_lc
+
+                        // SE CREA UNA CON EL MONTO DE LA PENA
+                        if (V_MONTO_PENA_LC_7 > pLcAmount) { // LA PENA ES MAYOR AL MONTO
+
+                            await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                SET ESTATUS ='CAN' 
+                                WHERE ESTATUS = 'GEN' 
+                                AND TIPO_REF = 7 
+                                AND ID_LC = ${V_ID_LC};                         
+                            `)
+
+                            // SOLO SE CREA UNA DESCONTADO UNA PARTE DE LA PENA
+                            
+                            // SE COBRA UNA PARTE DE LA PENA
+                            const spGen15 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: 'GCE',
+                                                P_MONTO_LC: 0,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: moment.utc(V_FECHA_VIG_PENA_LC_7).tz('America/Mexico_City').format('DD-MM-YYYY')
+                                            });
+
+                            const q30 = await this.entity.query(`SELECT LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
+                                FROM SERA.COMER_DET_LC
+                                WHERE ESTATUS = 'GEN' AND TIPO_REF = 7
+                                AND ID_LC = (SELECT ID_LC
+                                            FROM SERA.COMER_LC
+                                            WHERE ID_LOTE = ${pLotId}
+                                            AND ID_CLIENTE = ${pCustomerId}
+                                            AND ID_EVENTO = ${pEventId});
+                            `)
+
+                            pReference = q30[0].p_referencia_out
+
+                            await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                SET ESTATUS = 'PAG', 
+                                MONTO_PENA = ${pLcAmount} 
+                                WHERE LC_SAE || LC_BANCO = '${pReference}';                         
+                            `)
+
+                            // SE HACE LA NUEVA REFERENCIA CON SOLO UNA PARTE DE LA PENA QUE FALTA POR PAGAR
+                            const spGen16 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: 'GCE',
+                                                P_MONTO_LC: V_MONTO_LC_7,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: moment.utc(V_FECHA_VIG_PENA_LC_7).tz('America/Mexico_City').format('DD-MM-YYYY')
+                                            });
+
+                            const q31 = await this.entity.query(`SELECT LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
+                                FROM SERA.COMER_DET_LC
+                                WHERE ESTATUS = 'GEN' AND TIPO_REF = 7
+                                AND  ID_LC = (SELECT ID_LC
+                                                FROM SERA.COMER_LC
+                                                WHERE ID_LOTE = ${pLotId}
+                                                AND ID_CLIENTE = ${pCustomerId}
+                                                AND ID_EVENTO = ${pEventId});
+                            `)
+
+                            pReference = q31[0].p_referencia_out
+
+                            await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                SET MONTO_PENA = (MONTO_PENA  - ${pLcAmount}) 
+                                WHERE LC_SAE || LC_BANCO = '${pReference}';                         
+                            `)
+
+                        } else { // SE COBRA LA PENA Y SE LE COBRA EL RESTO
+
+                            V_MONTO_NUEVA_LC = pLcAmount - V_MONTO_PENA_LC_7;
+
+                            // SE CREA NUEVA LC
+                            const spGen17 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: 'GCE',
+                                                P_MONTO_LC: V_MONTO_NUEVA_LC,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: moment.utc(V_FECHA_VIG_PENA_LC_7).tz('America/Mexico_City').format('DD-MM-YYYY')
+                                            });
+
+                            const q32 = await this.entity.query(`SELECT LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
+                                FROM SERA.COMER_DET_LC
+                                WHERE ESTATUS = 'GEN' 
+                                AND TIPO_REF = 7
+                                AND ID_LC= (SELECT MAX(ID_LC)
+                                            FROM SERA.COMER_LC
+                                            WHERE ID_LOTE = ${pLotId}
+                                            AND ID_CLIENTE = ${pCustomerId}
+                                            AND ID_EVENTO = ${pEventId});
+                            `) // BUSCAMOS LA CREADA
+
+                            pReference = q32[0].p_referencia_out
+
+                            await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                SET ESTATUS = 'PAG', 
+                                MONTO_PENA = ${V_MONTO_NUEVA_LC} 
+                                WHERE LC_SAE || LC_BANCO = '${pReference}';                         
+                            `)
+
+                            if (pLcAmount > (V_MONTO_LC_7 + V_MONTO_PENA_LC_7)) {
+
+                                // ('CREAR UNA 3 O 4 SEGUN SEA EL CASO ')
+                                await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                    SET ESTATUS ='CAN' 
+                                    WHERE ESTATUS = 'GEN'  
+                                    AND ID_LC = ${V_ID_LC};                         
+                                `)
+
+                                V_MONTO_NUEVA_LC = V_MONTO_TOTAL_LOTE - (V_MONTO_PAG_LIQ + V_MONTO_PAG_GAR);
+
+                                if (v_fec_max_liq > V_FECHA_HOY) { // SE GENERA 4
+
+                                    const spGen18 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: 'LIQE',
+                                                P_MONTO_LC: V_MONTO_NUEVA_LC,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: null
+                                            });
+
+                                            pResult = 'OK'
+
+                                } else {
+
+                                    const spGen19 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: 'LIQN',
+                                                P_MONTO_LC: V_MONTO_NUEVA_LC,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: null
+                                            });
+
+                                    pResult = 'OK'
+
+                                }
+
+                            } else {
+
+                                // LA LINEA ORIGINAL ES MENOR A LO QUE SE DEBE
+                                await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                                    SET ESTATUS ='CAN' 
+                                    WHERE ESTATUS = 'GEN' 
+                                    AND TIPO_REF = 7  
+                                    AND ID_LC = ${V_ID_LC};                         
+                                `)
+
+                                V_MONTO_AUX = pLcAmount - (V_MONTO_LC_7 + V_MONTO_PENA_LC_7);
+
+                                // SE CREA NUEVA LC
+                                const spGen20 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: 'GCN',
+                                                P_MONTO_LC: V_MONTO_AUX,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: moment.utc(V_FECHA_VIG_PENA_LC_7).tz('America/Mexico_City').format('DD-MM-YYYY')
+                                            });
+                                pResult = 'OK'
+
+                            }
+
+                        }
+
+                    }
+
+                } else { // ('NO TIENE NINGUNA LINEA CREADA SE CREAN LCS')
+
+                    // PRIMERO SE CREA UNA 2 PAGADA 
+
+                    // SE HACE LA NUEVA REFERENCIA CON SOLO UNA PARTE DE LA PENA QUE FALTA POR PAGAR
+                    const spGen21 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: 'GCN',
+                                                P_MONTO_LC: pLcAmount,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: null
+                                            });
+                    
+                    const q33 = await this.entity.query(`SELECT LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
+                        FROM SERA.COMER_DET_LC
+                        WHERE ESTATUS = 'GEN' 
+                        AND TIPO_REF = 2
+                        AND ID_LC = (SELECT ID_LC
+                                    FROM SERA.COMER_LC
+                                    WHERE ID_LOTE = ${pLotId}
+                                    AND ID_CLIENTE = ${pCustomerId}
+                                    AND ID_EVENTO = ${pEventId});
+                    `)
+
+                    pReference = q33[0].p_referencia_out
+
+                    // ('Se actualiza a PAG ' || P_REFERENCIA_OUT)
+                    await this.entity.query(`UPDATE SERA.COMER_DET_LC 
+                        SET ESTATUS = 'PAG' 
+                        WHERE LC_SAE || LC_BANCO = '${pReference}';                         
+                    `)
+
+                    // OBTENEMOS LOS MONTOS PAGADOS DE LAS GARANTIAS
+                    const q34 = await this.entity.query(`SELECT SUM (MONTO)
+                        FROM SERA.COMER_REF_GARANTIAS
+                        WHERE ID_CLIENTE = ${pCustomerId}
+                        AND ID_LOTE = ${pLotId}
+                        AND ID_EVENTO = ${pEventId}
+                        AND ESTATUS IN ('VAL', 'PAG');
+                    `)
+
+                    V_MONTO_PAG_GAR = q34[0].sum
+
+                    // OBTENEMOS LOS MONTOS PAGADOS DE LAS LC
+                    const q35 = await this.entity.query(`SELECT SUM (MONTO)
+                        FROM SERA.COMER_DET_LC
+                        WHERE ID_LC = (SELECT ID_LC 
+                                        FROM SERA.COMER_LC 
+                                        WHERE ID_LOTE = ${pLotId} 
+                                        AND ID_CLIENTE = ${pCustomerId} 
+                                        AND ID_EVENTO =  ${pEventId}) 
+                        AND ESTATUS IN ('VAL', 'PAG');
+                    `)
+
+                    V_MONTO_PAG_LIQ = q35[0].sum
+
+                    // ASIGNAMOS LOS VALORES A LA GARANTIA Y LIQUIDACION
+                    V_MONTO_GARANTIA_LOTE = (V_MONTO_TOTAL_LOTE *  v_PorcentajeGarantia);
+                    V_MONTO_LIQUIDACION_LOTE = (V_MONTO_TOTAL_LOTE *  v_PorcentajeGarantia);
+
+                    V_MONTO_NUEVA_LC  = 0;
+                    V_MONTO_AUX = V_MONTO_PAG_GAR + V_MONTO_PAG_LIQ; // MONTO PAGADO
+
+                    if (V_MONTO_AUX < V_MONTO_GARANTIA_LOTE) { // ES MENOR Y SE GENERA LA GARANTIA
+
+                        V_MONTO_NUEVA_LC = V_MONTO_GARANTIA_LOTE - V_MONTO_AUX;
+                        const spGen22 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: 'GCN',
+                                                P_MONTO_LC: V_MONTO_NUEVA_LC,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: null
+                                            });
+
+                    }
+
+                    // REVISAR SI LE HACE FALTA MONTO DE LIQUIDACION Y SI ES ASI SE GENERA REFERENCIA
+                    if (V_MONTO_AUX < V_MONTO_TOTAL_LOTE) {  // ES MENOR Y SE GENERA LA GARANTIA
+
+                        V_MONTO_NUEVA_LC  = V_MONTO_TOTAL_LOTE - V_MONTO_AUX;
+
+                        const q36 = await this.entity.query(`SELECT SUM (MONTO)
+                            FROM SERA.COMER_DET_LC
+                            WHERE ID_LC = (SELECT ID_LC
+                                            FROM SERA.COMER_LC
+                                            WHERE ID_LOTE = ${pLotId}
+                                            AND ID_CLIENTE = ${pCustomerId}
+                                            AND ID_EVENTO = ${pEventId})
+                            AND ESTATUS IN ('GEN');
+                        `)
+
+                        V_MONTO_AUX2 = q36[0].sum
+                        V_MONTO_NUEVA_LC =  V_MONTO_NUEVA_LC -  V_MONTO_AUX2; 
+
+                        if (V_MONTO_NUEVA_LC > 0) {
+
+                            const spGen23 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: 'LIQN',
+                                                P_MONTO_LC: V_MONTO_NUEVA_LC,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: null
+                                            });
+
+                        }
+
+                    }
+
+                    pResult = 'OK';
+                }
+
+            } else if (pOperationType = 'E') {
+
+                const q37 = await this.entity.query(`SELECT TIPO_REF 
+                    FROM SERA.COMER_DET_LC 
+                    WHERE LC_SAE || LC_BANCO = '${pLcOriginal}';
+                `)
+
+                V_TIPO_REF = q37[0].tipo_ref
+
+                if (!V_TIPO_REF) {
+
+                    c_RESUL = 'Ingresar una referencia valida.'
+
+                }
+
+                if (V_TIPO_REF == 2) {
+
+                    V_DES_LC_TIPO = 'GCN';
+
+                }
+
+                if (V_TIPO_REF == 7) {
+
+                    V_DES_LC_TIPO = 'GCE';
+
+                }
+
+                if (V_TIPO_REF == 3) {
+
+                    V_DES_LC_TIPO = 'LIQN';
+
+                }
+
+                if (V_TIPO_REF == 4) {
+
+                    V_DES_LC_TIPO = 'LIQE';
+
+                }
+
+                const q38 = await this.entity.query(`SELECT 
+                    MONTO, 
+                    ID_LC,
+                    FEC_VIGENCIA
+                    FROM SERA.COMER_DET_LC
+                    WHERE LC_SAE || LC_BANCO = P_LC_ORIGINAL;
+                `)
+
+                V_MONTO_LC_ADMIN = q38[0].monto
+                V_ID_LC = q38[0].id_lc
+                V_FECHA_VIG_ADMIN = q38[0].fec_vigencia
+
+                const q39 = await this.entity.query(`SELECT 
+                    ID_EVENTO, 
+                    ID_LOTE, 
+                    ID_CLIENTE
+                    FROM SERA.COMER_LC
+                    WHERE ID_LC = ${V_ID_LC};
+                `)
+
+                V_ID_EVENTO = q39[0].id_evento
+                V_ID_LOTE = q39[0].id_lote
+                V_CLIENTE = q39[0].id_cliente
+
+                const spGen24 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: V_DES_LC_TIPO,
+                                                P_MONTO_LC: V_MONTO_LC_ADMIN,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: moment.utc(V_FECHA_VIG_ADMIN).tz('America/Mexico_City').format('DD-MM-YYYY')
+                                            });
+                pResult = 'OK'
+
+            } else if (pOperationType = 'S') {
+
+                if (pLcType == 2) {
+
+                    V_DES_LC_TIPO = 'GCN'
+
+                }
+
+                if (pLcType == 7) {
+
+                    V_DES_LC_TIPO = 'GCE'
+
+                }
+
+                if (pLcType == 3) {
+
+                    V_DES_LC_TIPO = 'LIQN'
+
+                }
+
+                if (pLcType == 4) {
+
+                    V_DES_LC_TIPO = 'LIQE'
+
+                }
+
+                if (pLcType == 1) {
+
+                    const spGen25 = await this.captureline.send({ cmd: 'spGenRg' }, 
+                                        {
+                                            P_ID_LOTE: pLotId, 
+                                            P_ID_CLIENTE: pCustomerId, 
+                                            P_PARAMETRO: 'GSE',
+                                            P_MONTO: pLcAmount,
+                                            P_IND_MOV: 'C',
+                                            P_FECVIGENCIA: V_FECHA_HOY,
+                                            P_NO_CHEQUE: null,
+                                            P_EXC_CHEQUE: null,
+                                            P_NO_PLAETA: null
+                                        });
+
+                    const q40 = await this.entity.query(`SELECT MAX (ID_LCG)
+                        FROM SERA.COMER_REF_GARANTIAS
+                        WHERE MONTO = ${pLcAmount}
+                        AND ESTATUS = 'GEN'
+                        AND ID_CLIENTE = ${pCustomerId}
+                        AND ID_LOTE = ${pLotId}
+                        AND ID_EVENTO = ${pEventId};
+                    `)
+
+                    if (q40.length !== 0){
+
+                        V_ID_DET_LC_S = q40[0].max
+
+                    } else {
+
+                        V_ID_DET_LC_S = 0
+
+                    }
+
+                    if (V_ID_DET_LC_S = 0) {
+
+                        await this.entity.query(`UPDATE SERA.COMER_REF_GARANTIAS
+                            SET ESTATUS = 'PAG'
+                            WHERE ID_LCG = ${V_ID_DET_LC_S};                         
+                        `)
+
+                        const q41 = await this.entity.query(`SELECT REF_GSAE || REF_GBANCO AS P_REFERENCIA_OUT
+                            FROM SERA.COMER_REF_GARANTIAS
+                            WHERE ID_LCG = ${V_ID_DET_LC_S};
+                        `)
+
+                        pReference = q41[0].p_referencia_out
+
+                        pResult = 'OK'
+
+                    }
+
+                } else {
+
+                    const spGen24 = await this.captureline.send({ cmd: 'spGenLc' }, 
+                                            {
+                                                P_ID_LOTE: pLotId, 
+                                                P_ID_CLIENTE: pCustomerId, 
+                                                P_PARAMETRO: V_DES_LC_TIPO,
+                                                P_MONTO_LC: pLcAmount,
+                                                P_IND_MOV: 'C',
+                                                P_FECVIGENCIA: V_FECHA_HOY
+                                            });
+
+                    const q42 = await this.entity.query(`SELECT MAX(ID_DET_LC)
+                        FROM SERA.COMER_DET_LC
+                        WHERE ID_LC = (SELECT ID_LC
+                                        FROM SERA.COMER_LC
+                                        WHERE     ID_LOTE = ${pLotId}
+                                        AND ID_CLIENTE = ${pCustomerId}
+                                        AND ID_EVENTO = ${pEventId})
+                        AND ESTATUS = 'GEN'
+                        AND MONTO = ${pLcAmount} ;
+                    `)
+
+                    if (q42.length !== 0){
+
+                        V_ID_DET_LC_S = q42[0].max
+
+                    } else {
+
+                        V_ID_DET_LC_S = 0
+
+                    }
+
+                    if (V_ID_DET_LC_S > 0) {
+
+                        await this.entity.query(`UPDATE SERA.COMER_DET_LC
+                            SET ESTATUS = 'PAG'
+                            WHERE ID_DET_LC = ${V_ID_DET_LC_S};                       
+                        `)
+
+                        const q43 = await this.entity.query(`SELECT LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
+                            FROM SERA.COMER_DET_LC
+                            WHERE ID_DET_LC = ${V_ID_DET_LC_S};
+                        `)
+
+                        pReference = q43[0].p_referencia_out
+
+                        pResult = 'OK'
+
+                    }
+
+                }
+
+            }
+
+        } else {
+
+            c_RESUL = 'El cliente ingresado es diferente al de la referencia original : ' + pLcOriginal;
+
+        }
+
+    } else {
+
+        c_RESUL = 'No se encontro el cliente de la referencia : ' + pLcOriginal;
+
+    }
+
+    return {
+
+        statusCode: HttpStatus.OK,
+        message: ['Procedimiento ejecutado correctamente'],
+        data: {c_RESUL, pResult, pReference}
+
+    }
+
+    } catch (error) {
+        console.log(error)
+        return {
+            statusCode: HttpStatus.OK,
+            message: [error.message]
+        }
+    }
     }
 
 }

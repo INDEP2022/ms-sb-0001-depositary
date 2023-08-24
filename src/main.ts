@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
 import { AppModule } from './app.module';
+import { Logger } from '@nestjs/common';
 
 
 async function bootstrap() {
@@ -22,5 +23,7 @@ async function bootstrap() {
   console.log(`Microservice listening INTERNAL${process.env.MS_NAME} on ports:`, app_port + ":" + ms_port_micro);
   console.log(`Microservice INTERNAL${process.env.MS_NAME} is running on: ${ms_port_micro}`);
   console.log(`Host name: ${host_name}`);
+  Logger.log(`${process.env.MS_NAME_CAPTURELINE} PORT: ${process.env.CAPTURELINE_HOST_PORT}`);
+  Logger.log(`${process.env.MS_NAME_CAPTURELINE} Host: ${process.env.CAPTURELINE_HOST_NAME}:${process.env.CAPTURELINE_HOST_PORT}`)
 }
 bootstrap();
