@@ -76,4 +76,9 @@ export class DepositaryQueriesController {
     async getFmaSinsPagDepositarias(dto: FmaSinsPagDepositariasMassiveDto) {
       return await this.service.getFmaSinsPagDepositarias(dto);
     }
+
+    @MessagePattern({cmd:'getFactJurRegDestLegV2'})
+    async getFactJurRegDestLegV2({dto, pagination}){
+      return await this.service.getFactJurRegDestLegV2(dto, pagination)
+    }
 }
