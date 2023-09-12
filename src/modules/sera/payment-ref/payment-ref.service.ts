@@ -1573,8 +1573,8 @@ export class PaymentRefService {
             this.gDepositos.splice(0, this.gDepositos.length);
             this.gDispersion.splice(0, this.gDispersion.length);
             //TODO: descomentar una ves las cree
-            // updateAccreditationGens(dto.pOne)
-            // updatePaymentsRef(dto.pOne)
+            this.updateAccreditationGens({pOne:dto.pOne})
+            this.updatePaymentsRef({pOne:dto.pOne})
 
             return {
                 statusCode: HttpStatus.OK,
