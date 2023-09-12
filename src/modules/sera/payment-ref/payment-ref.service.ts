@@ -1484,7 +1484,7 @@ export class PaymentRefService {
         const pGensDep = this.PaymentsgensDepositaryRepository;
 
         const L2 = await tpmRep.createQueryBuilder()
-            .orderBy('payGensId', 'ASC')
+            .orderBy('id_pagogens', 'ASC')
             .execute().then((res) => {
                 return res;
             });
