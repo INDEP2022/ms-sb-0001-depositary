@@ -16,6 +16,7 @@ import { PersonEntity } from '../sera/depositary-appointment/entity/person.entit
 import { SegUsersEntity } from '../sera/depositary-appointment/entity/seg-users.entity';
 import { PaginationDto } from 'src/shared/dto/pagination';
 import { FmaSinsPagDepositariasDto, FmaSinsPagDepositariasMassiveDto } from './dto/fma-sins-pag-depositarias.dto';
+import { GetFactJurRegDestLegDto } from './dto/get-fact-jur-reg-dest-leg.dto';
 @Injectable()
 export class DepositaryQueriesService {
     constructor(
@@ -225,8 +226,6 @@ export class DepositaryQueriesService {
             let filterableColumns = Object.assign(filterableColumns1, filterableColumns2,filterableColumns3,filterableColumns4); 
             let searchableColumns = Object.assign(searchableColumns1, searchableColumns2,searchableColumns3,searchableColumns4); 
             
-
-            
             await this.commonFilterService.setAllItem(query, this.appointmentDepositoryEntity); 
             
             const queryBuilder = this.appointmentDepositoryEntity.createQueryBuilder('table')
@@ -401,4 +400,55 @@ export class DepositaryQueriesService {
             }
         }
     }
+
+    //#region getFactJurRegDestLegV2
+    async getFactJurRegDestLegV2({id, description}:  GetFactJurRegDestLegDto, { limit, page }: PaginationDto) {
+        let count = 0;
+        try {
+
+            const dataSub = await this.entity.query(`SELECT NO_BIEN
+            FROM sera.bien b,
+            sera.expedientes e
+            where e.no_expediente = b.no_expediente
+            ${id ? `AND (b.NO_BIEN = ${id} OR b.ID_BIEN = ${id})` : ''}${description ? `AND b.DESCRIPCION LIKE '%${description}%'` : ''}`)
+
+            if (dataSub.length == 0) return { statusCode: HttpStatus.BAD_REQUEST, message: ['Registros no encontrados']}
+            const query = this.appointmentDepositoryEntity
+                .createQueryBuilder('nd')
+                .where(`nd.no_bien IN (${dataSub.map(x => x.no_bien).join(",")})`)
+                .orderBy('nd.FEC_INI_CONTRATO', 'DESC')
+                .leftJoinAndMapOne('nd.personNumber', PersonEntity, 'p', 'nd.no_persona = p.no_persona')
+                .leftJoinAndMapOne('nd.good', GoodEntity, 'tg', 'nd.no_bien = tg.no_bien')
+                .leftJoinAndMapOne('nd.user', SegUsersEntity, 'tsu', 'nd.representante_sera = tsu.usuario')
+                .orderBy('nd.numberAppointment', 'DESC')
+                .take(limit || 10)
+                .skip((page - 1) * limit || 0)
+            const [result, total] = await query.getManyAndCount()
+
+            if (result.length !== 0){
+                return {
+                    statusCode: HttpStatus.OK,
+                    message: ['Registros encontrados'],
+                    data: result,
+                    count: total
+                }
+            } else {
+                return {
+                    statusCode: HttpStatus.OK,
+                    message: ['Registros no encontrados'],
+                    data: null,
+                    count: 0
+                }
+            }
+            
+        } catch (error) {
+            return {
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: error.message,
+                data: [],
+            };
+        }
+
+    }
+    //#endregion getFactJurRegDestLegV2
 }

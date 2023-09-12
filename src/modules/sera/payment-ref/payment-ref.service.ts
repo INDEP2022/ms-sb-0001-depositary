@@ -295,9 +295,6 @@ export class PaymentRefService {
      */
     async dispersionAccreditations(name: number, good: number): Promise<object> {
         try {
-            console.log("dispersionAccreditations", "data de prueba")
-            good = 345521
-            name = 235
             const l1 = await this.ParametersmodDepositoryRepository.query(`
                 SELECT ID_PAGOGENS,ID_PAGO,NO_BIEN,MONTO,REFERENCIA,TIPOINGRESO,NO_TRANSFERENTE,IVA,MONTO_IVA,ABONO,
                    (SELECT SUM(PAGO_ACT) FROM SERA.PAGOSGENS_DEPOSITARIAS WHERE NO_NOMBRAMIENTO = ${name} AND NO_BIEN = ${good} AND STATUS = 'A' AND (ABONO_CUBIERTO = 0 OR ABONO_CUBIERTO IS NULL))PAGO_ACT,
@@ -341,9 +338,9 @@ export class PaymentRefService {
                 "DispercionAbonos": this.gDispercionAbonos,
             }
             return {
-                data: response,
                 statusCode: HttpStatus.OK,
-                message: ['OK']
+                message: ['OK'],
+                data: response
             };
         } catch (e) {
 

@@ -42,6 +42,65 @@ export class ApplicationService {
     return obj;
   }
   //---------------------------------------------------------------------------------------------
+  async comerDetLvSum(paymentNumber: number) {
+    try {
+
+      const q1 = `select SUM(monto) as total_monto, SUM(monto_pena) as total_pena
+      from sera.COMER_PAGOREF_VIRT
+      where id_pago = ${paymentNumber}`;
+
+      let consulta = await this.entity.query(q1)
+
+        if(!consulta.length) {
+          return new BadRequestException('No se encontraron registros')
+        }
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'OK',
+        data: consulta,
+      };
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error.message,
+        data: [],
+      };
+    }
+  }
+  
+  async comerDetLvGrief(grief: number) {
+    try {
+      // console.log(grief)
+
+      const q1 = `SELECT COALESCE(MONTO_PENA, 0) as mountGrief
+        FROM sera.COMER_DET_LC
+        WHERE TRIM(LC_SAE) || TRIM(LC_BANCO) = cast(${grief} as text)
+        AND ESTATUS <> 'CAN'
+        AND ID_LC IS NOT NULL
+        LIMIT 1`;
+
+      let consulta = await this.entity.query(q1)
+
+        if(!consulta.length) {
+          return new BadRequestException('No se encontraron registros')
+        }
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'OK',
+        data: consulta,
+      };
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error.message,
+        data: [],
+      };
+    }
+  }
+  
+  
   async validBlacklist(validBlacklist: number) {
     try {
       const consulta = await this.entity.query(

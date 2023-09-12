@@ -1438,7 +1438,7 @@ export class ComerPaymentService {
 
                                     pReference = q02[0].p_referencia_out
 
-                                    await this.entity.query(`UPDATE COMER_REF_GARANTIAS
+                                    await this.entity.query(`UPDATE sera.COMER_REF_GARANTIAS
                                         SET ESTATUS = 'PAG'
                                         WHERE REF_GSAE || REF_GBANCO = '${pReference}'
                                     `)
@@ -1511,7 +1511,7 @@ export class ComerPaymentService {
 
                                 }
 
-                                if (V_MONTO_TOTAL_LOTE = 0) {
+                                if (V_MONTO_TOTAL_LOTE == 0) {
 
                                     V_MONTO_TOTAL_LOTE = 0
 
@@ -1673,7 +1673,7 @@ export class ComerPaymentService {
                                             ID_LC, 
                                             LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
                                         FROM SERA.COMER_DET_LC 
-                                        WHERE ID_DET_LC = ${V_ID_DET_LC_3};
+                                        WHERE ID_DET_LC = '${V_ID_DET_LC_3}';
                                     `)
 
                                     V_MONTO_LC_ADMIN = q15[0].monto
@@ -1686,12 +1686,12 @@ export class ComerPaymentService {
 
                                         await this.entity.query(`UPDATE SERA.COMER_DET_LC 
                                             SET ESTATUS = 'PAG' 
-                                            WHERE ID_DET_LC = ${V_ID_DET_LC_3};
+                                            WHERE ID_DET_LC = '${V_ID_DET_LC_3}';
                                         `)
 
                                         const q16 = await this.entity.query(`SELECT LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
                                             FROM SERA.COMER_DET_LC
-                                            WHERE ID_DET_LC = ${V_ID_DET_LC_3}; 
+                                            WHERE ID_DET_LC = '${V_ID_DET_LC_3}'; 
                                         `)
 
                                         pReference = q16[0].p_referencia_out
@@ -1751,7 +1751,7 @@ export class ComerPaymentService {
                                         await this.entity.query(`UPDATE SERA.COMER_DET_LC 
                                             SET ESTATUS ='CAN' 
                                             WHERE ESTATUS = 'GEN'  
-                                            AND ID_LC = ${V_ID_LC};
+                                            AND ID_LC = '${V_ID_LC}';
                                         `)
 
                                         // SE HACE LA NUEVA REFERENCIA CON SOLO UNA PARTE DE LA PENA QUE FALTA POR PAGAR
@@ -1766,7 +1766,7 @@ export class ComerPaymentService {
                                         });                                        
 
                                         const q18 = await this.entity.query(`SELECT LC_SAE || LC_BANCO
-                                            FROM COMER_DET_LC
+                                            FROM sera.COMER_DET_LC
                                             WHERE ESTATUS = 'GEN' 
                                             AND TIPO_REF = 3
                                             AND ID_LC = (SELECT ID_LC
@@ -1882,7 +1882,7 @@ export class ComerPaymentService {
 
                                         await this.entity.query(`UPDATE sera.COMER_DET_LC
                                             SET ESTATUS = 'PAG'
-                                            WHERE ID_DET_LC = ${V_ID_DET_LC_4};   
+                                            WHERE ID_DET_LC = '${V_ID_DET_LC_4}';   
                                         `)
 
                                         V_MONTO_NUEVA_LC =  V_MON - pLcAmount;
@@ -1938,7 +1938,7 @@ export class ComerPaymentService {
                                             });
 
                                             const q23 = await this.entity.query(`SELECT MAX (ID_DET_LC)
-                                                FROM COMER_DET_LC
+                                                FROM sera.COMER_DET_LC
                                                 WHERE  ID_LC = (SELECT MAX (ID_LC)
                                                                 FROM SERA.COMER_LC
                                                                 WHERE ID_LOTE = ${pLotId}
@@ -1983,7 +1983,7 @@ export class ComerPaymentService {
                                             await this.entity.query(`UPDATE SERA.COMER_DET_LC 
                                                 SET  MONTO_PENA = (${V_MONTO_PENA_LC_4} - ${pLcAmount}), 
                                                     MONTO = ${V_MONTO_LC_4} 
-                                                WHERE ID_DET_LC = ${V_ID_LIN_MOD};                              
+                                                WHERE ID_DET_LC = '${V_ID_LIN_MOD}';                              
                                             `)
                                         }
 
@@ -2005,7 +2005,7 @@ export class ComerPaymentService {
                                     ID_LC, 
                                     LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
                                 FROM SERA.COMER_DET_LC 
-                                WHERE ID_DET_LC = ${V_ID_DET_LC_2};
+                                WHERE ID_DET_LC = '${V_ID_DET_LC_2}';
 
                             `)
 
@@ -2015,7 +2015,7 @@ export class ComerPaymentService {
                             V_ID_LC = q25[0].id_lc
                             pReference = q25[0].p_referencia_out
 
-                            if (V_MONTO_LC_ADMIN = pLcAmount) { // LOS MONTOS SON IGUALES SOLO SE REMPLAZA
+                            if (V_MONTO_LC_ADMIN == pLcAmount) { // LOS MONTOS SON IGUALES SOLO SE REMPLAZA
 
                                 await this.entity.query(`UPDATE SERA.COMER_DET_LC 
                                     SET ESTATUS = 'PAG' 
@@ -2024,7 +2024,7 @@ export class ComerPaymentService {
 
                                 const q26 = await this.entity.query(`SELECT LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
                                     FROM SERA.COMER_DET_LC
-                                    WHERE ID_DET_LC = ${V_ID_DET_LC_2}; 
+                                    WHERE ID_DET_LC = '${V_ID_DET_LC_2}'; 
                                 `)
 
                                 pReference = q26[0].p_referencia_out
@@ -2036,7 +2036,7 @@ export class ComerPaymentService {
                                     SET ESTATUS ='CAN' 
                                     WHERE ESTATUS = 'GEN' 
                                     AND TIPO_REF = 2 
-                                    AND ID_LC = ${V_ID_LC};                           
+                                    AND ID_LC = '${V_ID_LC}';                           
                                 `)
 
                                 const spGen10 = await this.captureline.send({ cmd: 'spGenLc' }, 
@@ -2084,7 +2084,7 @@ export class ComerPaymentService {
                                 await this.entity.query(`UPDATE SERA.COMER_DET_LC 
                                     SET ESTATUS ='CAN' 
                                     WHERE ESTATUS = 'GEN'  
-                                    AND ID_LC = ${V_ID_LC};                          
+                                    AND ID_LC = '${V_ID_LC}';                          
                                 `)
 
                                 // SE HACE LA NUEVA REFERENCIA CON SOLO UNA PARTE DE LA PENA QUE FALTA POR PAGAR
@@ -2103,7 +2103,7 @@ export class ComerPaymentService {
                                     WHERE ESTATUS = 'GEN' 
                                     AND TIPO_REF = 2
                                     AND ID_LC = (SELECT ID_LC
-                                                    FROM COMER_LC
+                                                    FROM sera.COMER_LC
                                                     WHERE ID_LOTE = ${pLotId}
                                                     AND ID_CLIENTE = ${pCustomerId}
                                                     AND ID_EVENTO = ${pEventId});
@@ -2158,7 +2158,7 @@ export class ComerPaymentService {
                             FEC_VIGENCIA, 
                             ID_LC
                         FROM SERA.COMER_DET_LC 
-                        WHERE ID_DET_LC = ${V_ID_DET_LC_7};
+                        WHERE ID_DET_LC = '${V_ID_DET_LC_7}';
                         `)
 
                         V_MONTO_LC_7 = q29[0].monto
@@ -2173,7 +2173,7 @@ export class ComerPaymentService {
                                 SET ESTATUS ='CAN' 
                                 WHERE ESTATUS = 'GEN' 
                                 AND TIPO_REF = 7 
-                                AND ID_LC = ${V_ID_LC};                         
+                                AND ID_LC = '${V_ID_LC}';                         
                             `)
 
                             // SOLO SE CREA UNA DESCONTADO UNA PARTE DE LA PENA
@@ -2275,7 +2275,7 @@ export class ComerPaymentService {
                                 await this.entity.query(`UPDATE SERA.COMER_DET_LC 
                                     SET ESTATUS ='CAN' 
                                     WHERE ESTATUS = 'GEN'  
-                                    AND ID_LC = ${V_ID_LC};                         
+                                    AND ID_LC = '${V_ID_LC}';                         
                                 `)
 
                                 V_MONTO_NUEVA_LC = V_MONTO_TOTAL_LOTE - (V_MONTO_PAG_LIQ + V_MONTO_PAG_GAR);
@@ -2457,7 +2457,7 @@ export class ComerPaymentService {
                     pResult = 'OK';
                 }
 
-            } else if (pOperationType = 'E') {
+            } else if (pOperationType == 'E') {
 
                 const q37 = await this.entity.query(`SELECT TIPO_REF 
                     FROM SERA.COMER_DET_LC 
@@ -2501,7 +2501,7 @@ export class ComerPaymentService {
                     ID_LC,
                     FEC_VIGENCIA
                     FROM SERA.COMER_DET_LC
-                    WHERE LC_SAE || LC_BANCO = P_LC_ORIGINAL;
+                    WHERE LC_SAE || LC_BANCO = '${pLcOriginal}';
                 `)
 
                 V_MONTO_LC_ADMIN = q38[0].monto
@@ -2513,7 +2513,7 @@ export class ComerPaymentService {
                     ID_LOTE, 
                     ID_CLIENTE
                     FROM SERA.COMER_LC
-                    WHERE ID_LC = ${V_ID_LC};
+                    WHERE ID_LC = '${V_ID_LC}';
                 `)
 
                 V_ID_EVENTO = q39[0].id_evento
@@ -2531,7 +2531,7 @@ export class ComerPaymentService {
                                             });
                 pResult = 'OK'
 
-            } else if (pOperationType = 'S') {
+            } else if (pOperationType == 'S') {
 
                 if (pLcType == 2) {
 
@@ -2591,7 +2591,7 @@ export class ComerPaymentService {
 
                     }
 
-                    if (V_ID_DET_LC_S = 0) {
+                    if (V_ID_DET_LC_S == 0) {
 
                         await this.entity.query(`UPDATE SERA.COMER_REF_GARANTIAS
                             SET ESTATUS = 'PAG'
@@ -2600,7 +2600,7 @@ export class ComerPaymentService {
 
                         const q41 = await this.entity.query(`SELECT REF_GSAE || REF_GBANCO AS P_REFERENCIA_OUT
                             FROM SERA.COMER_REF_GARANTIAS
-                            WHERE ID_LCG = ${V_ID_DET_LC_S};
+                            WHERE ID_LCG = '${V_ID_DET_LC_S}';
                         `)
 
                         pReference = q41[0].p_referencia_out
@@ -2651,7 +2651,7 @@ export class ComerPaymentService {
 
                         const q43 = await this.entity.query(`SELECT LC_SAE || LC_BANCO AS P_REFERENCIA_OUT
                             FROM SERA.COMER_DET_LC
-                            WHERE ID_DET_LC = ${V_ID_DET_LC_S};
+                            WHERE ID_DET_LC = '${V_ID_DET_LC_S}';
                         `)
 
                         pReference = q43[0].p_referencia_out

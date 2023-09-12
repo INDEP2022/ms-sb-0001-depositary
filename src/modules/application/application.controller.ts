@@ -11,6 +11,18 @@ export class ApplicationController {
     return await this.service.validBlacklist(validBlacklist);
   }
 
+  @MessagePattern({ cmd: 'comerDetLvGrief' })
+  async comerDetLvGrief(grief: number) {
+    // console.log(grief)
+    return await this.service.comerDetLvGrief(grief);
+  }
+
+  @MessagePattern({ cmd: 'comerDetLvSum' })
+  async comerDetLvSum(paymentNumber: number) {
+    // console.log(grief)
+    return await this.service.comerDetLvSum(paymentNumber);
+  }
+
   @MessagePattern({ cmd: 'cargaCliente1' })
   async cargaCliente1(no_nombramiento: number) {
     return await this.service.cargaCliente1(no_nombramiento);
