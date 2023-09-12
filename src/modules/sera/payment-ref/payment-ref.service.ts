@@ -790,7 +790,10 @@ export class PaymentRefService {
      * @return {*}  {Promise<void>}
      * @memberof PACKAGE BODY SERA.PAGOSREF_DEPOSITARIA lineas 722-872
      */
-    async execDeductions(dto: ExecDeductionsDto): Promise<void> {
+    async execDeductions(dto: ExecDeductionsDto) {
+        Logger.debug(`#################  #####################`);
+        console.log(dto)
+        Logger.debug(`##########################################`);
         let lPago: number,
             lNewMont: number,
             lXcent: number,
@@ -949,7 +952,11 @@ export class PaymentRefService {
             // llena la lista global de dispersiones
 
             //ejecución del procedimiento
-            this.insertDispersion({ pOne: dto.pOne })
+            await this.insertDispersion({ pOne: dto.pOne })
+        }
+        return {
+            statusCode:200,
+            message:["OK"]
         }
     }
     //#endregion
