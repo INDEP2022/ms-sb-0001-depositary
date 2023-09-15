@@ -427,7 +427,7 @@ export class SaeItemsDonacTmpVService {
   @Interval((+process.env.CRON_JOB || 60) * 1000)
   async updateAndDeleteTrigger() {
     try {
-      Logger.debug('TRIGGER', this.#table);
+      //Logger.debug('TRIGGER', this.#table);
       const result: any[] = await this.entity.query(`
         select * from audit.logged_actions where event_id > ${
           this.#eventId
@@ -436,8 +436,8 @@ export class SaeItemsDonacTmpVService {
 
       this.#eventId = result[0]?.event_id || this.#eventId;
 
-      Logger.log(this.#eventId);
-      Logger.log(result[0]);
+      //Logger.log(this.#eventId);
+      //Logger.log(result[0]);
 
       for (const loggedAction of result) {
         const client_query = JSON.parse(loggedAction.client_query);
@@ -451,7 +451,7 @@ export class SaeItemsDonacTmpVService {
           await this.deleteSaeItemsDonacTmpVB(client_query.id);
         }
       }
-      Logger.verbose('Finished Trigger', this.#table);
+      //Logger.verbose('Finished Trigger', this.#table);
     } catch (error) {
       console.log(error.message);
       Logger.error(error.message);

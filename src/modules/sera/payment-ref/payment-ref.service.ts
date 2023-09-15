@@ -41,6 +41,11 @@ export class PaymentRefService {
         @InjectRepository(refpayDepositoriesEntity) private RefpayDepositoriesRepository: Repository<refpayDepositoriesEntity>,
         @InjectRepository(paymentsgensDepositaryEntity) private PaymentsgensDepositaryRepository: Repository<paymentsgensDepositaryEntity>,
     ) {
+        this.execDeductions({
+                "pOne": 3948,//No_nombramiento
+                "pTwo": 528,//PERSONA
+                "pDate": new Date("2023-09-14")
+            })
         // this.prepOI({name:372,description:''})
         //2679
         // this.validDep({ name: 11, date: new Date('02/05/2023') }) 
@@ -140,7 +145,7 @@ export class PaymentRefService {
 
         this.gDepositos = []
         try {
-            var date = LocalDate.getCustom(dto.date, "MM/DD/YYYY")
+            var date = LocalDate.getNow()
 
             let sql = `
             SELECT RFD.ID_PAGO , RFD.MONTO,
@@ -154,11 +159,11 @@ export class PaymentRefService {
             AND RFD.VALIDO_SISTEMA  = 'A'
             AND RFD.NO_BIEN         = ND.NO_BIEN
             AND ND.NO_NOMBRAMIENTO  = ${dto.name}
-           -- AND ND.NO_PERSONA       = ${dto.person}
+            AND ND.NO_PERSONA       = ${dto.person}
             AND RFD.IDORDENINGRESO  IS NULL
             AND ND.IMPORTE_CONTRAPRESTACION   > 0
             ORDER BY RFD.ID_PAGO, RFD.MONTO DESC
-        `
+        ` 
             const l8 = await this.ParametersmodDepositoryRepository.query(sql);
 
             for (const row of l8) {
@@ -331,6 +336,7 @@ export class PaymentRefService {
                     dateProcess: row.fecha_proceso,
                     type: 'U',
                     insert: 'DB',
+                    xCover:null
                 });
             }
 
@@ -362,7 +368,7 @@ export class PaymentRefService {
     async dispersionDeductions(): Promise<object> {
         let lStatus: number = 0; //L_STATUS
         let dG: number = 0;
-        let rDispercionAbonos: any[] = this.gDispercionAbonos;
+         this.gDispercionAbonos;
         let gAppointment = 0; //G_NOMBRAMIENTO
         let gReference = null; //G_REFERENCIA
         try {
@@ -383,7 +389,7 @@ export class PaymentRefService {
                 ) {
                     if (lStatus <= 1) {
                         dG = dG + 1;
-
+                    
                         this.gDispercionAbonos.push({
                             payGensId: row.payGensId,
                             payId: row.payId,
@@ -407,11 +413,12 @@ export class PaymentRefService {
                             valuededu: row.valuededu,
                             impWithoutIva: row.impWithoutIva,
                             chkdedu: row.chkDedu ?? 0,
-                            origin: row.origin
+                            origin: row.origin,
+                            xCover:null
                         });
 
                         // TODO: Consultar si se va a guardar en la tabla temporal
-                        // await this.TmpPagosGensDepRepository.save(rDispercionAbonos[dG]);
+                         //await this.TmpPagosGensDepRepository.save(rDispercionAbonos[dG]);
 
                         if (gAppointment == 0 || gReference == null) {
                             gAppointment = row.noAppointment;
@@ -421,7 +428,7 @@ export class PaymentRefService {
                 }
             }
             let response = {
-                "rDispercionAbonos": rDispercionAbonos,
+                "rDispercionAbonos": this.gDispercionAbonos,
             };
 
             return {
@@ -456,27 +463,31 @@ export class PaymentRefService {
             lIva: number, // L_IVA
             lNewContra: number = 0.0, // L_NEWCONTRA
             dG: number = -1;
-        let lDepositos: any[] = this.gDepositos; //DEPOSITOS
-        let lDispercionAbonos: any[] = this.gDispercionAbonos; //DISPER_ABONOS
-        let lDispercion: any = [];
+        let lDepositos = this.gDepositos; //DEPOSITOS
+        let lDispercionAbonos = this.gDispercionAbonos; //DISPER_ABONOS
+        Logger.debug(`################# DISPERSION #####################`);
+        console.log(lDispercionAbonos)
+        Logger.debug(`##########################################`);
+        //let lDispercion: Dispersion = {};
         //DISPERSION
         try {
             this.gDispersion = []//LIMPIA LA LISTA
-
+            
             for (const deposito of lDepositos) {
                 for (const disperAbonos of lDispercionAbonos) {
-                    if (deposito.paid == 0) {
+
+                    if (deposito.paid <= 0) {
                         break;
                     }
 
-                    if (disperAbonos.origen == 'DB' && disperAbonos.status != 'X') {
+                    if (disperAbonos.origin == 'DB' && disperAbonos.status != 'X') {
                         dG++;
                         this.gDispersion.push({
                             payId: disperAbonos.payGensId, //ID_PAGO
                             noGood: disperAbonos.noGood, //NO_BIEN
                             amount: disperAbonos.amount, //IMPORTE
                             reference: disperAbonos.reference, //REFERENCIA
-                            typeInput: disperAbonos.typeInput, //TIPO_ENTRADA
+                            typeInput: `${disperAbonos.typeInput}`, //TIPO_ENTRADA
                             noTransferable: disperAbonos.noTransferable, //NO_TRANSFERIBLE
                             payment: disperAbonos.payment, //ABONO
                             paymentAct: disperAbonos.paymentAct, //ABONO_ACT
@@ -493,7 +504,7 @@ export class PaymentRefService {
                             origin: disperAbonos.origin, //ORIGEN
                             deduxcent: disperAbonos.deduxcent, //DEDUXCENT
                             deduValue: disperAbonos.deduValue, //DEDUVALOR
-                            chkDedu: disperAbonos.chkDedu, //CHK_DEDU
+                            chkDedu: disperAbonos.chkdedu, //CHK_DEDU
                         });
                         deposito.paid = deposito.paid - disperAbonos.amount;
                         disperAbonos.status = 'X';
@@ -515,10 +526,10 @@ export class PaymentRefService {
                                     lXCubrir = this.round(this.gIvaContra) - this.round(this.round(disperAbonos.paymentAct) + this.round(deposito.paid));
                                     dG++;
 
-                                    lDispercion = {
+                                    var lDispercion:Dispersion = {
                                         payId: disperAbonos.payGensId, //ID_PAGO
                                         noGood: disperAbonos.noGood, //NO_BIEN
-                                        amount: this.round(disperAbonos.paid), //IMPORTE
+                                        amount: this.round(deposito.paid), //IMPORTE
                                         reference: disperAbonos.reference, //REFERENCIA
                                         noTransferable: disperAbonos.noTransferable, //NO_TRANSFERIBLE
                                         payment: this.round(lMontosSinIva), //ABONO
@@ -535,7 +546,7 @@ export class PaymentRefService {
                                         xCover: this.round(lXCubrir), //X_CUBRIR
                                         deduxcent: disperAbonos.deduxcent, //DEDUXCENT
                                         deduValue: this.round(disperAbonos.deduValue), //DEDUVALOR
-                                        chkDedu: disperAbonos.chkDedu, //CHK_DEDU
+                                        chkDedu: disperAbonos.chkdedu, //CHK_DEDU
                                     }
 
                                     this.gDispersion.push(lDispercion);
@@ -562,12 +573,12 @@ export class PaymentRefService {
                                     lDispercion = {
                                         payId: disperAbonos.payGensId, //ID_PAGO
                                         noGood: disperAbonos.noGood, //NO_BIEN
-                                        amount: this.round(disperAbonos.paid), //IMPORTE
+                                        amount: this.round(deposito.paid), //IMPORTE
                                         reference: disperAbonos.reference, //REFERENCIA
                                         noTransferable: disperAbonos.noTransferable, //NO_TRANSFERIBLE
-                                        payment: disperAbonos.inset == 'DB' ? this.round(lMontosSinIva) : 0, //ABONO
+                                        payment: disperAbonos.insert == 'DB' ? this.round(lMontosSinIva) : 0, //ABONO
                                         paymentAct: this.round(lResto), //ABONO_ACT
-                                        status: disperAbonos.inset == 'DB' ? 'C' : 'P', //STATUS
+                                        status: disperAbonos.insert == 'DB' ? 'C' : 'P', //STATUS
                                         impWithoutIva: this.round(lMontosSinIva), //IMP_SIN_IVA
                                         iva: this.round(disperAbonos.iva), //IVA
                                         amountIva: this.round(lXCentIva), //MONTO_IVA
@@ -579,7 +590,7 @@ export class PaymentRefService {
                                         xCover: 0, //X_CUBRIR
                                         deduxcent: disperAbonos.deduxcent, //DEDUXCENT
                                         deduValue: this.round(disperAbonos.deduValue), //DEDUVALOR
-                                        chkDedu: disperAbonos.chkDedu, //CHK_DEDU
+                                        chkDedu: disperAbonos.chkdedu, //CHK_DEDU
                                     }
 
                                     this.gDispersion.push(lDispercion);
@@ -597,12 +608,12 @@ export class PaymentRefService {
                                     lDispercion = {
                                         payId: disperAbonos.payGensId, //ID_PAGO
                                         noGood: disperAbonos.noGood, //NO_BIEN
-                                        amount: this.round(disperAbonos.paid), //IMPORTE
+                                        amount: this.round(deposito.paid), //IMPORTE
                                         reference: disperAbonos.reference, //REFERENCIA
                                         noTransferable: disperAbonos.noTransferable, //NO_TRANSFERIBLE
-                                        payment: disperAbonos.inset == 'DB' ? this.round(lMontosSinIva) : 0, //ABONO
+                                        payment: disperAbonos.insert == 'DB' ? this.round(lMontosSinIva) : 0, //ABONO
                                         paymentAct: this.round(lResto), //ABONO_ACT
-                                        status: disperAbonos.inset == 'DB' ? 'C' : 'P', //STATUS
+                                        status: disperAbonos.insert == 'DB' ? 'C' : 'P', //STATUS
                                         impWithoutIva: this.round(lMontosSinIva), //IMP_SIN_IVA
                                         iva: this.round(disperAbonos.iva), //IVA
                                         amountIva: this.round(lXCentIva), //MONTO_IVA
@@ -614,7 +625,7 @@ export class PaymentRefService {
                                         xCover: 0, //X_CUBRIR
                                         deduxcent: disperAbonos.deduxcent, //DEDUXCENT
                                         deduValue: this.round(disperAbonos.deduValue), //DEDUVALOR
-                                        chkDedu: disperAbonos.chkDedu, //CHK_DEDU
+                                        chkDedu: disperAbonos.chkdedu, //CHK_DEDU
                                     }
 
                                     this.gDispersion.push(lDispercion);
@@ -638,7 +649,7 @@ export class PaymentRefService {
                                     lPagTot = this.round(lNewMont);
                                 }
 
-                                if (disperAbonos.chkDedu == 1) {
+                                if (disperAbonos.chkdedu == 1) {
                                     lIva = this.round(disperAbonos.iva);
                                 } else {
                                     lIva = await this.calculateIva(disperAbonos.iva, disperAbonos.deduxcent ?? 0);
@@ -653,7 +664,7 @@ export class PaymentRefService {
                                     lDispercion = {
                                         payId: disperAbonos.payGensId, //ID_PAGO
                                         noGood: disperAbonos.noGood, //NO_BIEN
-                                        amount: this.round(disperAbonos.paid), //IMPORTE
+                                        amount: this.round(deposito.paid), //IMPORTE
                                         reference: disperAbonos.reference, //REFERENCIA
                                         noTransferable: disperAbonos.noTransferable, //NO_TRANSFERIBLE
                                         payment: this.round(lMontosSinIva), //ABONO
@@ -698,12 +709,12 @@ export class PaymentRefService {
                                     lDispercion = {
                                         payId: disperAbonos.payGensId, //ID_PAGO
                                         noGood: disperAbonos.noGood, //NO_BIEN
-                                        amount: this.round(disperAbonos.paid), //IMPORTE
+                                        amount: this.round(deposito.paid), //IMPORTE
                                         reference: disperAbonos.reference, //REFERENCIA
                                         noTransferable: disperAbonos.noTransferable, //NO_TRANSFERIBLE
-                                        payment: disperAbonos.inset == 'DB' ? this.round(lMontosSinIva) : 0, //ABONO
+                                        payment: disperAbonos.insert == 'DB' ? this.round(lMontosSinIva) : 0, //ABONO
                                         paymentAct: this.round(lResto), //ABONO_ACT
-                                        status: disperAbonos.inset == 'DB' ? 'C' : 'P', //STATUS
+                                        status: disperAbonos.insert == 'DB' ? 'C' : 'P', //STATUS
                                         impWithoutIva: this.round(lMontosSinIva), //IMP_SIN_IVA
                                         iva: this.round(lIva), //IVA
                                         amountIva: this.round(lXCentIva), //MONTO_IVA
@@ -733,12 +744,12 @@ export class PaymentRefService {
                                     lDispercion = {
                                         payId: disperAbonos.payGensId, //ID_PAGO
                                         noGood: disperAbonos.noGood, //NO_BIEN
-                                        amount: this.round(disperAbonos.paid), //IMPORTE
+                                        amount: this.round(deposito.paid), //IMPORTE
                                         reference: disperAbonos.reference, //REFERENCIA
                                         noTransferable: disperAbonos.noTransferable, //NO_TRANSFERIBLE
-                                        payment: disperAbonos.inset == 'DB' ? this.round(lMontosSinIva) : 0, //ABONO
+                                        payment: disperAbonos.insert == 'DB' ? this.round(lMontosSinIva) : 0, //ABONO
                                         paymentAct: this.round(deposito.paid), //ABONO_ACT
-                                        status: disperAbonos.inset == 'DB' ? 'C' : 'P', //STATUS
+                                        status: disperAbonos.insert == 'DB' ? 'C' : 'P', //STATUS
                                         impWithoutIva: this.round(lMontosSinIva), //IMP_SIN_IVA
                                         iva: this.round(lIva), //IVA
                                         amountIva: this.round(lXCentIva), //MONTO_IVA
@@ -791,9 +802,7 @@ export class PaymentRefService {
      * @memberof PACKAGE BODY SERA.PAGOSREF_DEPOSITARIA lineas 722-872
      */
     async execDeductions(dto: ExecDeductionsDto) {
-        Logger.debug(`#################  #####################`);
-        console.log(dto)
-        Logger.debug(`##########################################`);
+       
         let lPago: number,
             lNewMont: number,
             lXcent: number,
@@ -812,17 +821,16 @@ export class PaymentRefService {
         lResto = 0.0;
         lMontoSinIva = 0.0;
         lXcentIva = 0.0;
+        this.gNombramiento = dto.pOne
         lXCubrir = 0.0;
         const dateNow = LocalDate.getNow();
 
-        this.gSumaTot = await this.fillPayments({ name: dto.pOne, person: dto.pTwo, date: dto.pDate, phase: 1 }).then((res) => {
-            return res.data.lDepTot;
-        });
-
+        this.gSumaTot =( await this.fillPayments({ name: dto.pOne, person: dto.pTwo, date: dto.pDate, phase: 1 }))?.data?.lDepTot || 0
+     
         // TODO: validar si las asigno a alguna variable
         await this.dispersionDeductions();
         await this.fillPaymentsDisp();
-
+        
         let lDepositos = this.gDepositos;
         let rDispercion = this.gDispersion;
 
@@ -952,7 +960,10 @@ export class PaymentRefService {
             // llena la lista global de dispersiones
 
             //ejecución del procedimiento
-            await this.insertDispersion({ pOne: dto.pOne })
+            var res = await this.insertDispersion({ pOne: dto.pOne })
+            Logger.debug(`################# res #####################`);
+            console.log(res)
+            Logger.debug(`##########################################`);
         }
         return {
             statusCode:200,
@@ -1337,6 +1348,8 @@ export class PaymentRefService {
 
             }
         }
+     
+
         return {
             statusCode: 200,
             message: ["OK"]
@@ -1367,7 +1380,9 @@ export class PaymentRefService {
                 .execute().then((res) => {
                     return res[0].max_id_pagogens ?? 0;
                 });
-
+            Logger.debug(`################# lIdprgens #####################`);
+            console.log(lIdprgens)
+            Logger.debug(`##########################################`);
             lIdpgens = await this.PaymentsgensDepositaryRepository
                 .createQueryBuilder('pagos')
                 .select('COALESCE(MAX(pagos.id_pago_cubrio), 0)', 'max_id_pago_cubrio')
@@ -1379,7 +1394,9 @@ export class PaymentRefService {
             //TODO: consultar que debo borrar
             await this.TmpPagosGensDepRepository.delete({});
             for (const dispersion of this.gDispersion) {
-
+                Logger.debug(`#################  #####################`);
+                console.log(dispersion)
+                Logger.debug(`##########################################`);
                 if (dispersion.type == 'U') {
                     dispersion.insert = 'DB';
 
@@ -1401,7 +1418,7 @@ export class PaymentRefService {
                         deduValue: this.round(dispersion.deduValue),
                         status: dispersion.status,
                         noAppointment: dispersion.noAppointment,
-                        dateProcess: dispersion.dateProcess,
+                        dateProcess: new Date(dispersion.dateProcess),
                         type: dispersion.type,
                         paymentAct: this.round(dispersion.paymentAct),
                         payCoverId: dispersion.payCoverId,
@@ -1942,6 +1959,7 @@ export class PaymentRefService {
 
         }
 
+        
         // INS_DISPERSION(P_NOMBR, L_PERSONA);
         await this.insertDispersion({ pOne: dto.name, pTwo: L_PERSONA })
         return {

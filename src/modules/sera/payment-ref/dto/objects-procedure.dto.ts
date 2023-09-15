@@ -21,7 +21,7 @@ export class Dispersion{
     iva: number //IVA
     amountIva: number //IMPORTE_IVA
     noAppointment: number //NO_CITA
-    dateProcess:  Date //FECHA_PROCESO
+    dateProcess:  Date| string //FECHA_PROCESO
     type: string //TIPO
     insert: string //INSERTO
     payCoverId: number //ID_PAGO_CUBRIO
@@ -57,4 +57,5 @@ export class DispercionAbonos{
     chkdedu?: number
     origin?:string
     payCoverId?: number
+    xCover:number
 }

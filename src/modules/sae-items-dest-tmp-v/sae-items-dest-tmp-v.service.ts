@@ -583,15 +583,15 @@ export class SaeItemsDestTmpVService {
   @Interval((+process.env.CRON_JOB || 60) * 1000)
   async updateAndDeleteTrigger() {
     try {
-      Logger.debug('TRIGGER', this.#table);
+      //Logger.debug('TRIGGER', this.#table);
       const result: any[] = await this.entity.query(`
         select * from audit.logged_actions where event_id > ${this.#eventId} and action in ('D', 'U') and table_name = '${this.#table.toLocaleLowerCase()}' order by event_id DESC;
       `)
 
       this.#eventId = result[0]?.event_id || this.#eventId;
 
-      Logger.log(this.#eventId);
-      Logger.log(result[0]);
+      //Logger.log(this.#eventId);
+      //Logger.log(result[0]);
 
       for (const loggedAction of result) {
         const client_query = JSON.parse(loggedAction.client_query);
@@ -606,7 +606,7 @@ export class SaeItemsDestTmpVService {
         }
       }
       
-      Logger.verbose('Finished Trigger', this.#table);
+      //Logger.verbose('Finished Trigger', this.#table);
     } catch (error) {
       console.log(error.message);
       Logger.error(error.message);
