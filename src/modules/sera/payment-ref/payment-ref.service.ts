@@ -5,7 +5,7 @@ import { ParametersmodDepositoryEntity } from "../../infrastructure/entities/par
 import { refpayDepositoriesEntity } from "../../infrastructure/entities/refpay-depositories.entity";
 import { TmpPagosGensDepEntity } from '../../infrastructure/entities/tmp-pagosgens-dep.entity';
 import { paymentsgensDepositaryEntity } from "../../infrastructure/entities/paymentsgens-depositary.entity";
-import { ExecDeductionsDto, FillAccreditationsDto, FillPaymentsDto, FullDepositDto, FullPaymentDto, GenericParamsDto, PrepOIDto, RemoveDisperPaymentsRefDto, ValidDep, ValidDepDto, } from "./dto/param.dto";
+import { ExecDeductionsDto, FillAccreditationsDto, FillPaymentsDto, FullDepositDto, FullPaymentDto, GenericParamsDto, PrepOIDto, PrepOIInmu, RemoveDisperPaymentsRefDto, ValidDep, ValidDepDto, } from "../validate-payments-ref/dto/param.dto";
 import { LocalDate } from "src/shared/config/text";
 import { Deposito, DispercionAbonos, Dispersion } from "./dto/objects-procedure.dto";
 import * as moment from 'moment';
@@ -1466,7 +1466,7 @@ export class PaymentRefService {
                         deduValue: this.round(dispersion.deduValue),
                         status: dispersion.status,
                         noAppointment: dispersion.noAppointment,
-                        dateProcess: dispersion.dateProcess,
+                        dateProcess:new Date(dispersion.dateProcess),
                         type: dispersion.type,
                         paymentAct: this.round(dispersion.paymentAct),
                         payCoverId: lIdpgens,
@@ -2285,5 +2285,9 @@ export class PaymentRefService {
     //#endregion
 
     //#endregion
+
+
+
+    
 
 }

@@ -1,7 +1,7 @@
 import { Controller, Get, HttpStatus } from "@nestjs/common";
 
 import { PaymentRefService } from "./payment-ref.service";
-import { ExecDeductionsDto, FillAccreditationsDto, FullDepositDto, GenericParamsDto, PrepOIDto, RemoveDisperPaymentsRefDto, ValidDep, ValidDepDto } from "./dto/param.dto";
+import { ExecDeductionsDto, FillAccreditationsDto, FullDepositDto, GenericParamsDto, PrepOIDto, RemoveDisperPaymentsRefDto, ValidDep, ValidDepDto } from "../validate-payments-ref/dto/param.dto";
 import { MessagePattern } from "@nestjs/microservices";
 
 @Controller('payment-ref')

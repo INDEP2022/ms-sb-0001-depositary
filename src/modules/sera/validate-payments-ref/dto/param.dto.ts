@@ -145,3 +145,21 @@ export class PrepOIDto {
     description: string;
 
 }
+
+export class PrepOIInmu{
+    event:number
+    descriptionEvent:string
+    inmueble:string
+    lot:number
+    phase:number
+    usuario?:string
+}
+export class PrepOiInmuAct{
+    event:number
+    descriptionEvent:string
+    inmueble:string
+    publicLot:number
+    lot:number
+    phase:number
+    usuario?:number
+}

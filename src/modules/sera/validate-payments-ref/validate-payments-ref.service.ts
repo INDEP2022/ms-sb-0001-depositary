@@ -19,6 +19,7 @@ import { LocalDate } from 'src/shared/utils/local-date';
 import { UpdateCurrentGeneralStatus } from './dto/update-current-general-status.dto';
 import { ACUMDETALLESOI } from './dto/prep-oi.dto';
 import InternalServerErrorException from 'src/shared/exceptions/internal-server-error.exception';
+import { PrepOIInmu, PrepOiInmuAct } from './dto/param.dto';
 
 @Injectable()
 export class ValidatePaymentsRefService {
@@ -4144,8 +4145,67 @@ export class ValidatePaymentsRefService {
     await this.actRefesAct(params.event, params.lot, params.phase);
     return { statusCode: 200, message: ['OK'], data: [] };
   }
+  async realStateSate(data:RealStateSale){
+    var COMPRA_TOT       = 0.0;
+    var     PAGADO_TOT        = 0.0;
 
-  async realStateSale(params: RealStateSale) {
+    var L7 = await this.entity.query(`
+    SELECT DISTINCT LOT.ID_CLIENTE
+    FROM sera.COMER_LOTES LOT
+    WHERE LOT.ID_EVENTO = ${data.event}
+      AND LOT.ID_LOTE = COALESCE(${data.lot}, LOT.ID_LOTE)
+      AND EXISTS (
+        SELECT PRF.ID_LOTE
+        FROM sera.COMER_PAGOREF PRF
+        WHERE PRF.ID_LOTE = LOT.ID_LOTE
+          AND PRF.VALIDO_SISTEMA = 'A'
+          AND PRF.FECHA <= '${LocalDate.getNextDay(data.date)}'
+      )
+      AND EXISTS (
+        SELECT 1
+        FROM sera.COMER_CLIENTESXEVENTO CXE
+        WHERE CXE.ID_EVENTO = ${data.event}
+          AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+          AND CXE.PROCESAR = 'S'
+      )
+      AND LOT.PRECIO_FINAL > 0
+      AND (LOT.VALIDO_SISTEMA IS NULL OR LOT.VALIDO_SISTEMA = CASE FASE WHEN 1 THEN '1' WHEN 2 THEN 'G' WHEN 3 THEN 'G' END);
+    
+    `)
+    var Parametros = await this.getParameters({eventId:data.event,address:'I'})
+    this.G_EVENTO = data.event
+    if(data.phase == 1){
+      await this.actLotes(data.event)
+      await this.prepareLot(data.lot,'I')
+    }
+    if(data.phase == 1){
+      await this.borraMuebles(data.event,null,data.phase)
+    }else if([2,3].includes(data.phase)){
+      await this.borraMuebles(data.event,data.lot,data.phase)
+
+    }
+    await this.realStateSale1(data)
+    if(data.phase != 3){
+      for (const iterator of L7) {
+        this.DISPERSION = []
+        COMPRA_TOT = await this.llenaLotes(data.event,iterator.id_cliente,data.lot,data.phase)
+        PAGADO_TOT = await this.llenaPagos(data.event,iterator.id_cliente,data.date,data.phase)
+        await this.penalizaInmu(COMPRA_TOT,PAGADO_TOT,iterator.id_cliente,data.phase)
+        await this.pagoALote(iterator.id_cliente,data.lot,data.phase)
+        await this.insDispBm(iterator.id_cliente,6,data.event)
+        await this.actClienteProc(iterator.id_cliente,data.event)
+        
+      }
+    }
+    await this.actPagos(data.event,'I',data.phase,data.lot)
+    await this.actRefes(data.event,data.lot,data.phase)
+    return {
+      statusCode:200,
+      message:["OK"]
+    }
+  }
+
+  async realStateSale1(params: RealStateSale) {
     var P1: any[] = await this.entity
       .query(` SELECT    LOT.ID_LOTE, LOT.PRECIO_FINAL, SUM(PAG.MONTO) as pagado, coalesce(LOT.ACUMULADO,0) as acum, LOT.ANTICIPO, LOT.ID_CLIENTE
                         FROM    sera.COMER_LOTES LOT, sera.COMER_PAGOREF PAG 
@@ -12714,6 +12774,842 @@ export class ValidatePaymentsRefService {
     } catch (error) {
       console.log(error);
       return new InternalServerErrorException(error.message);
+    }
+  }
+
+
+
+  async prepOiInmu(data: PrepOIInmu) {
+    var C1: any[] = await this.entity.query(`
+    
+     SELECT
+            PAG.ID_PAGO,
+            CLI.RFC,
+            TO_CHAR(PAG.FECHA, 'YYYYMMDD') as fecha,
+            PAG.MONTO,
+            SUBSTRING(PAG.REFERENCIAORI, 1, 30) as ref,
+            PAG.NO_MOVIMIENTO,
+            LOT.LOTE_PUBLICO,
+            PAG.MONTO,
+            SUBSTRING(LOT.DESCRIPCION, 1, 355) || ' PAGO DE ' ||
+            CASE
+                WHEN LOT.ID_ESTATUSVTA = 'GARA' THEN 'GARANTIA'
+                WHEN LOT.ID_ESTATUSVTA = 'PAG' THEN 'LIQUIDACION'
+            END as estatusvta,
+            PAG.ID_LOTE,
+            PMO.VALOR
+        FROM
+            SERA.COMER_PAGOREF PAG
+        INNER JOIN
+            SERA.COMER_LOTES LOT ON LOT.ID_LOTE = PAG.ID_LOTE
+        INNER JOIN
+            SERA.COMER_CLIENTES CLI ON CLI.ID_CLIENTE = LOT.ID_CLIENTE
+        INNER JOIN
+            SERA.COMER_PARAMETROSMOD PMO ON PAG.CVE_BANCO = PMO.PARAMETRO
+        WHERE
+            LOT.ID_EVENTO = ${data.event}
+            AND PAG.VALIDO_SISTEMA = 'S'
+            AND LOT.LOTE_PUBLICO <> 0
+            AND        LOT.ID_LOTE         = COALESCE(${data.lot},LOT.ID_LOTE)
+            AND PAG.IDORDENINGRESO IS NULL
+            AND NOT EXISTS (
+                SELECT 1
+                FROM SERA.COMER_CABECERAS CAB
+                WHERE CAB.IDPAGO = PAG.ID_PAGO
+                AND CAB.IDORDENGRABADA IS NOT NULL
+            )
+            AND EXISTS (
+                SELECT 1
+                FROM SERA.COMER_CLIENTESXEVENTO CXE
+                WHERE CXE.ID_EVENTO = ${data.event}
+                AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+                AND CXE.PROCESAR = 'S'
+            )
+        ORDER BY
+            PAG.ID_PAGO;
+    `)
+
+    var C2 = async (paid: number) => {
+      return await this.entity.query(`
+            select
+            
+                (GEN.MONTO_APP_IVA + GEN.IVA) IVA,
+                GEN.TIPO,
+                SUBSTRING(GEN.REFERENCIA, 1, 30) referencia,
+                GEN.MONTO_APP_IVA,
+                GEN.IVA val0,
+                1 val1,
+                COALESCE(CAT.CVMAN, '0') mandate,
+                GEN.MONTO_NOAPP_IVA,
+                SUBSTRING(LOT.DESCRIPCION, 1, 430) AS LOTE,
+                LOT.LOTE_PUBLICO,
+                LOT.ID_LOTE,
+                CASE
+                WHEN GEN.TIPO = 'N' THEN 'Pago Normal'
+                WHEN GEN.TIPO = 'P' THEN 'Pago a Penalizar'
+                WHEN GEN.TIPO = 'D' THEN 'Pago a Devolver'
+                END AS TIPO_DESCRIPCION,
+                LOT.PRECIO_FINAL,
+                CASE
+                  WHEN LOT.ID_ESTATUSVTA = 'GARA' THEN 'A'
+                  WHEN LOT.ID_ESTATUSVTA = 'PAG' THEN 'C'
+                END AS ESTATUS_DESCRIPCION,
+                CASE
+                  WHEN GEN.TIPO = 'N' THEN ${this.G_TPOINGRESO}
+                  WHEN GEN.TIPO = 'P' THEN  ${this.G_TPOINGRESOP}
+                  WHEN GEN.TIPO = 'D' THEN  ${this.G_TPOINGRESOD}
+                END AS TPINGRESO,
+                LOT.NUM_BIENES
+            FROM
+                SERA.COMER_PAGOSREFGENS GEN
+            LEFT JOIN
+                SERA.CAT_TRANSFERENTE CAT ON GEN.NO_TRANSFERENTE = CAT.NO_TRANSFERENTE
+            JOIN
+                SERA.COMER_LOTES LOT ON GEN.ID_LOTE = LOT.ID_LOTE
+            where
+                GEN.id_pago  = ${paid}
+                and
+                LOT.LOTE_PUBLICO <> 0
+                AND LOT.ID_LOTE = GEN.ID_LOTE
+                AND EXISTS (
+                    SELECT 1
+                    FROM SERA.COMER_PAGOREF PAG
+                    WHERE PAG.ID_PAGO = GEN.ID_PAGO
+                    AND PAG.VALIDO_SISTEMA = 'S'
+                    AND PAG.CONCILIADO IS NULL
+                )
+
+        `)
+    }
+
+    var C3 = async (lot: number) => {
+      return await this.entity.query(`SELECT
+            BXL.PCTSLOTE,
+            COALESCE(CAT.CVMAN, '0') as mandato,
+            BXL.NO_BIEN,
+            LEFT(BIE.DESCRIPCION, 438)as description, 
+            BXL.PRECIO_SIN_IVA,
+            BXL.MONTO_NOAPP_IVA,
+            BXL.IVA_FINAL
+        FROM
+            sera.BIEN BIE
+        JOIN
+            sera.COMER_BIENESXLOTE BXL ON BXL.ID_LOTE = ${lot}
+        LEFT JOIN
+            sera.CAT_TRANSFERENTE CAT ON BXL.NO_TRANSFERENTE = CAT.NO_TRANSFERENTE
+        WHERE
+            BXL.NO_BIEN = BIE.NO_BIEN
+            and bxl.id_lote = ${lot}
+        `)
+    }
+    let parameters = await this.getParameters({ address: 'I', eventId: data.event })
+    await this.bienesLote(data.event, null)
+
+    await this.entity.query(`
+      DELETE    SERA.COMER_CABECERAS CAB
+      WHERE    CAB.ID_EVENTO = ${data.event}
+      AND        CAB.IDORDENGRABADA IS NULL
+      AND        EXISTS (SELECT 1
+                      FROM    SERA.COMER_DETALLES DET
+                      WHERE    DET.ID_EVENTO         = CAB.ID_EVENTO
+                    AND        DET.IDENTIFICADOR    = CAB.IDENTIFICADOR
+                    AND        DET.ID_LOTE         = coalesce(${data.lot}, DET.ID_LOTE)
+                    )`)
+    await this.entity.query(`
+      DELETE sera.COMER_DETALLES WHERE ID_EVENTO = ${data.event} AND IDORDENGRABADA IS NULL AND ID_LOTE = coalesce(${data.lot}, ID_LOTE)
+    `)
+    if (data.phase == 1) {
+      await this.entity.query(`
+          UPDATE    SERA.COMER_BIENESXLOTE as  BXLS
+          SET    PCTSLOTE = (SELECT    BXL.PRECIO_FINAL/LOT.PRECIO_FINAL
+                              FROM    sera.COMER_LOTES LOT, sera.COMER_BIENESXLOTE BXL
+                              WHERE    LOT.ID_EVENTO = ${data.event}
+                              AND    LOT.ID_LOTE = BXL.ID_LOTE
+                              AND    BXLS.NO_BIEN = BXL.NO_BIEN
+                              )
+          WHERE    EXISTS ( SELECT    1
+                            FROM    sera.COMER_LOTES LOTS
+                            WHERE    LOTS.ID_EVENTO = ${data.event}
+                            AND      LOTS.ID_LOTE = BXLS.ID_LOTE
+                          )
+      `)
+    }
+    var O_IDENTI = (await this.entity.query(`select max(IDENTIFICADOR) as val1 from sera.comer_cabeceras where id_evento = ${data.event}`))[0]?.val1 || 0
+
+    var USUARIO = (await this.entity.query(` SELECT coalesce(RTRIM(LTRIM(USUARIO_SIRSAE)),'SAE'||USER) as usuario
+      FROM sera.SEG_USUARIOS
+      WHERE USUARIO = '${data.usuario}'`))[0]?.usuario || ''
+    for (const c1 of C1) {
+      O_IDENTI = parseInt(O_IDENTI) + 1;
+      var L_MANDATOS = (await this.entity.query(`
+        SELECT COUNT(DISTINCT BXL.NO_TRANSFERENTE)
+          FROM SERA.COMER_BIENESXLOTE BXL
+          JOIN SERA.BIEN BIE ON BIE.NO_BIEN = BXL.NO_BIEN
+          JOIN SERA.EXPEDIENTES EXP ON BIE.NO_EXPEDIENTE = EXP.NO_EXPEDIENTE
+          WHERE EXISTS (
+              SELECT 1
+              FROM SERA.COMER_LOTES LOT
+              WHERE LOT.ID_LOTE = ${data.lot}
+              AND LOT.ID_LOTE = BXL.ID_LOTE
+          )
+      `))
+      O_IDENTI = parseInt(O_IDENTI) + 1;
+      var P_CONCEP = 'DEPOSITO POR VENTA DE BIENES INMUEBLES ' + 'EVENTO ' + data.descriptionEvent + ' ' + c1.estatusvta;
+      await this.entity.query(`
+        INSERT INTO sera.COMER_CABECERAS
+                (IDENTIFICADOR,            CONSECUTIVO,    AREA,            DOCUMENTO,    UNRESPONSABLE,    CLIENTE_RFC,    CONCEPTO,
+                 ANEXO,                    FECHA,            TIPOPE,            FORMAPAGO,    FECHAORDEN,        BANCO,            USAUTORIZA,
+                 MONTO_TOTAL_PADRE,     NUMOVTO,        REFERENCIA,        IDPAGO,        ID_EVENTO)
+                VALUES
+                (${O_IDENTI},                0,                '${this.G_AREA}',            '${this.G_TPODOC}',    '${this.G_UR}',            '${c1.rfc}',            '${P_CONCEP}',
+                 '${this.G_ANEXO}',                '${c1.fecha}',        '${this.G_TPOPERACION}',     'R',        '${c1.fecha}',        '${c1.valor}',        '${data.usuario}',
+                 '${c1.monto}',                '${c1.no_movimiento}',         '${c1.ref}',            '${c1.id_pago}',    ${data.event});
+      `)
+      var c2Result = await C2(c1.id_pago)
+      for (const c2 of c2Result) {
+        var  H_IDENT = 0;
+
+        if(L_MANDATOS >  1 && c2.tipo == 'N'){
+          for (const c3 of await C3(data.lot)) {
+            var D_CONCEP = 'Pago Normal A cuenta del bien '+c3.no_bien+' '+c3.description;
+            H_IDENT++;
+            if(c3.iva == 0 || !c3.iva){
+              this.G_TASAIVA = 0
+              await this.entity.query(`
+                INSERT INTO sera.COMER_DETALLES
+                  (IDENTIFICADOR,            CONSECUTIVO,                MANDATO,    INGRESO,    IMPORTE,
+                    IVA,                    REFERENCIA,                 INDTIPO,    LOTESIAB,    DESCRIPCION,
+                    ID_EVENTO,                UNRESPONSABLE,                IMPORTE_SIVA,             ID_LOTE,    TIPO_PAGO,
+                    PORC_IVA,                PRECIO_VTA_LOTE
+                  )
+                  VALUES
+                  ('${O_IDENTI}',                ${H_IDENT},                   '${c3.mandato}',    '${c2.tpingreso}',    ROUND(${c2.monto_app_iva}*${c3.pctslote},2),
+                    ROUND(${c2.val0}*${c3.pctslote},2),    '${c2.ref}',                        '${c2.tipo}',        '${c2.lote_publico}',    '${D_CONCEP}',
+                    ${data.event},    '${this.G_UR}',        ROUND(${c2.monto_noapp_iva}*${c3.pctslote},2),    ${c2.id_lote},    '${c2.estatus_descripcion}',
+                    ${this.G_TASAIVA},    ${c2.precio_final}
+                  )
+              `)
+              this.G_TASAIVA= 16;
+            }else{
+              await this.entity.query(`
+              INSERT INTO sera.COMER_DETALLES
+                (IDENTIFICADOR,            CONSECUTIVO,                MANDATO,    INGRESO,    IMPORTE,
+                  IVA,                    REFERENCIA,                 INDTIPO,    LOTESIAB,    DESCRIPCION,
+                  ID_EVENTO,                UNRESPONSABLE,                IMPORTE_SIVA,             ID_LOTE,    TIPO_PAGO,
+                  PORC_IVA,                PRECIO_VTA_LOTE
+                )
+                VALUES
+                ('${O_IDENTI}',                ${H_IDENT},                   '${c3.mandato}',    '${c2.tpingreso}',    ROUND(${c2.monto_app_iva}*${c3.pctslote},2),
+                  ROUND(${c2.val0}*${c3.pctslote},2),    '${c2.ref}',                        '${c2.tipo}',        '${c2.lote_publico}',    '${D_CONCEP}',
+                  ${data.event},    '${this.G_UR}',        ROUND(${c2.monto_noapp_iva}*${c3.pctslote},2),    ${c2.id_lote},    '${c2.estatus_descripcion}',
+                  ${this.G_TASAIVA},    ${c2.precio_final}
+                )
+            `)
+            }
+
+          }
+        }else{
+          H_IDENT = Number(H_IDENT) + 1;
+          var H_SIAB = 0;
+          var H_CONCEP = "" 
+
+          if(c2.num_bienes == 1){
+            H_SIAB = (await this.entity.query(`
+              SELECT    BXL.NO_BIEN
+                           
+                            FROM    SERA.COMER_BIENESXLOTE BXL
+                            WHERE    BXL.ID_LOTE = ${c2.id_lote}
+                            limit 1
+            `))[0]?.no_bien
+             H_CONCEP = c2.tipo_descripcion+' A cuenta de NO SIAB '+H_SIAB+' del lote '+c2.lote_publico+' bienes '+c2.lote; 
+          }else{
+             H_CONCEP = c2.tipo_descripcion+' A cuenta del lote '+c2.lote_publico+' que contiene '+c2.num_bienes+' bienes '+c2.lote; 
+          }
+          if(c2.val0 == 0 || !c2.val0){
+            this.G_TASAIVA = 0;
+            await this.entity.query(`
+              INSERT INTO SERA.COMER_DETALLES
+                (IDENTIFICADOR,    CONSECUTIVO,    MANDATO,        INGRESO,    IMPORTE,
+                  IVA,            REFERENCIA,        INDTIPO,        LOTESIAB,    DESCRIPCION,
+                ID_EVENTO,        UNRESPONSABLE,    IMPORTE_SIVA,    ID_LOTE,    TIPO_PAGO,
+                PORC_IVA,        PRECIO_VTA_LOTE
+                )
+              VALUES
+                (${O_IDENTI},        ${H_IDENT},        '${c2.mandate}',            '${c2.tpingreso}',    ${c2.monto_app_iva},
+                ${c2.val0},            ${c2.ref},            '${c2.tipo}',            '${c2.lote_publico}',    '${H_CONCEP}',
+                ${data.event},        '${this.G_UR}',            ${c2.monto_noapp_iva},         ${c2.id_lote},    '${c2.estatus_descripcion}',
+                '${this.G_TASAIVA}',         ${c2.precio_final}
+              )
+            `)
+          }else{
+            this.G_TASAIVA = 16;
+
+            await this.entity.query(`
+            INSERT INTO SERA.COMER_DETALLES
+              (IDENTIFICADOR,    CONSECUTIVO,    MANDATO,        INGRESO,    IMPORTE,
+                IVA,            REFERENCIA,        INDTIPO,        LOTESIAB,    DESCRIPCION,
+              ID_EVENTO,        UNRESPONSABLE,    IMPORTE_SIVA,    ID_LOTE,    TIPO_PAGO,
+              PORC_IVA,        PRECIO_VTA_LOTE
+              )
+            VALUES
+              (${O_IDENTI},        ${H_IDENT},        '${c2.mandate}',            '${c2.tpingreso}',    ${c2.monto_app_iva},
+              ${c2.val0},            ${c2.ref},            '${c2.tipo}',            '${c2.lote_publico}',    '${H_CONCEP}',
+              ${data.event},        '${this.G_UR}',            ${c2.monto_noapp_iva},         ${c2.id_lote},    '${c2.estatus_descripcion}',
+              '${this.G_TASAIVA}',         ${c2.precio_final}
+            )
+          `)
+          }
+        }
+      }
+     
+    }
+    await this.typeAdjustPayment(data.event,data.lot)
+    await this.ajustTwoDecimals(data.event,data.lot)
+    return {
+      statusCode:200,
+      message:["OK"]
+    }
+  }
+
+
+  async typeAdjustPayment(event:number,lot:number){
+    var CTP = await this.entity.query(`
+        SELECT
+          DET.LOTESIAB,
+          COUNT(DET.LOTESIAB) as val1
+        FROM
+            sera.COMER_DETALLES DET
+        JOIN
+            sera.COMER_CABECERAS CAB ON DET.ID_EVENTO = ${event}
+        WHERE
+            DET.ID_EVENTO = ${event}
+            AND CAB.IDORDENGRABADA IS NULL
+            AND DET.TIPO_PAGO = 'C'
+            AND (DET.ID_LOTE = ${lot} OR ${lot} IS NULL) 
+        GROUP BY
+            DET.LOTESIAB
+        HAVING
+            COUNT(DET.LOTESIAB) > 1;  
+    `)
+    var ARU = await this.entity.query(`
+      SELECT
+        DET.LOTESIAB,
+        COUNT(DET.LOTESIAB) val1
+        FROM
+            SERA.COMER_DETALLES DET
+        JOIN
+           SERA. COMER_CABECERAS CAB ON DET.ID_EVENTO = DET.id_evento
+        WHERE
+            DET.ID_EVENTO = ${event}
+            AND DET.IDENTIFICADOR = CAB.IDENTIFICADOR
+            AND CAB.IDORDENGRABADA IS NULL
+            AND (DET.ID_LOTE = COALESCE(${lot}, DET.ID_LOTE))
+            AND LEFT(DET.REFERENCIA, 1) = '1'
+            AND DET.TIPO_PAGO = 'C'
+        GROUP BY
+            DET.LOTESIAB
+        HAVING
+            COUNT(DET.LOTESIAB) = 1
+    `)
+
+    var cont = 0 ;
+    for (const ctp of CTP) {
+      cont ++
+      if(cont> 1){
+        await this.entity.query(`
+          UPDATE    SERA.COMER_DETALLES
+          SET    TIPO_PAGO = 'A'
+          WHERE    ID_EVENTO = ${event}
+          AND    LOTESIAB =${lot}
+          AND    IDORDENGRABADA IS NULL
+        `)
+      }
+    }
+    for (const aru of ARU) {
+      if(cont == 1){
+        await this.entity.query(` UPDATE    sera.COMER_DETALLES
+        SET    TIPO_PAGO = 'T'
+        WHERE    ID_EVENTO = ${event}
+        AND    LOTESIAB = ${lot}
+        AND    IDORDENGRABADA IS NULL`)
+      }
+    }
+    await this.entity.query(`
+      UPDATE    sera.COMER_DETALLES
+      SET    TIPO_PAGO = 'T'
+      WHERE    ID_EVENTO = ${event}
+      AND    TIPO_PAGO IS NULL
+      AND    IDORDENGRABADA IS NULL
+      AND    INDTIPO IN ('D', 'P')
+    `)
+
+    return {
+      statusCode:200,
+      message:["OK"]
+    }
+  }
+//AJUSTA_DEC
+  async ajustTwoDecimals(event:number,lot:number){
+    var OBTINDENT = 1
+    await this.updateDecimal(event,OBTINDENT)
+  }
+  async findDifeDec(event:number,lot:number,ident:number){
+    var C1  = await this.entity.query(`
+      SELECT DISTINCT CAB.IDENTIFICADOR, CAB.MONTO_TOTAL_PADRE as monto
+      FROM sera.COMER_CABECERAS CAB
+      JOIN sera.COMER_DETALLES DET ON CAB.IDENTIFICADOR = DET.IDENTIFICADOR
+      WHERE CAB.ID_EVENTO = ${event}
+        AND DET.ID_EVENTO = ${event}
+        AND DET.ID_LOTE = COALESCE(${lot}, DET.ID_LOTE)
+        AND CAB.IDORDENGRABADA IS NULL
+      ORDER BY 1
+    `)
+
+    var VIDENT       =0
+    var VMONTO        = 0;
+    var HMONTO        = 0;
+    var AMONTO        = 0;
+    for (const c1 of C1) {
+      var monto = (await this.entity.query(`
+          SELECT    SUM(ROUND(IMPORTE,2)+ ROUND(IVA,2) +ROUND(IMPORTE_SIVA,2) ) as v1
+          FROM    sera.COMER_DETALLES
+          WHERE    ID_EVENTO = ${event}
+          AND    IDENTIFICADOR = '${c1.identificador}'
+      `))[0]?.v1 || 0
+      AMONTO = VMONTO - c1.monto
+      if(AMONTO != 0 && Math.abs(AMONTO)< 1.0){
+        VIDENT = c1.identificador
+        break
+      }
+    }
+    return {
+      statusCode:200,
+      message:["OK"],
+      data:{
+        ident:VIDENT
+      }
+    }
+  }
+
+  async updateDecimal(event:number,indent:number){
+    var MIMPORTE = await this.entity.query(`
+      SELECT    SUM(MONTO_TOTAL_PADRE)
+      FROM    sera.COMER_CABECERAS
+      WHERE    ID_EVENTO = ${event}
+      AND    IDENTIFICADOR = ${indent};
+    `)
+    await this.entity.query(`
+      UPDATE    sera.COMER_DETALLES
+      SET    IMPORTE = ROUND(IMPORTE,2), IVA = ROUND(IVA,2), IMPORTE_SIVA = ROUND(IMPORTE_SIVA,2)
+      WHERE    ID_EVENTO = ${event}
+      AND    IDENTIFICADOR = ${indent};  
+    `)
+    var result = await this.entity.query(`
+        SELECT    SUM(IMPORTE) val1, SUM(IVA) val2, SUM(IMPORTE_SIVA) val3
+        FROM    sera.COMER_DETALLES
+        WHERE    ID_EVENTO = ${event}
+        AND    IDENTIFICADOR = ${indent};
+    `)
+     var MIMPORTED = result[0]?.val1 || 0
+     var MIVAD = result[0]?.val2 ||0
+     var MIMPSIVAD = result[0]?.val3 ||0
+     var MORIGINAL = MIMPORTE;
+     var MMODIFICADO = Number(MIMPORTED) + Number(MIVAD) + Number(MIMPSIVAD);
+      var  MDIFE = MORIGINAL - MMODIFICADO;
+      await this.adjustRegxMand(event,indent,MDIFE)
+  }
+  async adjustRegxMand(event:number, ident:number,dife:number){
+
+    var AR_APP = 0
+
+    var AJ = await this.entity.query(`
+      SELECT   ( DISTINCT MANDATO) as mandate
+      FROM    sera.COMER_DETALLES
+      WHERE    ID_EVENTO = ${event}
+      AND    IDENTIFICADOR = ${ident}
+    `)
+
+      var AR_AUXCANT = Math.abs(dife);
+       var  AR_NUMAND = await this.mandateDecimalNumber(event, ident);
+       var  AR_CANT = dife / AR_NUMAND;
+       if(Math.abs(AR_CANT) == AR_AUXCANT){
+        AR_NUMAND = 1
+       }
+       for (const iterator of AJ) {
+        await this.entity.query(`
+          UPDATE    sera.COMER_DETALLES DET
+          SET    IMPORTE_SIVA = IMPORTE_SIVA + ${AR_CANT}
+          WHERE    ID_EVENTO = ${event}
+          AND    IDENTIFICADOR = ${ident}
+          AND    MANDATO = ${iterator.mandate}
+          AND    IMPORTE_SIVA > ABS(${AR_CANT})
+        `)
+
+        AR_APP = AR_APP + Math.abs(AR_CANT);
+        if(AR_NUMAND == 1) break;
+        if((iterator.mandate-1) == 1){
+          if(AR_AUXCANT-(AR_APP+Math.abs(AR_CANT)) != 0){
+            AR_CANT = AR_CANT+(AR_AUXCANT-(AR_APP+Math.abs(AR_CANT)))
+          }
+        }
+
+       }
+       return {
+        statusCode:200,
+        message:["OK"]
+       }
+  }
+
+  async mandateDecimalNumber(event:number, ident:number):Promise<number>{
+    var mandate = (await this.entity.query(`
+      SELECT    COUNT(DISTINCT MANDATO) as val1
+      FROM    sera.COMER_DETALLES
+      WHERE    ID_EVENTO = ${event}
+      AND    IDENTIFICADOR = ${ident};
+    `))[0]?.val1|| 0
+    return mandate
+  }
+
+  async prepOiInmuAct(data:PrepOiInmuAct){
+    var C1 = await this.entity.query(`
+        SELECT
+          PAG.ID_PAGO as P_IDPAGO,
+          CLI.RFC as P_RFC, 
+          TO_CHAR(PAG.FECHA, 'YYYYMMDD') as P_FECHA,
+          PAG.MONTO as P_MONTO,
+          SUBSTRING(PAG.REFERENCIAORI, 1, 30) as P_REFE,
+          PAG.NO_MOVIMIENTO as P_MOVTO,
+          LOT.LOTE_PUBLICO as P_LOTPUB,
+          PAG.MONTO as P_MONIVA,
+          SUBSTRING(LOT.DESCRIPCION, 1, 355) || ' PAGO DE ' ||
+              CASE
+                  WHEN LOT.ID_ESTATUSVTA = 'GARA' THEN 'GARANTIA'
+                  WHEN LOT.ID_ESTATUSVTA = 'PAG' THEN 'LIQUIDACION'
+              END as P_CONAUX,
+          PAG.ID_LOTE as P_IDLOTE,
+          PMO.VALOR as P_BANCO,
+          (SELECT CVE_PROCESO FROM SERA.COMER_EVENTOS EVE WHERE EVE.ID_EVENTO = LOT.ID_EVENTO) AS as P_CVE_EVENTO
+      FROM
+          SERA.COMER_PAGOREF PAG
+      JOIN
+          SERA.COMER_LOTES LOT ON LOT.ID_EVENTO = ${data.event} AND LOT.ID_LOTE = PAG.ID_LOTE
+      JOIN
+          SERA.COMER_CLIENTES CLI ON LOT.ID_CLIENTE = CLI.ID_CLIENTE
+      JOIN
+          SERA.COMER_PARAMETROSMOD PMO ON PAG.CVE_BANCO = PMO.PARAMETRO AND PMO.DIRECCION = 'C'
+      WHERE
+          PAG.VALIDO_SISTEMA = 'S'
+          AND LOT.LOTE_PUBLICO != 0
+          AND LOT.ID_LOTE = COALESCE(${data.lot}, LOT.ID_LOTE)
+          AND PAG.IDORDENINGRESO IS NULL
+          AND NOT EXISTS (
+              SELECT 1
+              FROM SERA.COMER_CABECERAS CAB
+              WHERE CAB.IDPAGO = PAG.ID_PAGO
+              AND CAB.IDORDENGRABADA IS NOT NULL
+          )
+          AND EXISTS (
+              SELECT 1
+              FROM SERA.COMER_CLIENTESXEVENTO CXE
+              WHERE CXE.ID_EVENTO = ${data.event}
+              AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
+              AND CXE.PROCESAR = 'S'
+          )
+      ORDER BY
+          LOT.LOTE_PUBLICO,
+          PAG.REFERENCIA
+
+    `)
+    var C2 =async (paid:number)=>{
+      return await this.entity.query(`
+          SELECT
+            (GEN.MONTO_APP_IVA + GEN.IVA) as H_MONTO,
+            GEN.TIPO as H_TIPO,
+            SUBSTRING(GEN.REFERENCIA, 1, 30) as H_REFE,
+            GEN.MONTO_APP_IVA as H_MONIVA,
+            GEN.IVA as H_IVA,
+            1 as H_MOV,
+            COALESCE(CAT.CVMAN, '0') as H_MAND,
+            GEN.MONTO_NOAPP_IVA as H_MONSIVA,
+            SUBSTRING(LOT.DESCRIPCION, 1, 430) as H_LOTDES,
+            LOT.LOTE_PUBLICO as H_LOTPUB,
+            LOT.ID_LOTE as H_IDLOTE,
+            CASE
+                WHEN GEN.TIPO = 'N' THEN 'Pago Normal'
+                WHEN GEN.TIPO = 'P' THEN 'Pago a Penalizar'
+                WHEN GEN.TIPO = 'D' THEN 'Pago a Devolver'
+                ELSE NULL
+            END AS H_DESCTIPO,
+            LOT.PRECIO_FINAL as H_MONTOLOTE,
+            CASE
+                WHEN LOT.ID_ESTATUSVTA = 'VEN' THEN 'A'
+                WHEN LOT.ID_ESTATUSVTA = 'GARA' THEN 'A'
+                WHEN LOT.ID_ESTATUSVTA = 'PAG' THEN 'C'
+                ELSE NULL
+            END AS H_IDTIPO,
+            CASE
+                WHEN GEN.TIPO = 'N' THEN '${this.G_TPOINGRESO}'
+                WHEN GEN.TIPO = 'P' THEN'${this.G_TPOINGRESOP}'
+                WHEN GEN.TIPO = 'D' THEN '${this.G_TPOINGRESOD}'
+                ELSE NULL
+            END AS H_INGRESO,
+            LOT.NUM_BIENES as H_NUMBIENES
+        FROM
+            sera.COMER_PAGOSREFGENS GEN
+        JOIN
+            sera.COMER_LOTES LOT ON GEN.ID_LOTE = LOT.ID_LOTE
+        LEFT JOIN
+            sera.CAT_TRANSFERENTE CAT ON GEN.NO_TRANSFERENTE = CAT.NO_TRANSFERENTE
+        WHERE
+            GEN.ID_PAGO = ${paid}
+            AND LOT.LOTE_PUBLICO != 0
+            AND LOT.ID_LOTE = GEN.ID_LOTE
+            AND EXISTS (
+                SELECT 1
+                FROM sera.COMER_PAGOREF PAG
+                WHERE PAG.ID_PAGO = GEN.ID_PAGO
+                AND PAG.VALIDO_SISTEMA = 'S'
+                AND PAG.CONCILIADO IS NULL
+            )
+  
+      `)
+    }
+    var C3 = async (lot:number)=>{
+      return await this.entity.query(`
+        SELECT
+          BXL.PCTSLOTE as D_PCT,
+          COALESCE(CAT.CVMAN, '0') as D_MANDATO,
+          BXL.NO_BIEN as D_NOBIEN,
+          SUBSTRING(BIE.DESCRIPCION, 1, 438) as AUX_CONCEP,
+          BXL.PRECIO_SIN_IVA as D_MONIVA,
+          BXL.MONTO_NOAPP_IVA as D_MONSIVA,
+          BXL.IVA_FINAL as D_IVA
+        FROM
+            BIENES BIE
+        JOIN
+            COMER_BIENESXLOTE BXL ON BXL.NO_BIEN = BIE.NO_BIEN
+        LEFT JOIN
+            CAT_TRANSFERENTE CAT ON BXL.NO_TRANSFERENTE = CAT.NO_TRANSFERENTE
+        WHERE
+            BXL.ID_LOTE = ${lot};
+  
+      `)
+    }
+    var C4 = async (lot:number)=>{
+      return await this.entity.query(`
+        SELECT TO_CHAR(BXL.NO_BIEN) as C_NO_BIEN
+        FROM SERA.COMER_BIENESXLOTE BXL
+        WHERE BXL.ID_LOTE = ${lot}
+          ORDER BY BXL.NO_BIEN
+        LIMIT 300;
+      
+      `)
+    }
+    var parametros = await this.getParameters({eventId:data.event,address:'I'})
+    await this.bienesLote(data.event,null)
+    await this.entity.query(`
+      DELETE FROM SERA.COMER_CABECERAS CAB
+      WHERE CAB.ID_EVENTO = ${data.event}
+      AND CAB.IDORDENGRABADA IS NULL
+      AND EXISTS (
+          SELECT 1
+          FROM SERA.COMER_DETALLES DET
+          WHERE DET.ID_EVENTO = CAB.ID_EVENTO
+          AND DET.IDENTIFICADOR = CAB.IDENTIFICADOR
+          AND DET.ID_LOTE = COALESCE(${data.lot}, DET.ID_LOTE)
+      )
+    
+    `)
+    await this.entity.query(`        DELETE COMER_DETALLES WHERE ID_EVENTO = ${data.event} AND IDORDENGRABADA IS NULL AND ID_LOTE = COALESCE(${data.lot}, ID_LOTE)    `)
+    if(data.phase == 1 ||data.phase == 7 ||data.phase == 3 ||data.phase == 4 ||data.phase == 2){
+      await this.entity.query(`
+          UPDATE    SERA.COMER_BIENESXLOTE BXLS
+          SET    PCTSLOTE = (SELECT    BXL.PRECIO_FINAL/LOT.PRECIO_FINAL
+                              FROM    SERA.COMER_LOTES LOT, SERA.COMER_BIENESXLOTE BXL
+                              WHERE    LOT.ID_EVENTO = ${data.event}
+                              AND    LOT.ID_LOTE = BXL.ID_LOTE
+                              AND    LOT.ID_CLIENTE IS NOT NULL
+                              AND    BXLS.NO_BIEN = BXL.NO_BIEN
+                              limit 1
+                              )
+          WHERE    EXISTS (SELECT    1
+                          FROM    SERA.COMER_LOTES LOTS
+                          WHERE    LOTS.ID_EVENTO = ${data.event}
+                          AND        LOTS.ID_CLIENTE IS NOT NULL
+                          AND        LOTS.ID_LOTE = BXLS.ID_LOTE
+                          )
+      `)
+    }
+
+    var AUX_CONT =( await this.entity.query(` SELECT    MAX(IDENTIFICADOR) as val1
+    FROM    SERA.COMER_CABECERAS
+    WHERE    ID_EVENTO = ${data.event}`))[0]?.val1 || 0
+    var O_IDENTI = AUX_CONT
+    var USUARIO = (await this.entity.query(` SELECT coalesce(RTRIM(LTRIM(USUARIO_SIRSAE)),'SAE'||USER) as usuario
+      FROM sera.SEG_USUARIOS
+      WHERE USUARIO = '${data.usuario}'`))[0]?.usuario || ''
+    for (const c1 of C1) {
+      O_IDENTI = Number(O_IDENTI) + 1;
+      var L_MANDATOS = (await this.entity.query(`
+        SELECT COUNT(DISTINCT BXL.NO_TRANSFERENTE)
+          FROM SERA.COMER_BIENESXLOTE BXL
+          JOIN SERA.BIEN BIE ON BIE.NO_BIEN = BXL.NO_BIEN
+          JOIN SERA.EXPEDIENTES EXP ON BIE.NO_EXPEDIENTE = EXP.NO_EXPEDIENTE
+          WHERE EXISTS (
+              SELECT 1
+              FROM SERA.COMER_LOTES LOT
+              WHERE LOT.ID_LOTE = ${data.lot}
+              AND LOT.ID_LOTE = BXL.ID_LOTE
+          )
+      `))
+      O_IDENTI = Number(O_IDENTI) + 1;
+      var P_CONCEP = 'DEPOSITO POR VENTA DE BIENES INMUEBLES '+ 'EVENTO ' +data.descriptionEvent +' '+c1.p_conaux;
+      await this.entity.query(`
+       INSERT INTO sera.COMER_CABECERAS
+        (IDENTIFICADOR,            CONSECUTIVO,    AREA,            DOCUMENTO,    UNRESPONSABLE,    CLIENTE_RFC,    CONCEPTO,
+        ANEXO,                    FECHA,            TIPOPE,            FORMAPAGO,    FECHAORDEN,        BANCO,            USAUTORIZA,
+        MONTO_TOTAL_PADRE,     NUMOVTO,        REFERENCIA,        IDPAGO,        ID_EVENTO, CVE_EVENTO)
+        VALUES
+        (${O_IDENTI},                0,                '${this.G_AREA}',            '${this.G_TPODOC}',    '${this.G_UR}',            '${c1.p_rfc}',            '${P_CONCEP}',
+        '${this.G_ANEXO}',                '${c1.p_fecha}',        '${this.G_TPOPERACION}',     'R',        '${c1.p_fecha}',        '${c1.p_banco}',        '${USUARIO}',
+        '${c1.p_monto}',                '${c1.p_movto}',         '${c1.p_refe}',            '${c1.p_idpago}',    ${data.event}, '${c1.p_cve_evento}')
+      `)
+      for (const c2 of await C2(c1.p_idpago)) {
+        var H_IDENT = 0;
+        if(c2.h_tipo == 'D' && ["1","2","3","4"].includes((`${c2.h_refe}`.substring(0,1))))   {
+          var H_IDTIPO = 'T'
+        }
+        if(c2.h_tipo == 'A' && ["3","4"].includes((`${c2.h_refe}`.substring(0,1))))   {
+          var H_IDTIPO = 'C'
+        }
+        if(L_MANDATOS >  1 && c2.h_tipo== 'N'){
+          var AUX_CONCEP = null
+          for (const c3 of await C3(data.lot)) {
+            var D_CONCEP = 'Pago Normal A cuenta del bien '+c3.d_nobien +' '+AUX_CONCEP;
+            H_IDENT ++;
+            this.G_TASAIVA = 16
+            if(c2.h_iva == 0 || !c2.h_iva){
+              this.G_TASAIVA = 0
+              await this.entity.query(`
+              INSERT INTO SERA.COMER_DETALLES
+                (IDENTIFICADOR,            CONSECUTIVO,                MANDATO,    INGRESO,    IMPORTE,
+                  IVA,                    REFERENCIA,                 INDTIPO,    LOTESIAB,    DESCRIPCION,
+                  ID_EVENTO,                UNRESPONSABLE,                IMPORTE_SIVA,             ID_LOTE,    TIPO_PAGO,
+                  PORC_IVA,                PRECIO_VTA_LOTE
+                )
+              VALUES
+                  (${O_IDENTI},                ${H_IDENT},                    ${c3.d_mandato},    '${c2.h_ingreso}',    ROUND(${c2.h_moniva}*${c3.d_pct},2),
+                    ROUND(${c2.h_iva}*${c3.d_pct},2),    '${c2.h_refe}',                        '${c2.h_tipo}',        '${c2.h_lotpub}',    '${D_CONCEP}',
+                    ${data.event},    '${this.G_UR}',        ROUND(${c2.h_monsiva}*${c3.d_pct},2),    '${c2.h_idlote}',    '${c2.h_idtipo}',
+                    '${this.G_TASAIVA}',                '${c2.h_montolote}'
+                  )
+              `)
+              this.G_TASAIVA = 16;
+            }else{
+              await this.entity.query(`
+              INSERT INTO SERA.COMER_DETALLES
+                (IDENTIFICADOR,            CONSECUTIVO,                MANDATO,    INGRESO,    IMPORTE,
+                  IVA,                    REFERENCIA,                 INDTIPO,    LOTESIAB,    DESCRIPCION,
+                  ID_EVENTO,                UNRESPONSABLE,                IMPORTE_SIVA,             ID_LOTE,    TIPO_PAGO,
+                  PORC_IVA,                PRECIO_VTA_LOTE
+                )
+              VALUES
+                  (${O_IDENTI},                ${H_IDENT},                    ${c3.d_mandato},    '${c2.h_ingreso}',    ROUND(${c2.h_moniva}*${c3.d_pct},2),
+                    ROUND(${c2.h_iva}*${c3.d_pct},2),    '${c2.h_refe}',                        '${c2.h_tipo}',        '${c2.h_lotpub}',    '${D_CONCEP}',
+                    ${data.event},    '${this.G_UR}',        ROUND(${c2.h_monsiva}*${c3.d_pct},2),    '${c2.h_idlote}',    '${c2.h_idtipo}',
+                    '${this.G_TASAIVA}',                '${c2.h_montolote}'
+                  )
+              `)
+            }
+          }
+        }else{
+          H_IDENT ++
+          var H_SIAB = 0
+          this.G_TASAIVA = 16
+          var H_CONCEP = ""
+          if(c2.h_numbienes == 1){
+            H_SIAB =(await this.entity.query(`
+              SELECT    BXL.NO_BIEN
+              FROM    sera.COMER_BIENESXLOTE BXL
+              WHERE    BXL.ID_LOTE = ${c2.h_idlote}
+              limit 1
+            `))[0]?.no_bien
+            H_CONCEP =c2.h_desctipo+' A cuenta de NO SIAB '+(H_SIAB)+' '+'del lote '+(c2.h_lotpub)+' '+ c2.h_lotdes
+          }else{
+            H_CONCEP = c2.h_desctipo||' A cuenta del lote '+(c2.h_lotpub)+' que contiene '+ (c2.h_numbienes)+' bienes '+`${c2.h_lotdes}`.substring(0,410);
+          }
+          if(c2.h_iva == 0 || !c2.h_iva){
+            this.G_TASAIVA = 0
+            await this.entity.query(`
+              INSERT INTO sera.COMER_DETALLES
+                (IDENTIFICADOR,    CONSECUTIVO,    MANDATO,        INGRESO,    IMPORTE,
+                  IVA,            REFERENCIA,        INDTIPO,        LOTESIAB,    DESCRIPCION,
+                ID_EVENTO,        UNRESPONSABLE,    IMPORTE_SIVA,    ID_LOTE,    TIPO_PAGO,
+                PORC_IVA,        PRECIO_VTA_LOTE
+              )
+              VALUES
+                (${O_IDENTI},        ${H_IDENT},        '${c2.h_mand}',            '${c2.h_ingreso}',    '${c2.h_moniva}',
+                '${c2.h_iva}',            '${c2.h_refe}',            '${c2.h_tipo}',            '${c2.h_lotpub}',    '${H_CONCEP}',
+                ${data.event},        '${this.G_UR}',            '${c2.h_monsiva}',        '${c2.h_idlote}',    '${c2.h_idtipo}',
+                ${this.G_TASAIVA},        '${c2.h_montolote}'
+              )
+            `)
+            this.G_TASAIVA = 16;
+
+          }else{
+            await this.entity.query(`
+            INSERT INTO sera.COMER_DETALLES
+              (IDENTIFICADOR,    CONSECUTIVO,    MANDATO,        INGRESO,    IMPORTE,
+                IVA,            REFERENCIA,        INDTIPO,        LOTESIAB,    DESCRIPCION,
+              ID_EVENTO,        UNRESPONSABLE,    IMPORTE_SIVA,    ID_LOTE,    TIPO_PAGO,
+              PORC_IVA,        PRECIO_VTA_LOTE
+            )
+            VALUES
+              (${O_IDENTI},        ${H_IDENT},        '${c2.h_mand}',            '${c2.h_ingreso}',    '${c2.h_moniva}',
+              '${c2.h_iva}',            '${c2.h_refe}',            '${c2.h_tipo}',            '${c2.h_lotpub}',    '${H_CONCEP}',
+              ${data.event},        '${this.G_UR}',            '${c2.h_monsiva}',        '${c2.h_idlote}',    '${c2.h_idtipo}',
+              ${this.G_TASAIVA},        '${c2.h_montolote}'
+            )
+          `)
+          }
+        }
+
+      }
+      var A_NO_BIEN = ""
+      for (const c4 of await C4(data.lot)) {
+        A_NO_BIEN = c4.no+A_NO_BIEN+"-"
+      }
+      A_NO_BIEN = A_NO_BIEN.substring(0,A_NO_BIEN.length-1)
+      await this.entity.query(`
+        UPDATE sera.COMER_DETALLES
+          SET BIENESSIAB   = SUBSTR('${A_NO_BIEN}',1,3000)
+        WHERE ID_EVENTO    = ${data.event}
+          AND LOTESIAB     = ${data.publicLot}
+          AND ID_LOTE      = ${data.lot}
+      `)
+      A_NO_BIEN = ""
+    }
+
+    await this.typeAdjustPayment(data.event,data.lot)
+    await this.ajustTwoDecimals(data.event,data.lot)
+    return {
+      statusCode:200,
+      message:["OK"]
+    }
+  }
+
+  async actEstGralIAct(data:UpdateCurrentGeneralStatus){
+    await this.actLotesInmuAct({
+      event:data.event,
+      phase:data.phase,lot:data.lot,publicLot:data.lot
+    })
+    if([3,4,7,2,1].includes(data.phase)){
+      await this.remesas(data.event)
+      await this.historic({address:'I',event:data.event,user:data.user})
+    }
+    return {
+      statusCode:200,
+      message:["OK"]
     }
   }
 }

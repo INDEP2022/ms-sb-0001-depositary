@@ -6,6 +6,7 @@ import { PresencialBM } from './dto/presencial-bm.dto';
 import { RealStateSale, RealStateSaleCurrent } from './dto/real-state-sale.dto';
 import { ValidatePaymentsRefService } from './validate-payments-ref.service';
 import { UpdateCurrentGeneralStatus } from './dto/update-current-general-status.dto';
+import { PrepOIInmu, PrepOiInmuAct } from './dto/param.dto';
 
 @Controller('validate-payments-ref')
 export class ValidatePaymentsRefController {
@@ -38,8 +39,24 @@ export class ValidatePaymentsRefController {
     @MessagePattern({ cmd: 'realStateSale' })
     async realStateSale(parameters:RealStateSale){
         
-        return await this.service.realStateSale(parameters)
+        return await this.service.realStateSale1(parameters)
     }
+
+    @MessagePattern({ cmd: 'ventaInmu' })
+    async ventaInmu(parameters:RealStateSale){
+        return await this.service.realStateSate(parameters)
+    }
+
+    @MessagePattern({ cmd: 'prepOiInmu' })
+    async prepOiInmu(parameters:PrepOIInmu){
+        return await this.service.prepOiInmu(parameters)
+    }
+    @MessagePattern({ cmd: 'prepOiInmuAct' })
+    async prepOiInmuAct(parameters:PrepOiInmuAct){
+        return await this.service.prepOiInmuAct(parameters)
+    }
+    
+
     @MessagePattern({ cmd: 'currentFullErase' })
     async currentFullErase(params:CurrentFullErase){
         return await this.service.currentFullErase(params)
@@ -60,6 +77,10 @@ export class ValidatePaymentsRefController {
     @MessagePattern({ cmd: 'updateCurrentGeneralStatus' })
     async updateCurrentGeneralStatus(params:UpdateCurrentGeneralStatus){
         return await this.service.updateCurrentGeneralStatus(params)
+    }
+    @MessagePattern({ cmd: 'updateCurrentGeneralIStatus' })
+    async updateCurrentGeneralIStatus(params:UpdateCurrentGeneralStatus){
+        return await this.service.actEstGralIAct(params)
     }
 
     @MessagePattern({ cmd: 'updateGeneralStatus' })
