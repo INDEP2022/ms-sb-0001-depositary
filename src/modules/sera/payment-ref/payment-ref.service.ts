@@ -41,11 +41,10 @@ export class PaymentRefService {
         @InjectRepository(refpayDepositoriesEntity) private RefpayDepositoriesRepository: Repository<refpayDepositoriesEntity>,
         @InjectRepository(paymentsgensDepositaryEntity) private PaymentsgensDepositaryRepository: Repository<paymentsgensDepositaryEntity>,
     ) {
-        this.execDeductions({
+       /* this.insertDispersionDb({
                 "pOne": 3948,//No_nombramiento
-                "pTwo": 528,//PERSONA
-                "pDate": new Date("2023-09-14")
-            })
+                "pTwo": null,//PERSONA
+            })*/
         // this.prepOI({name:372,description:''})
         //2679
         // this.validDep({ name: 11, date: new Date('02/05/2023') }) 
@@ -1503,16 +1502,15 @@ export class PaymentRefService {
     async insertDispersionDb(dto: GenericParamsDto): Promise<object> {
         let lIdprgens: number = 0,
             lAbcu: number = 0,
-            UorIquery: any;
+            UorIquery = "";
         const tpmRep = this.TmpPagosGensDepRepository;
         const pGensDep = this.PaymentsgensDepositaryRepository;
 
         const L2 = await tpmRep.createQueryBuilder()
             .orderBy('id_pagogens', 'ASC')
-            .execute().then((res) => {
-                return res;
-            });
+            .getMany();
         try {
+           
             for (const i in L2) {
                 if (L2[i].type == 'U') {
 
@@ -1587,12 +1585,16 @@ export class PaymentRefService {
 
                 await pGensDep.query(UorIquery).then((result) => {
                     return result;
+                }).catch(err=>{
+                    Logger.debug(`################# ${UorIquery} #####################`);
+                    console.log(err)
+                    Logger.debug(`##########################################`);
                 });
             }
 
             //Limpia las listas globales
-            this.gDepositos.splice(0, this.gDepositos.length);
-            this.gDispersion.splice(0, this.gDispersion.length);
+            this.gDepositos= [];
+            this.gDispersion = []
             //TODO: descomentar una ves las cree
             this.updateAccreditationGens({pOne:dto.pOne})
             this.updatePaymentsRef({pOne:dto.pOne})
