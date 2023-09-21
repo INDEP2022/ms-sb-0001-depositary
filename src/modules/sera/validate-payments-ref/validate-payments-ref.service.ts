@@ -6149,7 +6149,7 @@ export class ValidatePaymentsRefService {
                                                         AND CXE.PROCESAR = 'S'
                                                         )`);
 
-          await this.entity.query(` DELETE sera.COMER_PAGOSREFGENS CPRG
+          await this.entity.query(` DELETE FROM sera.COMER_PAGOSREFGENS CPRG
                                 WHERE ID_LOTE = ${V_ID_LOTE}
                                   AND EXISTS (SELECT 1
                                                 FROM sera.COMER_LOTES LOT
@@ -6343,7 +6343,7 @@ export class ValidatePaymentsRefService {
                                                            AND CXE.ID_CLIENTE = LOT.ID_CLIENTE
                                                            AND CXE.PROCESAR = 'S'
                                                            )`);
-          await this.entity.query(` DELETE sera.COMER_PAGOSREFGENS CPRG
+          await this.entity.query(` DELETE FROM sera.COMER_PAGOSREFGENS CPRG
                                         WHERE ID_LOTE = ${V_ID_LOTE}
                                         AND EXISTS (SELECT 1
                                                         FROM sera.COMER_LOTES LOT
@@ -6589,7 +6589,7 @@ export class ValidatePaymentsRefService {
                                                         AND CXE.PROCESAR = 'S'
                                                         )`);
 
-        await this.entity.query(` DELETE sera.COMER_PAGOSREFGENS CPR
+        await this.entity.query(` DELETE FROM sera.COMER_PAGOSREFGENS CPR
                                 WHERE ID_LOTE = ${V_ID_LOTE}
                                   AND EXISTS (SELECT 1
                                                 FROM sera.COMER_LOTES LOT
@@ -9750,7 +9750,7 @@ export class ValidatePaymentsRefService {
                 AND    EVE.ID_TPEVENTO = 6
                 AND    EVE.ID_EVENTO = LOT2.ID_EVENTO`);
 
-    await this.entity.query(` DELETE    sera.COMER_PAGOSREFGENS GEN
+    await this.entity.query(` DELETE  FROM  sera.COMER_PAGOSREFGENS GEN
                         WHERE    EXISTS (SELECT    1
                                 FROM     sera.COMER_LOTES LOT
                                 WHERE    LOT.ID_EVENTO = ${event}
@@ -9866,7 +9866,7 @@ export class ValidatePaymentsRefService {
                                         )
                                 AND    BXL.ID_BIENXLOTE_REMESA IS NOT NULL
                                 )`);
-    await this.entity.query(`DELETE    sera.COMER_BIENESRECHAZADOS
+    await this.entity.query(`DELETE  FROM  sera.COMER_BIENESRECHAZADOS
                         WHERE    ID_EVENTO = ${event}`);
     await this.entity.query(`UPDATE    sera.COMER_CLIENTESXEVENTO
                         SET    PROCESADO = 'N'
@@ -12906,7 +12906,7 @@ export class ValidatePaymentsRefService {
     await this.bienesLote(data.event, null)
 
     await this.entity.query(`
-      DELETE    SERA.COMER_CABECERAS CAB
+      DELETE  FROM  SERA.COMER_CABECERAS CAB
       WHERE    CAB.ID_EVENTO = ${data.event}
       AND        CAB.IDORDENGRABADA IS NULL
       AND        EXISTS (SELECT 1
@@ -12916,7 +12916,7 @@ export class ValidatePaymentsRefService {
                     AND        DET.ID_LOTE         = coalesce(${data.lot}, DET.ID_LOTE)
                     )`)
     await this.entity.query(`
-      DELETE sera.COMER_DETALLES WHERE ID_EVENTO = ${data.event} AND IDORDENGRABADA IS NULL AND ID_LOTE = coalesce(${data.lot}, ID_LOTE)
+      DELETE FROM sera.COMER_DETALLES WHERE ID_EVENTO = ${data.event} AND IDORDENGRABADA IS NULL AND ID_LOTE = coalesce(${data.lot}, ID_LOTE)
     `)
     if (data.phase == 1) {
       await this.entity.query(`
