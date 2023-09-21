@@ -13223,7 +13223,7 @@ export class ValidatePaymentsRefService {
     var AR_APP = 0
 
     var AJ = await this.entity.query(`
-      SELECT   ( DISTINCT MANDATO) as mandate
+      SELECT   DISTINCT( MANDATO) as mandate
       FROM    sera.COMER_DETALLES
       WHERE    ID_EVENTO = ${event}
       AND    IDENTIFICADOR = ${ident}
