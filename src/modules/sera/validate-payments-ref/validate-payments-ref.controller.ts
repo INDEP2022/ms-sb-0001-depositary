@@ -82,6 +82,10 @@ export class ValidatePaymentsRefController {
     async updateCurrentGeneralIStatus(params:UpdateCurrentGeneralStatus){
         return await this.service.actEstGralIAct(params)
     }
+    @MessagePattern({ cmd: 'updateGeneralIStatus' })
+    async updateGeneralIStatus(params:UpdateCurrentGeneralStatus){
+        return await this.service.actEstGralI(params)
+    }
 
     @MessagePattern({ cmd: 'updateGeneralStatus' })
     async updateGeneralStatus(data:{event:number,user:string}){

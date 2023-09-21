@@ -13606,6 +13606,26 @@ export class ValidatePaymentsRefService {
     if([3,4,7,2,1].includes(data.phase)){
       await this.remesas(data.event)
       await this.historic({address:'I',event:data.event,user:data.user})
+      if(data.phase == 4){
+        await this.blackList(data.event)
+      }
+    }
+    return {
+      statusCode:200,
+      message:["OK"]
+    }
+  }
+  async actEstGralI(data:UpdateCurrentGeneralStatus){
+    await this.actLotesInmuAct({
+      event:data.event,
+      phase:data.phase,lot:data.lot,publicLot:data.lot
+    })
+    if([1,2].includes(data.phase)){
+      await this.remesas(data.event)
+      await this.historic({address:'I',event:data.event,user:data.user})
+      if(data.phase == 2){
+        await this.blackList(data.event)
+      }
     }
     return {
       statusCode:200,
