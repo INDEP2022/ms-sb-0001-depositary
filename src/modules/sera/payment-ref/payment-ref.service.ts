@@ -43,7 +43,7 @@ export class PaymentRefService {
     ) {
         this.validDep({
             "name": 3948,
-            "date": new Date("2023-09-20")
+            "date": new Date("2023-09-22")
         })
        /* this.insertDispersionDb({
                 "pOne": 3948,//No_nombramiento
@@ -1234,8 +1234,7 @@ export class PaymentRefService {
             lMontosinIva: number = 0.0,
             lxCentIva: number = 0.0,
             lxCubrir: number = 0.0,
-            lIvatotal: number = 0.0,
-            gK: number = -1;
+            lIvatotal: number = 0.0
         const gDepositos = this.gDepositos;
         const gDispercion = this.gDispersion;
         let lDispercion: any = {};
@@ -1251,7 +1250,6 @@ export class PaymentRefService {
                             lMontosinIva = await this.amountWithoutIva(depos.paid, this.gIva);
                             lxCentIva = await this.xCentIva(lMontosinIva, dispersion.iva);
                             lxCubrir = this.round(lResto - depos.paid);
-                            gK++;
 
                             lDispercion = {
                                 payId: depos.payId,
@@ -1280,14 +1278,13 @@ export class PaymentRefService {
                             depos.paid = 0;
                             dispersion.status = 'X';
 
-                            if (dispersion[gK].status == 'A') {
+                            if (dispersion.status == 'A') {
                                 break;
                             }
 
                         } else if (depos.paid > lResto) {
                             lMontosinIva = await this.amountWithoutIva(lResto, dispersion.iva);
                             lxCentIva = await this.xCentIva(lMontosinIva, dispersion.iva);
-                            gK++;
 
                             lDispercion = {
                                 payId: depos.payId,
@@ -1317,7 +1314,6 @@ export class PaymentRefService {
                         } else if (depos.paid == lResto) {
                             lMontosinIva = await this.amountWithoutIva(lResto, dispersion.iva);
                             lxCentIva = await this.xCentIva(lMontosinIva, dispersion.iva);
-                            gK++;
 
                             lDispercion = {
                                 payId: depos.payId,
