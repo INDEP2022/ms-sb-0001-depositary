@@ -161,5 +161,5 @@ export class PrepOiInmuAct{
     publicLot:number
     lot:number
     phase:number
-    usuario?:number
+    user?:string
 }

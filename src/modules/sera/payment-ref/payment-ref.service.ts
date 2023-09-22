@@ -41,6 +41,10 @@ export class PaymentRefService {
         @InjectRepository(refpayDepositoriesEntity) private RefpayDepositoriesRepository: Repository<refpayDepositoriesEntity>,
         @InjectRepository(paymentsgensDepositaryEntity) private PaymentsgensDepositaryRepository: Repository<paymentsgensDepositaryEntity>,
     ) {
+        this.validDep({
+            "name": 3948,
+            "date": new Date("2023-09-20")
+        })
        /* this.insertDispersionDb({
                 "pOne": 3948,//No_nombramiento
                 "pTwo": null,//PERSONA
@@ -1821,7 +1825,7 @@ export class PaymentRefService {
             AND ND.IMPORTE_CONTRAPRESTACION > 0
             AND ND.NO_PERSONA IS NOT NULL
         `);
-
+            
         L_PARAMETROS = await this.paramsDep(dto.name, 'D')
         var GK = 0;
         L_ABONO_X = 0.0
@@ -1837,7 +1841,10 @@ export class PaymentRefService {
             var r = await this.fillPayments({ name: dto.name, person: L_PERSONA, date: dto.date, phase: 1 })
 
             this.gSumaTot = r.data?.lDepTot || 0
-            await this.fillAccreditations({ name: dto.name, good: L_NO_BIEN, process: 1 })
+            var fulA = await this.fillAccreditations({ name: dto.name, good: L_NO_BIEN, process: 1 })
+            Logger.debug(`#################  #####################`);
+            console.log(fulA)
+            Logger.debug(`##########################################`);
             for (const deposito of this.gDepositos) {
 
 

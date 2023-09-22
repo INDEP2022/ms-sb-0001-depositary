@@ -106,7 +106,9 @@ export class ValidatePaymentsRefService {
     private entity: Repository<ComerEventEntity>,
     @InjectRepository(ComerParameterModEntity)
     private entity2: Repository<ComerParameterModEntity>,
-  ) { }
+  ) { 
+
+  }
 
   /**
    *
@@ -13288,7 +13290,7 @@ export class ValidatePaymentsRefService {
               END as P_CONAUX,
           PAG.ID_LOTE as P_IDLOTE,
           PMO.VALOR as P_BANCO,
-          (SELECT CVE_PROCESO FROM SERA.COMER_EVENTOS EVE WHERE EVE.ID_EVENTO = LOT.ID_EVENTO) AS as P_CVE_EVENTO
+          (SELECT CVE_PROCESO FROM SERA.COMER_EVENTOS EVE WHERE EVE.ID_EVENTO = LOT.ID_EVENTO) AS P_CVE_EVENTO
       FROM
           SERA.COMER_PAGOREF PAG
       JOIN
@@ -13420,7 +13422,7 @@ export class ValidatePaymentsRefService {
       )
     
     `)
-    await this.entity.query(`        DELETE COMER_DETALLES WHERE ID_EVENTO = ${data.event} AND IDORDENGRABADA IS NULL AND ID_LOTE = COALESCE(${data.lot}, ID_LOTE)    `)
+    await this.entity.query(`        DELETE from sera.COMER_DETALLES WHERE ID_EVENTO = ${data.event} AND IDORDENGRABADA IS NULL AND ID_LOTE = COALESCE(${data.lot}, ID_LOTE)    `)
     if(data.phase == 1 ||data.phase == 7 ||data.phase == 3 ||data.phase == 4 ||data.phase == 2){
       await this.entity.query(`
           UPDATE    SERA.COMER_BIENESXLOTE BXLS
@@ -13447,7 +13449,7 @@ export class ValidatePaymentsRefService {
     var O_IDENTI = AUX_CONT
     var USUARIO = (await this.entity.query(` SELECT coalesce(RTRIM(LTRIM(USUARIO_SIRSAE)),'SAE'||USER) as usuario
       FROM sera.SEG_USUARIOS
-      WHERE USUARIO = '${data.usuario}'`))[0]?.usuario || ''
+      WHERE USUARIO = '${data.user}'`))[0]?.usuario || ''
     for (const c1 of C1) {
       O_IDENTI = Number(O_IDENTI) + 1;
       var L_MANDATOS = (await this.entity.query(`
@@ -13592,6 +13594,7 @@ export class ValidatePaymentsRefService {
 
     await this.typeAdjustPayment(data.event,data.lot)
     await this.ajustTwoDecimals(data.event,data.lot)
+    
     return {
       statusCode:200,
       message:["OK"]
@@ -13601,7 +13604,7 @@ export class ValidatePaymentsRefService {
   async actEstGralIAct(data:UpdateCurrentGeneralStatus){
     await this.actLotesInmuAct({
       event:data.event,
-      phase:data.phase,lot:data.lot,publicLot:data.lot
+      phase:data.phase,lot:data.lot,publicLot:data.publicLot
     })
     if([3,4,7,2,1].includes(data.phase)){
       await this.remesas(data.event)
