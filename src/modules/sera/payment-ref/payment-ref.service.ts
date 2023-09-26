@@ -41,17 +41,15 @@ export class PaymentRefService {
         @InjectRepository(refpayDepositoriesEntity) private RefpayDepositoriesRepository: Repository<refpayDepositoriesEntity>,
         @InjectRepository(paymentsgensDepositaryEntity) private PaymentsgensDepositaryRepository: Repository<paymentsgensDepositaryEntity>,
     ) {
-        this.validDep({
-            "name": 3948,
-            "date": new Date("2023-09-22")
-        })
-       /* this.insertDispersionDb({
+        //this.validDep({ name: 3948, date: new Date() }) 
+       
+         this.insertDispersionDb({
                 "pOne": 3948,//No_nombramiento
                 "pTwo": null,//PERSONA
-            })*/
+            })
+
         // this.prepOI({name:372,description:''})
         //2679
-        // this.validDep({ name: 11, date: new Date('02/05/2023') }) 
     }
 
     //#region **PACKAGE BODY SERA.PAGOSREF_DEPOSITARIA**
@@ -421,7 +419,7 @@ export class PaymentRefService {
                         });
 
                         // TODO: Consultar si se va a guardar en la tabla temporal
-                         //await this.TmpPagosGensDepRepository.save(rDispercionAbonos[dG]);
+                        // await this.TmpPagosGensDepRepository.save(rDispercionAbonos[dG]);
 
                         if (gAppointment == 0 || gReference == null) {
                             gAppointment = row.noAppointment;
@@ -1235,13 +1233,11 @@ export class PaymentRefService {
             lxCentIva: number = 0.0,
             lxCubrir: number = 0.0,
             lIvatotal: number = 0.0
-        const gDepositos = this.gDepositos;
-        const gDispercion = this.gDispersion;
-        let lDispercion: any = {};
+        let lDispercion: Dispersion
         const dateNow = LocalDate.getNow();
 
-        for (const depos of gDepositos) {
-            for (const dispersion of gDispercion) {
+        for (const depos of this.gDepositos) {
+            for (const dispersion of this.gDispersion) {
 
                 if (dispersion.status == 'A' && dispersion.xCover > 0) {
                     if (!dispersion?.deduxcent) {
@@ -1263,8 +1259,8 @@ export class PaymentRefService {
                                 impWithoutIva: this.round(lMontosinIva),
                                 iva: this.round(dispersion.iva),
                                 amountIva: this.round(lxCentIva),
-                                deduxcent: dispersion.deduxcent,
-                                deduValue: this.round(dispersion.deduValue),
+                                deduxcent: dispersion.deduxcent ||null,
+                                deduValue: this.round(dispersion.deduValue) ||null,
                                 noAppointment: dispersion.noAppointment,
                                 dateProcess: new Date(dateNow),
                                 type: 'I',
@@ -1298,8 +1294,8 @@ export class PaymentRefService {
                                 impWithoutIva: this.round(lMontosinIva),
                                 iva: this.round(dispersion.iva),
                                 amountIva: this.round(lxCentIva),
-                                deduxcent: dispersion.deduxcent,
-                                deduValue: this.round(dispersion.deduValue),
+                                deduxcent: dispersion.deduxcent ||null,
+                                deduValue: this.round(dispersion.deduValue) ||null,
                                 noAppointment: dispersion.noAppointment,
                                 dateProcess: new Date(dateNow),
                                 type: 'I',
@@ -1326,9 +1322,9 @@ export class PaymentRefService {
                                 status: 'A',
                                 impWithoutIva: this.round(lMontosinIva),
                                 iva: this.round(dispersion.iva),
-                                amountIva: this.round(lxCentIva),
-                                deduxcent: dispersion.deduxcent,
-                                deduValue: this.round(dispersion.deduValue),
+                                amountIva: this.round(lxCentIva) ,
+                                deduxcent: dispersion.deduxcent ||null,
+                                deduValue: this.round(dispersion.deduValue) ||null,
                                 noAppointment: dispersion.noAppointment,
                                 dateProcess: new Date(dateNow),
                                 type: 'I',
@@ -1379,9 +1375,7 @@ export class PaymentRefService {
                 .execute().then((res) => {
                     return res[0].max_id_pagogens ?? 0;
                 });
-            Logger.debug(`################# lIdprgens #####################`);
-            console.log(lIdprgens)
-            Logger.debug(`##########################################`);
+           
             lIdpgens = await this.PaymentsgensDepositaryRepository
                 .createQueryBuilder('pagos')
                 .select('COALESCE(MAX(pagos.id_pago_cubrio), 0)', 'max_id_pago_cubrio')
@@ -1393,9 +1387,7 @@ export class PaymentRefService {
             //TODO: consultar que debo borrar
             await this.TmpPagosGensDepRepository.delete({});
             for (const dispersion of this.gDispersion) {
-                Logger.debug(`#################  #####################`);
-                console.log(dispersion)
-                Logger.debug(`##########################################`);
+              
                 if (dispersion.type == 'U') {
                     dispersion.insert = 'DB';
 
@@ -1509,6 +1501,9 @@ export class PaymentRefService {
         const L2 = await tpmRep.createQueryBuilder()
             .orderBy('id_pagogens', 'ASC')
             .getMany();
+        Logger.debug(`################# L2 #####################`);
+        console.log(L2)
+        Logger.debug(`##########################################`);
         try {
            
             for (const i in L2) {
@@ -1527,11 +1522,11 @@ export class PaymentRefService {
                         ABONO            = ${this.round(L2[i].payment)},
                         PAGO_ACT         = ${this.round(L2[i].paymentAct)},
                         DEDUXCENT        = ${L2[i].deduxcent},
-                        DEDUVALOR        = ${this.round(L2[i].deduValue)},
-                        STATUS           = ${L2[i].status},
+                        DEDUVALOR        = ${this.round(L2[i].deduValue) || null},
+                        STATUS           = '${L2[i].status}',
                         NO_NOMBRAMIENTO  = ${L2[i].noAppointment},
                         ID_PAGO_CUBRIO   = ${L2[i].payCoverId},
-                        FECHA_PROCESO    = ${L2[i].dateProcess},
+                        FECHA_PROCESO    = '${L2[i].dateProcess}',
                         IMP_SIN_IVA      = ${this.round(L2[i].impWithoutIva)},
                         OBSERV_PAGO      = ${L2[i].paymentObserv},
                         OBSERV_DEDU      = ${L2[i].deduObserv},
@@ -1543,14 +1538,12 @@ export class PaymentRefService {
                 } else if (L2[i].type == 'I') {
                     let noAppointment = L2[i].noAppointment;
 
-                    lIdprgens = await pGensDep
+                    lIdprgens  = (await  pGensDep
                         .createQueryBuilder()
                         .select("COALESCE(MAX(ID_PAGOGENS), 0) + 1", "id")
-                        .from("PAGOSGENS_DEPOSITARIAS", "p")
-                        .where("p.NO_NOMBRAMIENTO = :noNombramiento", { noAppointment })
-                        .execute().then((result) => {
-                            return result ?? 1;
-                        });
+                        .where("NO_NOMBRAMIENTO = :noNombramiento", { noNombramiento:noAppointment })
+                        .getRawMany())[0]?.id || 1
+                   
 
                     UorIquery = `INSERT INTO SERA.PAGOSGENS_DEPOSITARIAS (
                                 ID_PAGOGENS, ID_PAGO, NO_BIEN, MONTO, REFERENCIA,
@@ -1571,10 +1564,10 @@ export class PaymentRefService {
                                 ${this.round(L2[i].amountIva)},
                                 ${this.round(L2[i].payment)},
                                 ${L2[i].deduxcent},
-                                ${this.round(L2[i].deduValue)},
-                                ${L2[i].status},
+                                ${this.round(L2[i].deduValue) || null},
+                                '${L2[i].status}',
                                 ${L2[i].noAppointment},
-                                ${L2[i].dateProcess},
+                                '${L2[i].dateProcess}',
                                 ${this.round(L2[i].paymentAct)},
                                 ${L2[i].payCoverId},
                                 ${L2[i].deduObserv},
@@ -1604,6 +1597,9 @@ export class PaymentRefService {
                 message: ['OK']
             };
         } catch (e) {
+            Logger.debug(`################# ee #####################`);
+            console.log(e)
+            Logger.debug(`##########################################`);
             return {
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: e.message,
@@ -1667,23 +1663,35 @@ export class PaymentRefService {
      */
     async updatePaymentsRef(dto: GenericParamsDto): Promise<object> {
         try {
-            const updateQuery = `UPDATE PAGOREF_DEPOSITARIAS REF
-                                SET REF.VALIDO_SISTEMA = 'S', REF.FECHA_VAL_SISTEMA = TRUNC(SYSDATE)
-                                WHERE REF.VALIDO_SISTEMA = 'A'
-                                AND REF.ID_PAGO IN(SELECT GEN.ID_PAGO
-                                    FROM SERA.PAGOSGENS_DEPOSITARIAS GEN
-                                    INNER JOIN NOMBRAMIENTOS_DEPOSITARIA ND
-                                    ON GEN.NO_NOMBRAMIENTO = ND.NO_NOMBRAMIENTO
-                                    INNER JOIN PERSONASXNOM_DEPOSITARIAS PXD
-                                    ON ND.NO_PERSONA = PXD.NO_PERSONA AND PXD.PROCESAR = 'S' AND PXD.ENVIADO_SIRSAE = 'N'
-                                    WHERE ND.NO_NOMBRAMIENTO = ${dto.pOne} AND ND.NO_BIEN != 0 AND ND.NO_PERSONA IS NOT NULL
-            ); `;
+            const updateQuery = `update
+            SERA.PAGOREF_DEPOSITARIAS REFD
+        set
+            VALIDO_SISTEMA = 'S'
+            , FECHA_VAL_SISTEMA = current_date
+        where
+            VALIDO_SISTEMA = 'A'
+            and ID_PAGO in(
+                select
+                    GEN.ID_PAGO
+                from
+                    SERA.PAGOSGENS_DEPOSITARIAS GEN
+                inner join SERA.NOMBRAMIENTOS_DEPOSITARIA ND
+                            on
+                    GEN.NO_NOMBRAMIENTO = ND.NO_NOMBRAMIENTO
+                inner join SERA.PERSONASXNOM_DEPOSITARIAS PXD
+                            on
+                    ND.NO_PERSONA::text = PXD.NO_PERSONA
+                    and PXD.PROCESAR = 'S'
+                    and PXD.ENVIADO_SIRSAE = 'N'
+                where
+                    ND.NO_NOMBRAMIENTO = ${dto.pOne}
+                    and ND.NO_BIEN != 0
+                    and ND.NO_PERSONA is not null
+                    ) `;
             //TODO: consultar que debo borrar
-            // await this.TmpPagosGensDepRepository.delete({});
 
-            let response = await this.RefpayDepositoriesRepository.query(updateQuery).then((result) => {
-                return result;
-            });
+            let response = await this.RefpayDepositoriesRepository.query(updateQuery)
+            await this.TmpPagosGensDepRepository.delete({});
 
             return {
                 data: [response],
@@ -1691,6 +1699,9 @@ export class PaymentRefService {
                 message: ['OK']
             };
         } catch (e) {
+            Logger.debug(`################# e #####################`);
+            console.log(e)
+            Logger.debug(`##########################################`);
             return {
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: e.message,
@@ -1838,9 +1849,7 @@ export class PaymentRefService {
 
             this.gSumaTot = r.data?.lDepTot || 0
             var fulA = await this.fillAccreditations({ name: dto.name, good: L_NO_BIEN, process: 1 })
-            Logger.debug(`#################  #####################`);
-            console.log(fulA)
-            Logger.debug(`##########################################`);
+         
             for (const deposito of this.gDepositos) {
 
 
@@ -1848,7 +1857,7 @@ export class PaymentRefService {
                 L_MONTOSIN_IVA = 0.0;
                 L_XCENTIVA = 0.0;
                 L_XCUBRIR = 0.0;
-                var dispersion: any = {}
+                var dispersion: any = {} 
 
                 if (deposito.paid < this.gIvaContra && deposito.paid > 0) {
 
@@ -1859,7 +1868,7 @@ export class PaymentRefService {
                     dispersion.payId = deposito.payId;
                     dispersion.noGood = deposito.good;
                     dispersion.amount = this.round(this.gIvaContra);
-                    dispersion.reference = L_REFERENCIA;
+                    dispersion.reference = L_REFERENCIA+"";
                     dispersion.noTransferable = deposito.mandate;
                     dispersion.payment = this.round(L_MONTOSIN_IVA);
                     dispersion.paymentAct = this.round(deposito.paid);
@@ -1888,7 +1897,7 @@ export class PaymentRefService {
                         dispersion.payId = deposito.payId;
                         dispersion.noGood = deposito.good;
                         dispersion.amount = this.round(this.gIvaContra);
-                        dispersion.reference = L_REFERENCIA;
+                        dispersion.reference = L_REFERENCIA+"";
                         dispersion.noTransferable = deposito.mandate;
                         dispersion.payment = 0;
                         dispersion.paymentAct = this.round(this.gIvaContra);
@@ -1913,7 +1922,7 @@ export class PaymentRefService {
                         dispersion.payId = deposito.payId;
                         dispersion.noGood = deposito.good;
                         dispersion.amount = this.round(this.gIvaContra);
-                        dispersion.reference = L_REFERENCIA;
+                        dispersion.reference = L_REFERENCIA+"";
                         dispersion.noTransferable = deposito.mandate;
                         dispersion.payment = this.round(L_MONTOSIN_IVA);
                         dispersion.paymentAct = this.round(deposito.paid);
@@ -1937,7 +1946,7 @@ export class PaymentRefService {
                     dispersion.payId = deposito.payId;
                     dispersion.noGood = deposito.good;
                     dispersion.amount = this.round(this.gIvaContra);
-                    dispersion.reference = L_REFERENCIA;
+                    dispersion.reference = L_REFERENCIA+"";
                     dispersion.noTransferable = deposito.mandate;
                     dispersion.payment = 0;
                     dispersion.paymentAct = this.round(this.gIvaContra);
