@@ -1,8 +1,6 @@
-import { Injectable, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpStatus,Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { of } from 'rxjs';
 import { Repository } from 'typeorm';
-import { cli } from 'winston/lib/winston/config';
 import { Asigna } from './dto/asigna.dto';
 import { BlackListCurrent } from './dto/black-list.dto';
 import { DISPERPENA, Dispersa } from './dto/dispersa.dto';
@@ -13,7 +11,6 @@ import { Pago } from './dto/payment.dto';
 import { PresencialBM } from './dto/presencial-bm.dto';
 import { RealStateSale, RealStateSaleCurrent } from './dto/real-state-sale.dto';
 import { ComerEventEntity } from './entity/comer-event.entity';
-import { ComerLotsEntity } from './entity/comer-lots.entity';
 import { ComerParameterModEntity } from './entity/comer-parameter-mod.entity';
 import { LocalDate } from 'src/shared/utils/local-date';
 import { UpdateCurrentGeneralStatus } from './dto/update-current-general-status.dto';
@@ -107,7 +104,7 @@ export class ValidatePaymentsRefService {
     @InjectRepository(ComerParameterModEntity)
     private entity2: Repository<ComerParameterModEntity>,
   ) { 
-
+   
   }
 
   /**
@@ -3270,7 +3267,7 @@ export class ValidatePaymentsRefService {
     if (this.G_PKREFGEN == 0) {
       const result: any[] = await this.entity
         .query(`SELECT    coalesce(MAX(ID_PAGOREFGENS),0) as id_pago 
-                        FROM    sera.COMER_PAGOSREFGENS limit 12 
+                        FROM    sera.COMER_PAGOSREFGENS 
                         WHERE    ID_EVENTO = ${event}`);
       this.G_PKREFGEN = result[0].id_pago;
       return true;
@@ -3454,7 +3451,7 @@ export class ValidatePaymentsRefService {
                                         FROM  sera.COMER_PAGOREF PRF
                                 WHERE  PRF.ID_LOTE = LOT.ID_LOTE
                                         AND  PRF.VALIDO_SISTEMA = 'A'
-                                        AND  PRF.FECHA <= '${params.date}'
+                                        AND  PRF.FECHA <= '${LocalDate.getCustom(params.date)}'
                                         )
                         AND  EXISTS (SELECT  1
                                         FROM  sera.COMER_CLIENTESXEVENTO CXE
@@ -3961,7 +3958,7 @@ export class ValidatePaymentsRefService {
                                         FROM sera.COMER_LOTES LOT
                                         WHERE LOT.ID_EVENTO = ${params.event}
                                         AND LOT.ID_LOTE =${params.lot}`);
-        L_CLIENTE = result[0].id_cliente;
+        L_CLIENTE = result[0]?.id_cliente || null;
         this.DISPERSION = [];
         COMPRA_TOT = await this.llenaLotesAct(
           params.event,
@@ -4145,6 +4142,8 @@ export class ValidatePaymentsRefService {
 
     await this.actPagos(params.event, 'I', params.phase, params.lot);
     await this.actRefesAct(params.event, params.lot, params.phase);
+    Logger.debug(`#################  #####################`);
+    Logger.debug(`##########################################`);
     return { statusCode: 200, message: ['OK'], data: [] };
   }
   async realStateSate(data:RealStateSale){
@@ -4817,7 +4816,7 @@ export class ValidatePaymentsRefService {
                         AND        PAG.VALIDO_SISTEMA = 'A'
                         AND        LOT.ID_LOTE = coalesce(${lot}, LOT.ID_LOTE)
                         AND        LOT.ID_LOTE = PAG.ID_LOTE
-                        AND        PAG.FECHA          <= '${date}'
+                        AND        PAG.FECHA          <= '${LocalDate.getCustom(date)}'
                         AND        coalesce(LOT.ESASIGNADO,'S') != 'N'
                         AND        LOT.ID_EVENTO = CRG.ID_EVENTO
                         AND        LOT.ID_LOTE = CRG.ID_LOTE
@@ -4849,7 +4848,7 @@ export class ValidatePaymentsRefService {
                         AND        PAG.VALIDO_SISTEMA = 'A'
                         AND        LOT.ID_LOTE = coalesce(${lot}, LOT.ID_LOTE)
                         AND        LOT.ID_LOTE = PAG.ID_LOTE
-                        AND        PAG.FECHA          <= '${date}'
+                        AND        PAG.FECHA          <= '${LocalDate.getCustom(date)}'
                         AND        coalesce(LOT.ESASIGNADO,'S') != 'N'
                         AND        PAG.REFERENCIA LIKE '2%'
                         AND        EXISTS (SELECT    1
@@ -4883,7 +4882,7 @@ export class ValidatePaymentsRefService {
                         AND        PAG.VALIDO_SISTEMA = 'A'
                         AND        LOT.ID_LOTE = coalesce(${lot}, LOT.ID_LOTE)
                         AND        LOT.ID_LOTE = PAG.ID_LOTE
-                        AND        PAG.FECHA          <= '${date}'
+                        AND        PAG.FECHA          <= '${LocalDate.getCustom(date)}'
                         AND        coalesce(LOT.ESASIGNADO,'S') != 'N'
                         AND        PAG.REFERENCIA LIKE '7%'
                         AND        EXISTS (SELECT    1
@@ -4918,7 +4917,7 @@ export class ValidatePaymentsRefService {
                         AND        PAG.VALIDO_SISTEMA = 'A'
                         AND        LOT.ID_LOTE = coalesce(${lot}, LOT.ID_LOTE)
                         AND        LOT.ID_LOTE = PAG.ID_LOTE
-                        AND        PAG.FECHA          <= '${date}'
+                        AND        PAG.FECHA          <= '${LocalDate.getCustom(date)}'
                         AND        coalesce(LOT.ESASIGNADO,'S') != 'N'
                         AND        PAG.REFERENCIA LIKE '3%'
                         AND        EXISTS (SELECT    1
@@ -4950,7 +4949,7 @@ export class ValidatePaymentsRefService {
                         AND        PAG.VALIDO_SISTEMA = 'A'
                         AND        LOT.ID_LOTE = coalesce(${lot}, LOT.ID_LOTE)
                         AND        LOT.ID_LOTE = PAG.ID_LOTE
-                        AND        PAG.FECHA          <= '${date}'
+                        AND        PAG.FECHA          <= '${LocalDate.getCustom(date)}'
                         AND        coalesce(LOT.ESASIGNADO,'S') != 'N'
                         AND        PAG.REFERENCIA LIKE '4%'
                         AND        EXISTS (SELECT    1
@@ -4981,7 +4980,7 @@ export class ValidatePaymentsRefService {
                         AND        PAG.VALIDO_SISTEMA = 'A'
                         AND        LOT.ID_LOTE = coalesce(${lot}, LOT.ID_LOTE)
                         AND        LOT.ID_LOTE = PAG.ID_LOTE
-                        AND        PAG.FECHA          <= '${date}'
+                        AND        PAG.FECHA          <= '${LocalDate.getCustom(date)}'
                         AND        coalesce(LOT.ESASIGNADO,'S') != 'N'
                         AND        PAG.REFERENCIA LIKE '2%'
                         AND        EXISTS (SELECT    1
@@ -5038,7 +5037,7 @@ export class ValidatePaymentsRefService {
                                 WHERE LOT.ID_LOTE          = ${lot}
                                 AND PAG.VALIDO_SISTEMA   = 'A'
                                 AND LOT.ID_LOTE          = PAG.ID_LOTE
-                                AND PAG.FECHA            <= '${date}'
+                                AND PAG.FECHA            <= '${LocalDate.getCustom(date)}'
                                 AND PAG.IDORDENINGRESO   IS NULL
                                 AND LOT.ID_LOTE          = CRG.ID_LOTE
                                 AND LOT.ID_CLIENTE       = CRG.ID_CLIENTE
@@ -5072,7 +5071,7 @@ export class ValidatePaymentsRefService {
                                 WHERE LOT.ID_LOTE          = ${lot}
                                 AND PAG.VALIDO_SISTEMA   = 'A'
                                 AND LOT.ID_LOTE          = PAG.ID_LOTE
-                                AND PAG.FECHA            <= '${date}'
+                                AND PAG.FECHA            <= '${LocalDate.getCustom(date)}'
                                 AND PAG.IDORDENINGRESO IS NULL
                                 AND PAG.REFERENCIA LIKE '7%'
                                 AND EXISTS ( SELECT 1
@@ -5111,7 +5110,7 @@ export class ValidatePaymentsRefService {
                                 WHERE LOT.ID_LOTE          = ${lot}
                                 AND PAG.VALIDO_SISTEMA   = 'A'
                                 AND LOT.ID_LOTE          = PAG.ID_LOTE
-                                AND PAG.FECHA            <= '${date}'
+                                AND PAG.FECHA            <= '${LocalDate.getCustom(date)}'
                                 AND PAG.IDORDENINGRESO IS NULL
                                 AND PAG.REFERENCIA LIKE '3%'
                                 AND EXISTS ( SELECT 1
@@ -5150,7 +5149,7 @@ export class ValidatePaymentsRefService {
                                 WHERE LOT.ID_LOTE          = ${lot}
                                 AND PAG.VALIDO_SISTEMA   = 'A'
                                 AND LOT.ID_LOTE          = PAG.ID_LOTE
-                                AND PAG.FECHA            <= '${date}'
+                                AND PAG.FECHA            <= '${LocalDate.getCustom(date)}'
                                 AND PAG.IDORDENINGRESO IS NULL
                                 AND PAG.REFERENCIA LIKE '4%'
                                 AND EXISTS ( SELECT 1
@@ -5189,7 +5188,7 @@ export class ValidatePaymentsRefService {
                                 WHERE LOT.ID_LOTE          = ${lot}
                                 AND PAG.VALIDO_SISTEMA   = 'A'
                                 AND LOT.ID_LOTE          = PAG.ID_LOTE
-                                AND PAG.FECHA            <= '${date}'
+                                AND PAG.FECHA            <= '${LocalDate.getCustom(date)}'
                                 AND PAG.IDORDENINGRESO IS NULL
                                 ORDER BY PAG.MONTO DESC`);
       I1.forEach(async (element) => {
@@ -5236,7 +5235,7 @@ export class ValidatePaymentsRefService {
                         WHERE    LOT.ID_LOTE = ${lot}
                         AND        PAG.VALIDO_SISTEMA = 'A'
                         AND        LOT.ID_LOTE = PAG.ID_LOTE
-                        AND        PAG.FECHA          <= '${date}'
+                        AND        PAG.FECHA          <= '${LocalDate.getCustom(date)}'
                         AND        PAG.IDORDENINGRESO IS NULL
                         ORDER BY PAG.MONTO DESC`);
 
@@ -5597,7 +5596,7 @@ export class ValidatePaymentsRefService {
       var L8: any[] = await this.entity
         .query(`  SELECT    PRF.ID_PAGO, PRF.MONTO, LOT.NO_TRANSFERENTE, PRF.ID_LOTE
                                 FROM    sera.COMER_PAGOREF PRF, sera.COMER_LOTES LOT
-                                WHERE    PRF.FECHA <= '${date}'
+                                WHERE    PRF.FECHA <= '${LocalDate.getCustom(date)}'
                                 AND        PRF.VALIDO_SISTEMA = 'A'
                                 AND        PRF.ID_LOTE = LOT.ID_LOTE 
                                 AND        LOT.ID_EVENTO = ${event} 
@@ -5621,7 +5620,7 @@ export class ValidatePaymentsRefService {
         var C2_F1: any[] = await this.entity
           .query(` SELECT     PRF.ID_PAGO, PRF.MONTO, LOT.NO_TRANSFERENTE, PRF.ID_LOTE
                                 FROM       sera.COMER_PAGOREF PRF, sera.COMER_LOTES LOT, sera.COMER_REF_GARANTIAS CRG
-                                WHERE      PRF.FECHA <= '${date}'
+                                WHERE      PRF.FECHA <= '${LocalDate.getCustom(date)}'
                                 AND        PRF.VALIDO_SISTEMA = 'A'
                                 AND        PRF.ID_LOTE = LOT.ID_LOTE
                                 AND        LOT.ID_EVENTO = ${event}
@@ -5648,7 +5647,7 @@ export class ValidatePaymentsRefService {
         var C2_F2: any[] = await this.entity
           .query(`SELECT    PRF.ID_PAGO, PRF.MONTO, LOT.NO_TRANSFERENTE, PRF.ID_LOTE
                                         FROM    sera.COMER_PAGOREF PRF, sera.COMER_LOTES LOT
-                                        WHERE    PRF.FECHA <= '${date}'
+                                        WHERE    PRF.FECHA <= '${LocalDate.getCustom(date)}'
                                         AND        PRF.VALIDO_SISTEMA = 'A'
                                         AND        PRF.ID_LOTE = LOT.ID_LOTE
                                         AND        LOT.ID_EVENTO = ${event}
@@ -5673,7 +5672,7 @@ export class ValidatePaymentsRefService {
           .query(` SELECT    PRF.ID_PAGO, PRF.MONTO, LOT.NO_TRANSFERENTE, PRF.ID_LOTE
                                
                                             FROM    sera.COMER_PAGOREF PRF, sera.COMER_LOTES LOT
-                                            WHERE    PRF.FECHA <= '${date}'
+                                            WHERE    PRF.FECHA <= '${LocalDate.getCustom(date)}'
                                             AND        PRF.VALIDO_SISTEMA = 'A'
                                             AND        PRF.ID_LOTE = LOT.ID_LOTE
                                             AND        LOT.ID_EVENTO = ${event}
@@ -5697,7 +5696,7 @@ export class ValidatePaymentsRefService {
         var C2_F3: any[] = await this.entity
           .query(` SELECT    PRF.ID_PAGO, PRF.MONTO, LOT.NO_TRANSFERENTE, PRF.ID_LOTE
                                 FROM    sera.COMER_PAGOREF PRF, sera.COMER_LOTES LOT
-                                WHERE    PRF.FECHA <= '${date}'
+                                WHERE    PRF.FECHA <= '${LocalDate.getCustom(date)}'
                                 AND        PRF.VALIDO_SISTEMA = 'A'
                                 AND        PRF.ID_LOTE = LOT.ID_LOTE
                                 AND        LOT.ID_EVENTO = ${event}
@@ -5721,7 +5720,7 @@ export class ValidatePaymentsRefService {
         var C2_F4: any[] = await this.entity
           .query(` SELECT    PRF.ID_PAGO, PRF.MONTO, LOT.NO_TRANSFERENTE, PRF.ID_LOTE
                                 FROM    sera.COMER_PAGOREF PRF, sera.COMER_LOTES LOT
-                                WHERE    PRF.FECHA <= '${date}'
+                                WHERE    PRF.FECHA <= '${LocalDate.getCustom(date)}'
                                 AND        PRF.VALIDO_SISTEMA = 'A'
                                 AND        PRF.ID_LOTE = LOT.ID_LOTE
                                 AND        LOT.ID_EVENTO = ${event}
@@ -5745,7 +5744,7 @@ export class ValidatePaymentsRefService {
         var C2: any[] = await this.entity
           .query(` SELECT    PRF.ID_PAGO, PRF.MONTO, LOT.NO_TRANSFERENTE, PRF.ID_LOTE
                                 FROM    sera.COMER_PAGOREF PRF, sera.COMER_LOTES LOT
-                                WHERE    PRF.FECHA <= '${date}'
+                                WHERE    PRF.FECHA <= '${LocalDate.getCustom(date)}'
                                 AND        PRF.VALIDO_SISTEMA = 'A'
                                 AND        PRF.ID_LOTE = LOT.ID_LOTE
                                 AND        LOT.ID_EVENTO = ${event}
@@ -8740,7 +8739,7 @@ export class ValidatePaymentsRefService {
                                 FROM    sera.COMER_PAGOREF PRF
                                 WHERE    PRF.ID_LOTE = LOT.ID_LOTE
                                 AND        PRF.VALIDO_SISTEMA = 'A'
-                                AND        PRF.FECHA <= ${date}
+                                AND        PRF.FECHA <= '${LocalDate.getCustom(date)}'
                                 )
                 AND        EXISTS (SELECT    1
                                 FROM    sera.COMER_CLIENTESXEVENTO CXE
@@ -9475,7 +9474,7 @@ export class ValidatePaymentsRefService {
                AND        PAG.VALIDO_SISTEMA = 'A'
                AND        LOT.ID_LOTE = coalesce(${lot}, LOT.ID_LOTE)
                AND        LOT.ID_LOTE = PAG.ID_LOTE
-               AND        PAG.FECHA          <= '${date}'
+               AND        PAG.FECHA          <= '${LocalDate.getCustom(date)}'
                AND        coalesce(LOT.ESASIGNADO,'S') != 'N'
                AND        EXISTS (SELECT    1
                                FROM    sera.COMER_CLIENTESXEVENTO CXE
@@ -9542,7 +9541,7 @@ export class ValidatePaymentsRefService {
                                         FROM    sera.COMER_PAGOREF PRF
                                         WHERE    PRF.ID_LOTE = LOT.ID_LOTE
                                         AND        PRF.VALIDO_SISTEMA = 'A'
-                                        AND        PRF.FECHA <= '${date}'
+                                        AND        PRF.FECHA <= '${LocalDate.getCustom(date)}'
                                         )
                         AND        EXISTS (SELECT    1
                                         FROM    sera.COMER_CLIENTESXEVENTO CXE
@@ -9694,7 +9693,7 @@ export class ValidatePaymentsRefService {
     const L8 = await this.entity
       .query(`SELECT    PRF.ID_PAGO, PRF.MONTO, LOT.NO_TRANSFERENTE, PRF.ID_LOTE
                         FROM    sera.COMER_PAGOREF PRF, sera.COMER_LOTES LOT
-                        WHERE    PRF.FECHA         <= '${date}'
+                        WHERE    PRF.FECHA         <= '${LocalDate.getCustom(date)}'
                         AND        PRF.VALIDO_SISTEMA = 'A'
                         AND        PRF.ID_LOTE        = LOT.ID_LOTE
                         AND        LOT.ID_EVENTO      = ${event}
@@ -10749,7 +10748,7 @@ export class ValidatePaymentsRefService {
                                 FROM    sera.COMER_PAGOREF PRF
                                 WHERE    PRF.ID_LOTE = LOT.ID_LOTE
                                 AND        PRF.VALIDO_SISTEMA = 'A'
-                                AND        PRF.FECHA <= '${date}'
+                                AND        PRF.FECHA <= '${LocalDate.getCustom(date)}'
                                 )
                 AND        EXISTS (SELECT    1
                                 FROM    sera.COMER_CLIENTESXEVENTO CXE
