@@ -42,11 +42,11 @@ export class PaymentRefService {
         @InjectRepository(paymentsgensDepositaryEntity) private PaymentsgensDepositaryRepository: Repository<paymentsgensDepositaryEntity>,
     ) {
         //this.validDep({ name: 3948, date: new Date() }) 
-       
-         this.insertDispersionDb({
-                "pOne": 3948,//No_nombramiento
-                "pTwo": null,//PERSONA
-            })
+
+        this.insertDispersionDb({
+            "pOne": 3948,//No_nombramiento
+            "pTwo": null,//PERSONA
+        })
 
         // this.prepOI({name:372,description:''})
         //2679
@@ -164,7 +164,7 @@ export class PaymentRefService {
             AND RFD.IDORDENINGRESO  IS NULL
             AND ND.IMPORTE_CONTRAPRESTACION   > 0
             ORDER BY RFD.ID_PAGO, RFD.MONTO DESC
-        ` 
+        `
             const l8 = await this.ParametersmodDepositoryRepository.query(sql);
 
             for (const row of l8) {
@@ -315,7 +315,7 @@ export class PaymentRefService {
 
 
             let ga = 0;
-
+            this.gDispercionAbonos = []
             for (const row of l1) {
                 ga++;
                 this.gDispercionAbonos.push({
@@ -337,7 +337,7 @@ export class PaymentRefService {
                     dateProcess: row.fecha_proceso,
                     type: 'U',
                     insert: 'DB',
-                    xCover:null
+                    xCover: null
                 });
             }
 
@@ -369,7 +369,7 @@ export class PaymentRefService {
     async dispersionDeductions(): Promise<object> {
         let lStatus: number = 0; //L_STATUS
         let dG: number = 0;
-         this.gDispercionAbonos;
+        this.gDispercionAbonos;
         let gAppointment = 0; //G_NOMBRAMIENTO
         let gReference = null; //G_REFERENCIA
         try {
@@ -390,7 +390,7 @@ export class PaymentRefService {
                 ) {
                     if (lStatus <= 1) {
                         dG = dG + 1;
-                    
+
                         this.gDispercionAbonos.push({
                             payGensId: row.payGensId,
                             payId: row.payId,
@@ -415,7 +415,7 @@ export class PaymentRefService {
                             impWithoutIva: row.impWithoutIva,
                             chkdedu: row.chkDedu ?? 0,
                             origin: row.origin,
-                            xCover:null
+                            xCover: null
                         });
 
                         // TODO: Consultar si se va a guardar en la tabla temporal
@@ -473,7 +473,7 @@ export class PaymentRefService {
         //DISPERSION
         try {
             this.gDispersion = []//LIMPIA LA LISTA
-            
+
             for (const deposito of lDepositos) {
                 for (const disperAbonos of lDispercionAbonos) {
 
@@ -527,7 +527,7 @@ export class PaymentRefService {
                                     lXCubrir = this.round(this.gIvaContra) - this.round(this.round(disperAbonos.paymentAct) + this.round(deposito.paid));
                                     dG++;
 
-                                    var lDispercion:Dispersion = {
+                                    var lDispercion: Dispersion = {
                                         payId: disperAbonos.payGensId, //ID_PAGO
                                         noGood: disperAbonos.noGood, //NO_BIEN
                                         amount: this.round(deposito.paid), //IMPORTE
@@ -803,7 +803,7 @@ export class PaymentRefService {
      * @memberof PACKAGE BODY SERA.PAGOSREF_DEPOSITARIA lineas 722-872
      */
     async execDeductions(dto: ExecDeductionsDto) {
-       
+
         let lPago: number,
             lNewMont: number,
             lXcent: number,
@@ -826,12 +826,12 @@ export class PaymentRefService {
         lXCubrir = 0.0;
         const dateNow = LocalDate.getNow();
 
-        this.gSumaTot =( await this.fillPayments({ name: dto.pOne, person: dto.pTwo, date: dto.pDate, phase: 1 }))?.data?.lDepTot || 0
-     
+        this.gSumaTot = (await this.fillPayments({ name: dto.pOne, person: dto.pTwo, date: dto.pDate, phase: 1 }))?.data?.lDepTot || 0
+
         // TODO: validar si las asigno a alguna variable
         await this.dispersionDeductions();
         await this.fillPaymentsDisp();
-        
+
         let lDepositos = this.gDepositos;
         let rDispercion = this.gDispersion;
 
@@ -967,8 +967,8 @@ export class PaymentRefService {
             Logger.debug(`##########################################`);
         }
         return {
-            statusCode:200,
-            message:["OK"]
+            statusCode: 200,
+            message: ["OK"]
         }
     }
     //#endregion
@@ -1259,8 +1259,8 @@ export class PaymentRefService {
                                 impWithoutIva: this.round(lMontosinIva),
                                 iva: this.round(dispersion.iva),
                                 amountIva: this.round(lxCentIva),
-                                deduxcent: dispersion.deduxcent ||null,
-                                deduValue: this.round(dispersion.deduValue) ||null,
+                                deduxcent: dispersion.deduxcent || null,
+                                deduValue: this.round(dispersion.deduValue) || null,
                                 noAppointment: dispersion.noAppointment,
                                 dateProcess: new Date(dateNow),
                                 type: 'I',
@@ -1294,8 +1294,8 @@ export class PaymentRefService {
                                 impWithoutIva: this.round(lMontosinIva),
                                 iva: this.round(dispersion.iva),
                                 amountIva: this.round(lxCentIva),
-                                deduxcent: dispersion.deduxcent ||null,
-                                deduValue: this.round(dispersion.deduValue) ||null,
+                                deduxcent: dispersion.deduxcent || null,
+                                deduValue: this.round(dispersion.deduValue) || null,
                                 noAppointment: dispersion.noAppointment,
                                 dateProcess: new Date(dateNow),
                                 type: 'I',
@@ -1322,9 +1322,9 @@ export class PaymentRefService {
                                 status: 'A',
                                 impWithoutIva: this.round(lMontosinIva),
                                 iva: this.round(dispersion.iva),
-                                amountIva: this.round(lxCentIva) ,
-                                deduxcent: dispersion.deduxcent ||null,
-                                deduValue: this.round(dispersion.deduValue) ||null,
+                                amountIva: this.round(lxCentIva),
+                                deduxcent: dispersion.deduxcent || null,
+                                deduValue: this.round(dispersion.deduValue) || null,
                                 noAppointment: dispersion.noAppointment,
                                 dateProcess: new Date(dateNow),
                                 type: 'I',
@@ -1343,7 +1343,7 @@ export class PaymentRefService {
 
             }
         }
-     
+
 
         return {
             statusCode: 200,
@@ -1375,7 +1375,7 @@ export class PaymentRefService {
                 .execute().then((res) => {
                     return res[0].max_id_pagogens ?? 0;
                 });
-           
+
             lIdpgens = await this.PaymentsgensDepositaryRepository
                 .createQueryBuilder('pagos')
                 .select('COALESCE(MAX(pagos.id_pago_cubrio), 0)', 'max_id_pago_cubrio')
@@ -1387,7 +1387,7 @@ export class PaymentRefService {
             //TODO: consultar que debo borrar
             await this.TmpPagosGensDepRepository.delete({});
             for (const dispersion of this.gDispersion) {
-              
+
                 if (dispersion.type == 'U') {
                     dispersion.insert = 'DB';
 
@@ -1457,7 +1457,7 @@ export class PaymentRefService {
                         deduValue: this.round(dispersion.deduValue),
                         status: dispersion.status,
                         noAppointment: dispersion.noAppointment,
-                        dateProcess:new Date(dispersion.dateProcess),
+                        dateProcess: new Date(dispersion.dateProcess),
                         type: dispersion.type,
                         paymentAct: this.round(dispersion.paymentAct),
                         payCoverId: lIdpgens,
@@ -1505,7 +1505,7 @@ export class PaymentRefService {
         console.log(L2)
         Logger.debug(`##########################################`);
         try {
-           
+
             for (const i in L2) {
                 if (L2[i].type == 'U') {
 
@@ -1538,12 +1538,12 @@ export class PaymentRefService {
                 } else if (L2[i].type == 'I') {
                     let noAppointment = L2[i].noAppointment;
 
-                    lIdprgens  = (await  pGensDep
+                    lIdprgens = (await pGensDep
                         .createQueryBuilder()
                         .select("COALESCE(MAX(ID_PAGOGENS), 0) + 1", "id")
-                        .where("NO_NOMBRAMIENTO = :noNombramiento", { noNombramiento:noAppointment })
+                        .where("NO_NOMBRAMIENTO = :noNombramiento", { noNombramiento: noAppointment })
                         .getRawMany())[0]?.id || 1
-                   
+
 
                     UorIquery = `INSERT INTO SERA.PAGOSGENS_DEPOSITARIAS (
                                 ID_PAGOGENS, ID_PAGO, NO_BIEN, MONTO, REFERENCIA,
@@ -1578,7 +1578,7 @@ export class PaymentRefService {
 
                 await pGensDep.query(UorIquery).then((result) => {
                     return result;
-                }).catch(err=>{
+                }).catch(err => {
                     Logger.debug(`################# ${UorIquery} #####################`);
                     console.log(err)
                     Logger.debug(`##########################################`);
@@ -1586,11 +1586,11 @@ export class PaymentRefService {
             }
 
             //Limpia las listas globales
-            this.gDepositos= [];
+            this.gDepositos = [];
             this.gDispersion = []
             //TODO: descomentar una ves las cree
-            this.updateAccreditationGens({pOne:dto.pOne})
-            this.updatePaymentsRef({pOne:dto.pOne})
+            this.updateAccreditationGens({ pOne: dto.pOne })
+            this.updatePaymentsRef({ pOne: dto.pOne })
 
             return {
                 statusCode: HttpStatus.OK,
@@ -1832,7 +1832,7 @@ export class PaymentRefService {
             AND ND.IMPORTE_CONTRAPRESTACION > 0
             AND ND.NO_PERSONA IS NOT NULL
         `);
-            
+
         L_PARAMETROS = await this.paramsDep(dto.name, 'D')
         var GK = 0;
         L_ABONO_X = 0.0
@@ -1849,7 +1849,7 @@ export class PaymentRefService {
 
             this.gSumaTot = r.data?.lDepTot || 0
             var fulA = await this.fillAccreditations({ name: dto.name, good: L_NO_BIEN, process: 1 })
-         
+
             for (const deposito of this.gDepositos) {
 
 
@@ -1857,7 +1857,7 @@ export class PaymentRefService {
                 L_MONTOSIN_IVA = 0.0;
                 L_XCENTIVA = 0.0;
                 L_XCUBRIR = 0.0;
-                var dispersion: any = {} 
+                var dispersion: any = {}
 
                 if (deposito.paid < this.gIvaContra && deposito.paid > 0) {
 
@@ -1868,7 +1868,7 @@ export class PaymentRefService {
                     dispersion.payId = deposito.payId;
                     dispersion.noGood = deposito.good;
                     dispersion.amount = this.round(this.gIvaContra);
-                    dispersion.reference = L_REFERENCIA+"";
+                    dispersion.reference = L_REFERENCIA + "";
                     dispersion.noTransferable = deposito.mandate;
                     dispersion.payment = this.round(L_MONTOSIN_IVA);
                     dispersion.paymentAct = this.round(deposito.paid);
@@ -1897,7 +1897,7 @@ export class PaymentRefService {
                         dispersion.payId = deposito.payId;
                         dispersion.noGood = deposito.good;
                         dispersion.amount = this.round(this.gIvaContra);
-                        dispersion.reference = L_REFERENCIA+"";
+                        dispersion.reference = L_REFERENCIA + "";
                         dispersion.noTransferable = deposito.mandate;
                         dispersion.payment = 0;
                         dispersion.paymentAct = this.round(this.gIvaContra);
@@ -1922,7 +1922,7 @@ export class PaymentRefService {
                         dispersion.payId = deposito.payId;
                         dispersion.noGood = deposito.good;
                         dispersion.amount = this.round(this.gIvaContra);
-                        dispersion.reference = L_REFERENCIA+"";
+                        dispersion.reference = L_REFERENCIA + "";
                         dispersion.noTransferable = deposito.mandate;
                         dispersion.payment = this.round(L_MONTOSIN_IVA);
                         dispersion.paymentAct = this.round(deposito.paid);
@@ -1946,7 +1946,7 @@ export class PaymentRefService {
                     dispersion.payId = deposito.payId;
                     dispersion.noGood = deposito.good;
                     dispersion.amount = this.round(this.gIvaContra);
-                    dispersion.reference = L_REFERENCIA+"";
+                    dispersion.reference = L_REFERENCIA + "";
                     dispersion.noTransferable = deposito.mandate;
                     dispersion.payment = 0;
                     dispersion.paymentAct = this.round(this.gIvaContra);
@@ -1973,7 +1973,7 @@ export class PaymentRefService {
 
         }
 
-        
+
         // INS_DISPERSION(P_NOMBR, L_PERSONA);
         await this.insertDispersion({ pOne: dto.name, pTwo: L_PERSONA })
         return {
@@ -2302,6 +2302,6 @@ export class PaymentRefService {
 
 
 
-    
+
 
 }
