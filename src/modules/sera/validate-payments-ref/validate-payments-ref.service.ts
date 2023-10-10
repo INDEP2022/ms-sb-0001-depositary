@@ -13251,7 +13251,7 @@ export class ValidatePaymentsRefService {
           WHERE    ID_EVENTO = ${event}
           AND    IDENTIFICADOR = ${ident}
           AND    MANDATO = ${iterator.mandate}
-          AND    IMPORTE_SIVA > ABS(${AR_CANT})
+          AND    IMPORTE_SIVA > ABS(${AR_CANT||0})
         `)
 
         AR_APP = AR_APP + Math.abs(AR_CANT);
