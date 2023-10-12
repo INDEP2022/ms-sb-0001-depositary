@@ -104,15 +104,7 @@ export class ValidatePaymentsRefService {
     @InjectRepository(ComerParameterModEntity)
     private entity2: Repository<ComerParameterModEntity>,
   ) { 
-   this.prepOiInmuAct({
-    "event": 23743,
-    "descriptionEvent": "SEI 06/22",   
-    "inmueble": "I",
-    "publicLot": 60211,    
-    "lot": 6176008,
-    "phase": 6,   
-    "user": "sigebiadmon"
-   })
+   
   }
 
   /**
