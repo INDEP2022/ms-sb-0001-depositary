@@ -9903,6 +9903,26 @@ export class ValidatePaymentsRefService {
   }
 
   async bienesLote(event: number, lot: number) {
+    var lots:any[] = await this.entity.query(`SELECT id_lote from sera.COMER_LOTES where id_evento = ${event}`)
+   
+    var countAll:any[] = await this.entity.query(`
+      SELECT COUNT(1), id_lote
+      FROM    sera.COMER_BIENESXLOTE
+      WHERE    ID_LOTE in(${lots.map(x=>x.id_lote).join(',')})
+      group by id_lote
+    `)
+   
+    countAll.forEach(async(element) => {
+      await this.entity.query(`
+        UPDATE sera.comer_lotes
+        set num_bienes = ${element.count}
+        where id_lote = ${element.id_lote}
+      `)
+    });
+    return {
+      statusCode:200,
+      message:["OK"]
+    }
     return await this.entity.query(`UPDATE    sera.COMER_LOTES LOT
                 SET    NUM_BIENES = (    SELECT COUNT(*)
                              FROM    sera.COMER_BIENESXLOTE BXL
@@ -13249,8 +13269,8 @@ export class ValidatePaymentsRefService {
           UPDATE    sera.COMER_DETALLES DET
           SET    IMPORTE_SIVA = IMPORTE_SIVA + ${AR_CANT}
           WHERE    ID_EVENTO = ${event}
-          AND    IDENTIFICADOR = ${ident}
-          AND    MANDATO = ${iterator.mandate}
+          AND    IDENTIFICADOR = '${ident}'
+          AND    MANDATO = '${iterator.mandate}'
           AND    IMPORTE_SIVA > ABS(${AR_CANT||0})
         `)
 
@@ -13329,6 +13349,7 @@ export class ValidatePaymentsRefService {
           PAG.REFERENCIA
 
     `)
+   
     var C2 =async (paid:number)=>{
       return await this.entity.query(`
           SELECT
@@ -13449,7 +13470,9 @@ export class ValidatePaymentsRefService {
                           )
       `)
     }
-
+    Logger.debug(`################# C1 #####################`);
+    console.log(C1)
+    Logger.debug(`##########################################`);
     var AUX_CONT =( await this.entity.query(` SELECT    MAX(IDENTIFICADOR) as val1
     FROM    SERA.COMER_CABECERAS
     WHERE    ID_EVENTO = ${data.event}`))[0]?.val1 || 0
