@@ -9911,6 +9911,7 @@ export class ValidatePaymentsRefService {
         where id_lote = ${element.id_lote}
       `)
     });
+    Logger.debug("UPDATE END")
     return {
       statusCode:200,
       message:["OK"]
@@ -13171,7 +13172,10 @@ export class ValidatePaymentsRefService {
   }
 //AJUSTA_DEC
   async ajustTwoDecimals(event:number,lot:number){
-    var OBTINDENT = 1
+    var OBTINDENT = (await this.findDifeDec(event,lot,11)).data?.ident|| 0
+    if(OBTINDENT == 0){
+      return null
+    }
     await this.updateDecimal(event,OBTINDENT)
   }
   async findDifeDec(event:number,lot:number,ident:number){
@@ -13616,7 +13620,7 @@ export class ValidatePaymentsRefService {
 
     await this.typeAdjustPayment(data.event,data.lot)
     await this.ajustTwoDecimals(data.event,data.lot)
-    
+    Logger.debug("END PREP OI INMU")
     return {
       statusCode:200,
       message:["OK"]
