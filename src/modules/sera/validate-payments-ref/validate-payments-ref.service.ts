@@ -104,7 +104,11 @@ export class ValidatePaymentsRefService {
     @InjectRepository(ComerParameterModEntity)
     private entity2: Repository<ComerParameterModEntity>,
   ) { 
-   
+   this.currentRealStateSale({
+        "event": 23743,
+    "phase": 1,    "date": new Date("2023-10-12T20:53:54.000Z"),
+    "lot": 6176008,    "address": "I"
+   })
   }
 
   /**
@@ -4810,7 +4814,7 @@ export class ValidatePaymentsRefService {
 
     if (phase == 1) {
       var P1_F1 = await this.entity
-        .query(`SELECT    LOT.ID_LOTE, LOT.PRECIO_FINAL, SUM(PAG.MONTO) as pagado, coalesce(LOT.ACUMULADO,0) as acum as acum, LOT.ANTICIPO, LOT.ID_CLIENTE
+        .query(`SELECT    LOT.ID_LOTE, LOT.PRECIO_FINAL, SUM(PAG.MONTO) as pagado, coalesce(LOT.ACUMULADO,0) as acum, LOT.ANTICIPO, LOT.ID_CLIENTE
                         FROM    sera.COMER_LOTES LOT, sera.COMER_PAGOREF PAG, sera.COMER_REF_GARANTIAS CRG
                         WHERE    LOT.ID_EVENTO = ${event} 
                         AND        PAG.VALIDO_SISTEMA = 'A'
