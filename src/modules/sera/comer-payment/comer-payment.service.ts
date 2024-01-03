@@ -388,7 +388,7 @@ export class ComerPaymentService {
                 (select LOTE_PUBLICO from sera.COMER_LOTES where ID_LOTE = a.ID_LOTE) LOTE_PUBLICO
         from sera.COMER_PAGOREF a `;
 
-        LV_QUERY_INCO =`select ${params.typeSearch},ID_PAGO, REFERENCIA,COALESCE(referenciaori, '0') AS referenciaori,NO_MOVTO,FECHA, MONTO,
+        LV_QUERY_INCO =`select ${params.typeSearch},ID_PAGO, REFERENCIA,COALESCE(referenciaori, '0') AS referenciaori,COALESCE( NO_MOVTO, 0),FECHA, MONTO,
                         CVE_BANCO, CODIGO, ID_LOTE, NULL,CUENTA,ID_CLIENTE,DESCRIPCION,
                         ID_TIPO_SAT,TIPO,NULL,IDORDENINGRESO,NULL,NULL,NULL,0,
                         (select ID_EVENTO    from sera.COMER_LOTES where ID_LOTE = a.ID_LOTE) ID_EVENTO,
@@ -537,7 +537,6 @@ export class ComerPaymentService {
                         if (LV_VALMAEBUS == 0) {
                             await this.entity.query(`insert into sera.BUSQUEDA_PAGOS_MAE (ID_TBUSQUEDA, DES_TBUSQUEDA) values ('${params.typeSearch}','${LV_TIPO_PAGO}')`)
                         }
-                        console.log(LV_QUERY);
                         await this.entity.query(LV_QUERY)
                     }
                 }
