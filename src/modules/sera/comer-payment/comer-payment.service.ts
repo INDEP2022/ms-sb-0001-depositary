@@ -348,31 +348,31 @@ export class ComerPaymentService {
 
     async searchPayment(params: SearchPayment) {
 
-        var LV_QUERY = ""
-        var LV_QUERY_INSE = ""
-        var LV_QUERY_PREF = ""
-        var LV_QUERY_INCO = ""
-        var LV_QUERY_COUN = ""
-        var LV_WHERE = ""
-        var LV_WHERE_EVELOT = ""
-        var LV_WHERE_BANCO = ""
-        var LV_WHERE_MONTO = ""
-        var LV_WHERE_REFE = ""
-        var LV_WHERE_VSIS = ""
-        var LV_WHERE_TBUSQ = ""
-        var LV_TABLE = ""
-        var LV_TIPO_PAGO = ""
-        var LV_ID_INCONSIS = ""
-        var LV_VALEVENTO = 0
-        var LV_VALLOTE = 0
-        var LV_VALBANCO = 0
-        var LV_VALMAEBUS = 0
-        var LV_TOTREGQRY = 0
+        let LV_QUERY = ""
+        let LV_QUERY_INSE = ""
+        let LV_QUERY_PREF = ""
+        let LV_QUERY_INCO = ""
+        let LV_QUERY_COUN = ""
+        let LV_WHERE = ""
+        let LV_WHERE_EVELOT = ""
+        let LV_WHERE_BANCO = ""
+        let LV_WHERE_MONTO = ""
+        let LV_WHERE_REFE = ""
+        let LV_WHERE_VSIS = ""
+        let LV_WHERE_TBUSQ = ""
+        let LV_TABLE = ""
+        let LV_TIPO_PAGO = ""
+        let LV_ID_INCONSIS = ""
+        let LV_VALEVENTO = 0
+        let LV_VALLOTE = 0
+        let LV_VALBANCO = 0
+        let LV_VALMAEBUS = 0
+        let LV_TOTREGQRY = 0
 
 
         try {
-            var P_MSG_PROCESO = 'Proceso finalizo satisfactoriamente ...'
-            var P_EST_PROCESO = 1
+            let P_MSG_PROCESO = 'Proceso finalizo satisfactoriamente ...'
+            let P_EST_PROCESO = 1
             LV_WHERE = 'where 1=1';
 
             LV_QUERY_INSE = `insert into sera.BUSQUEDA_PAGOS_DET(
@@ -381,12 +381,20 @@ export class ComerPaymentService {
                 ID_TIPO_SAT,TIPO,RESULTADO,IDORDENINGRESO,ID_PROCESO,ID_INCONSIS,DESC_INCONSIS,
                 ID_SELEC,ID_EVENTO,LOTE_PUBLICO
                 ) `;
-            LV_QUERY_PREF = `select '${params.typeSearch}',ID_PAGO, REFERENCIA,REFERENCIA,NO_MOVIMIENTO,FECHA, MONTO,
+            LV_QUERY_PREF = `select ${params.typeSearch},ID_PAGO, REFERENCIA,REFERENCIA,NO_MOVIMIENTO,FECHA, MONTO,
                 CVE_BANCO, CODIGO, ID_LOTE, VALIDO_SISTEMA,CUENTA,ID_CLIENTE,DESCRIPCION,
                 ID_TIPO_SAT,TIPO,RESULTADO,IDORDENINGRESO,NULL,NULL,NULL,0,
                 (select ID_EVENTO    from sera.COMER_LOTES where ID_LOTE = a.ID_LOTE) ID_EVENTO,
                 (select LOTE_PUBLICO from sera.COMER_LOTES where ID_LOTE = a.ID_LOTE) LOTE_PUBLICO
         from sera.COMER_PAGOREF a `;
+
+        LV_QUERY_INCO =`select ${params.typeSearch},ID_PAGO, REFERENCIA,COALESCE(referenciaori, '0') AS referenciaori,NO_MOVTO,FECHA, MONTO,
+                        CVE_BANCO, CODIGO, ID_LOTE, NULL,CUENTA,ID_CLIENTE,DESCRIPCION,
+                        ID_TIPO_SAT,TIPO,NULL,IDORDENINGRESO,NULL,NULL,NULL,0,
+                        (select ID_EVENTO    from sera.COMER_LOTES where ID_LOTE = a.ID_LOTE) ID_EVENTO,
+                        (select LOTE_PUBLICO from sera.COMER_LOTES where ID_LOTE = a.ID_LOTE) LOTE_PUBLICO
+                        from sera.COMER_PAGOS_INCONSISTENCIAS a `
+
             LV_QUERY_COUN = 'select count(0) as count from ';
             if ((params.event || 11111111111) == 11111111111) {
                 LV_VALEVENTO = 0;
@@ -529,7 +537,7 @@ export class ComerPaymentService {
                         if (LV_VALMAEBUS == 0) {
                             await this.entity.query(`insert into sera.BUSQUEDA_PAGOS_MAE (ID_TBUSQUEDA, DES_TBUSQUEDA) values ('${params.typeSearch}','${LV_TIPO_PAGO}')`)
                         }
-
+                        console.log(LV_QUERY);
                         await this.entity.query(LV_QUERY)
                     }
                 }
