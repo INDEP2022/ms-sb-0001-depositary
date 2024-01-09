@@ -2,6 +2,7 @@ import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { ComerPaymentService } from './comer-payment.service';
 import { SearchPayment } from './dto/search-payment.dto';
+import { selectionPaymentDto } from './dto/selection-payment.dto';
 
 @Controller('comer-payment')
 export class ComerPaymentController {
@@ -29,8 +30,8 @@ export class ComerPaymentController {
  
     @MessagePattern({ cmd: 'selectionPayment' })
 
-    async selectionPayment(data:{selection:number,typeInconci:number}){
-        return await this.service.selectionPayment(data.selection,data.typeInconci)
+    async selectionPayment(data:selectionPaymentDto){
+        return await this.service.selectionPayment(data)
     }
     @MessagePattern({ cmd: 'masivePaymentVPS' })
 

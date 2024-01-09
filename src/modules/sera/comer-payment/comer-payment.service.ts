@@ -10,6 +10,7 @@ import * as moment from 'moment-timezone';
 import { pAdmPayEfeDuplicatedDto } from './dto/p-adm-pay-efe-duplicate.dto';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
+import { selectionPaymentDto } from './dto/selection-payment.dto';
 
 @Injectable()
 export class ComerPaymentService {
@@ -789,25 +790,39 @@ export class ComerPaymentService {
     }
 
 
-    async selectionPayment(selection: number, typeInconci: number) {
-        var P_MSG_PROCESO: string
-        var P_EST_PROCESO: number
-        var LV_TOTREGIS: number
+    async selectionPayment({data, selection}: selectionPaymentDto) {
 
-        var r = await this.entity.query(`select count(0)as count 
-        from sera.BUSQUEDA_PAGOS_DET
-        where ID_TBUSQUEDA   = ${typeInconci}`)
-        LV_TOTREGIS = r[0].count || 0
+        for (const i in data) {
+            var P_MSG_PROCESO: string
+            var LV_TOTREGIS: number
 
-        if (LV_TOTREGIS == 0) {
-            P_EST_PROCESO = 0;
-            P_MSG_PROCESO = 'No existe registros para cambiar la caja de selección';
-        } else {
-            P_MSG_PROCESO = 'Se procesaron ' + LV_TOTREGIS + ' registro(s).';
-            await this.entity.query(` update sera.BUSQUEDA_PAGOS_DET
-            set ID_SELEC = ${selection}
-            where ID_TBUSQUEDA   = ${typeInconci}`)
+            let processId: number = data[i].processId
+            let movtoNumber: number = data[i].movtoNumber
+            let monto: number = data[i].monto
+            let referenceori: number = data[i].referenceori
+
+            var r = await this.entity.query(`select count(0)as count 
+            from sera.BUSQUEDA_PAGOS_DET
+            where id_proceso   = ${processId}
+            and no_movto = ${movtoNumber}
+            and monto = ${monto}
+            and referenciaori = ${referenceori}`)
+            LV_TOTREGIS = r[0].count || 0
+
+            if (LV_TOTREGIS == 0) {
+                P_MSG_PROCESO = 'No existe registros para cambiar la caja de selección';
+            } else {
+                P_MSG_PROCESO = 'Se procesaron ' + LV_TOTREGIS + ' registro(s).';
+                await this.entity.query(` update sera.BUSQUEDA_PAGOS_DET
+                set ID_SELEC = ${selection}
+                where id_proceso   = ${processId}
+                and no_movto = ${movtoNumber}
+                and monto = ${monto}
+                and referenciaori = ${referenceori}`)
+            }
         }
+
+        
 
         return { statusCode: 200, message: [P_MSG_PROCESO], data: [] }
     }
