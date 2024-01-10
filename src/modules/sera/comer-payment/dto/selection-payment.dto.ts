@@ -4,8 +4,8 @@ export class selectionPaymentDto{
             processId : number,
             movtoNumber : number,
             monto : number,
-            referenceori : number,
+            referenceori : string,
+            selection : number
         }
     ]
-    selection : number
 }

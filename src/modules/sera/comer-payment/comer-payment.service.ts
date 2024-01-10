@@ -789,24 +789,31 @@ export class ComerPaymentService {
     }
 
 
-    async selectionPayment({data, selection}: selectionPaymentDto) {
+    async selectionPayment({data}: selectionPaymentDto) {
+            let P_MSG_PROCESO: string;
+            let LV_TOTREGIS: number = 0;
 
         for (const i in data) {
-            var P_MSG_PROCESO: string
-            var LV_TOTREGIS: number
 
-            let processId: number = data[i].processId
-            let movtoNumber: number = data[i].movtoNumber
-            let monto: number = data[i].monto
-            let referenceori: number = data[i].referenceori
-
-            var r = await this.entity.query(`select count(0)as count 
+            let processId: number = data[i].processId;
+            let movtoNumber: number = data[i].movtoNumber;
+            let monto: number = data[i].monto;
+            let referenceori: string = data[i].referenceori;
+            let selection: number = data[i].selection;
+            console.log(`select count(0)as count 
             from sera.BUSQUEDA_PAGOS_DET
             where id_proceso   = ${processId}
             and no_movto = ${movtoNumber}
             and monto = ${monto}
-            and referenciaori = ${referenceori}`)
-            LV_TOTREGIS = r[0].count || 0
+            and referenciaori = ${referenceori? `'${referenceori}'`:null}`);
+            let r = await this.entity.query(`select count(0)as count 
+            from sera.BUSQUEDA_PAGOS_DET
+            where id_proceso   = ${processId}
+            and no_movto = ${movtoNumber}
+            and monto = ${monto}
+            and referenciaori = ${referenceori? `'${referenceori}'`:null}`)
+            let count = r[0].count? +r[0].count : 0;
+            LV_TOTREGIS+= count;
 
             if (LV_TOTREGIS == 0) {
                 P_MSG_PROCESO = 'No existe registros para cambiar la caja de selección';
@@ -817,12 +824,10 @@ export class ComerPaymentService {
                 where id_proceso   = ${processId}
                 and no_movto = ${movtoNumber}
                 and monto = ${monto}
-                and referenciaori = ${referenceori}`)
+                and referenciaori = ${referenceori? `'${referenceori}'`:null}`)
             }
         }
-
         
-
         return { statusCode: 200, message: [P_MSG_PROCESO], data: [] }
     }
 
