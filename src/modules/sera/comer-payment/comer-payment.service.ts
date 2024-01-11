@@ -599,7 +599,7 @@ export class ComerPaymentService {
 
             return {
                 statusCode: 200, message: ["ok"], data: {
-                    statusProcess: 0,
+                    statusProcess: P_EST_PROCESO,
                     messageProcess: P_MSG_PROCESO
                 }
             }
