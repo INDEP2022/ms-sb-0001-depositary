@@ -271,10 +271,13 @@ export class ComerPaymentService {
     }
 
     async changePaymentProcess(currentSearch: number, newSearch: number) {
-        var LV_DESC_BUSQUEDA = ""
+       try {
+        let LV_DESC_BUSQUEDA = "";
+        let fechafor: string;
 
-        var P_EST_PROCESO = 1;
-        var P_MSG_PROCESO = 'Proceso finalizado.';
+        let P_EST_PROCESO = 1;
+        let P_MSG_PROCESO = 'Proceso finalizado.';
+        let fecha: string= ""; 
 
         if ((newSearch || 0) == 0) {
             P_EST_PROCESO = 0;
@@ -313,7 +316,7 @@ export class ComerPaymentService {
             }
 
             await this.entity.query(`insert into sera.BUSQUEDA_PAGOS_MAE(ID_TBUSQUEDA,DES_TBUSQUEDA) values(${newSearch},'${LV_DESC_BUSQUEDA}')`)
-
+            
             const C_DATAFEC: any[] = await this.entity.query(` select CODIGO       ,CUENTA     ,CVE_BANCO     ,DESC_INCONSIS  ,DESCRIPCION,FECHA     ,GEN_REFERENCIA,
                 ID_CLIENTE   ,ID_EVENTO  ,ID_INCONSIS   ,ID_LOTE        ,ID_PAGO    ,ID_PROCESO,ID_SELEC      ,
                 ID_TBUSQUEDA ,ID_TIPO_SAT,IDORDENINGRESO,LOTE_PUBLICO   ,MONTO      ,NO_MOVTO  ,REFERENCIA    ,
@@ -321,29 +324,80 @@ export class ComerPaymentService {
                 from sera.BUSQUEDA_PAGOS_DET
                 where ID_TBUSQUEDA = ${currentSearch}
                 and ID_SELEC     = 1`)
-            C_DATAFEC.forEach(async dat => {
-                await this.entity.query(` insert into sera.BUSQUEDA_PAGOS_DET (
-                    CODIGO     ,CUENTA        ,CVE_BANCO      ,DESC_INCONSIS,DESCRIPCION,FECHA     ,GEN_REFERENCIA, 
-                    ID_CLIENTE ,ID_EVENTO     ,ID_LOTE        ,ID_PAGO      ,ID_PROCESO ,ID_SELEC  ,ID_TBUSQUEDA  ,
-                    ID_TIPO_SAT,IDORDENINGRESO,LOTE_PUBLICO   ,MONTO        ,NO_MOVTO   ,REFERENCIA,REFERENCIAORI ,
-                    RESULTADO  ,TIPO          ,TIPO_REFERENCIA,VALIDO_SISTEMA
-                    )
-                values (
-                    '${dat.codigo}'    ,'${dat.cuenta}'       , '${dat.cve_banco}'      ,'${dat.desc_inconsis}','${dat.descripcion}','${dat.fecha}'     ,'${dat.gen_referencia}',
-                    ${dat.id_cliente} ,${dat.id_evento}     ,${dat.id_lote}        ,${dat.id_pago}      ,${dat.id_proceso} ,${dat.id_selec}  ,${newSearch}  ,
-                    ${dat.id_tipo_sat},${dat.idordeningreso},'${dat.lote_publico}'   ,${dat.monto}        ,'${dat.no_movto}'  ,'${dat.referencia}','${dat.referenciaori}' ,
-                    '${dat.resultado}' ,'${dat.tipo}'         ,'${dat.tipo_referencia}','${dat.valido_sistema}'
-                        )`)
+            for (const i in C_DATAFEC) {
+                const codigo = C_DATAFEC[i].codigo?C_DATAFEC[i].codigo:null;
+                const cuenta = C_DATAFEC[i].cuenta?C_DATAFEC[i].cuenta:null;
+                const cve_banco = C_DATAFEC[i].cve_banco?C_DATAFEC[i].cve_banco:null;
+                const desc_inconsis = C_DATAFEC[i].desc_inconsis?C_DATAFEC[i].desc_inconsis:null;
+                const descripcion = C_DATAFEC[i].descripcion?C_DATAFEC[i].descripcion:null;
+                const gen_referencia = C_DATAFEC[i].gen_referencia?C_DATAFEC[i].gen_referencia:null;
+                const id_cliente = C_DATAFEC[i].id_cliente?+C_DATAFEC[i].id_cliente:0;
+                const id_evento = C_DATAFEC[i].id_evento?+C_DATAFEC[i].id_evento:0;
+                const id_lote = C_DATAFEC[i].id_lote?+C_DATAFEC[i].id_lote:0;
+                const id_pago = C_DATAFEC[i].id_pago?+C_DATAFEC[i].id_pago:0;
+                const id_proceso = C_DATAFEC[i].id_proceso?+C_DATAFEC[i].id_proceso:0;
+                const id_selec = C_DATAFEC[i].id_selec?+C_DATAFEC[i].id_selec:0;
+                const id_tipo_sat = C_DATAFEC[i].id_tipo_sat?+C_DATAFEC[i].id_tipo_sat:0;
+                const idordeningreso = C_DATAFEC[i].idordeningreso?+C_DATAFEC[i].idordeningreso:0;
+                const lote_publico = C_DATAFEC[i].lote_publico?+C_DATAFEC[i].lote_publico:0;
+                const monto = C_DATAFEC[i].monto?+C_DATAFEC[i].monto:0;
+                const no_movto = C_DATAFEC[i].no_movto?C_DATAFEC[i].no_movto:null;
+                const referencia = C_DATAFEC[i].referencia?C_DATAFEC[i].referencia:null;
+                const referenciaori = C_DATAFEC[i].referenciaori?C_DATAFEC[i].referenciaori:null;
+                const resultado = C_DATAFEC[i].resultado?C_DATAFEC[i].resultado:null;
+                const tipo = C_DATAFEC[i].tipo?C_DATAFEC[i].tipo:null;
+                const tipo_referencia = C_DATAFEC[i].tipo_referencia?C_DATAFEC[i].tipo_referencia:null;
+                const valido_sistema = C_DATAFEC[i].valido_sistema?C_DATAFEC[i].valido_sistema:null;
+                const id_tbusqueda = C_DATAFEC[i].id_tbusqueda?C_DATAFEC[i].id_tbusqueda:null;
+                fecha = C_DATAFEC[i].fecha?C_DATAFEC[i].fecha:null; 
+
+
+                fechafor = moment(fecha).format('YYYY-MM-DD');
+
+                if (fechafor == "Invalid date") {
+                    fechafor = null
+                }
+
                 await this.entity.query(`delete from  sera.BUSQUEDA_PAGOS_DET 
-                where ID_TBUSQUEDA = ${dat.id_tbusqueda}
-                  and ID_PROCESO   =${dat.id_proceso};`)
-            });
+                where ID_TBUSQUEDA = ${id_tbusqueda}
+                  and ID_PROCESO   =${id_proceso};`);
+                const query = `
+                INSERT INTO sera.BUSQUEDA_PAGOS_DET (
+                    CODIGO, CUENTA, CVE_BANCO, DESC_INCONSIS, DESCRIPCION, FECHA, GEN_REFERENCIA, 
+                    ID_CLIENTE, ID_EVENTO, ID_LOTE, ID_PAGO, ID_PROCESO, ID_SELEC, ID_TBUSQUEDA, 
+                    ID_TIPO_SAT, IDORDENINGRESO, LOTE_PUBLICO, MONTO, NO_MOVTO, REFERENCIA, REFERENCIAORI, 
+                    RESULTADO, TIPO, TIPO_REFERENCIA, VALIDO_SISTEMA
+                ) VALUES (
+                    $1, $2, $3, $4, $5, $6, $7,
+                    $8, $9, $10, $11, $12, $13, $14,
+                    $15, $16, $17, $18, $19, $20, $21, $22,
+                    $23, $24, $25
+                )
+                `;
+                const values = [
+                    codigo, cuenta, cve_banco, desc_inconsis, descripcion, fechafor, gen_referencia,
+                    id_cliente, id_evento, id_lote, id_pago, id_proceso, id_selec, newSearch,
+                    id_tipo_sat, idordeningreso,lote_publico, monto, no_movto, referencia, referenciaori,
+                    resultado, tipo, tipo_referencia, valido_sistema
+                ].map(value => (value !== null && value !== undefined) ? value : null);
+
+                await this.entity.query(query, values);
+
+                };
+            }
+                
             return {
                 statusCode: 200, message: ["OK"], data: {
                     estProcess: P_EST_PROCESO,
                     msgProcess: P_MSG_PROCESO
                 }
             }
+        }
+         catch (error) {
+            return {
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: [error.message],
+            };
         }
     }
 
@@ -546,7 +600,7 @@ export class ComerPaymentService {
             return {
                 statusCode: 200, message: ["ok"], data: {
                     statusProcess: 0,
-                    messageProcess: 'No se encontraron registros al realizar la consulta...'
+                    messageProcess: P_MSG_PROCESO
                 }
             }
         } catch (error) {
