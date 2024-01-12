@@ -626,7 +626,7 @@ export class ComerPaymentService {
             var LV_VAL_CBAN: number;
             var LV_ID_LOTE: number;
             var LV_PRECIO_FINAL: number
-            var LV_ID_CLIEPRO: number
+            var LV_ID_CLIEPRO: number 
             var LV_ID_ESTATUSVTA: string
             var LV_VAL_REFALT_GL: number;
             var LV_VALPAGOS: number;
@@ -635,10 +635,16 @@ export class ComerPaymentService {
             var LV_ID_CLIEORI: number;
             var LV_REGVIRTUAL: number;
             var LV_SUM_PAGOS: number;
-            var C_DATEFEC: any[] = await this.entity.query(`select REFERENCIA,ID_TIPO_SAT,VALIDO_SISTEMA,CVE_BANCO     ,IDORDENINGRESO,ID_PAGO,
+
+            const Cursor_DATEFEC = async (processId:number) => {
+                return await this.entity.query(`
+                select REFERENCIA,ID_TIPO_SAT,VALIDO_SISTEMA,CVE_BANCO     ,IDORDENINGRESO,ID_PAGO,
                         ID_EVENTO ,ID_LOTE    ,LOTE_PUBLICO  ,REFERENCIA_ALT,ID_PROCESO
                 from sera.BUSQUEDA_PAGOS_DET
-                where ID_PROCESO = ${process}`);
+                where ID_PROCESO = ${processId}`);
+            }
+
+            const C_DATEFEC: any[] = await Cursor_DATEFEC(process)
             for (const element of C_DATEFEC) {
                 P_EST_PROCESO = 1;
                 P_MSG_PROCESO = 'Proceso finalizado';
@@ -679,7 +685,11 @@ export class ComerPaymentService {
                             from sera.COMER_PAGOREF
                             where REFERENCIA = '${element.referencia}'
                             limit 1`);
-                        const LV_VAL_SIS_ORG = r2[0].val
+                        let LV_VAL_SIS_ORG = r2[0].val
+
+                        if (LV_VAL_SIS_ORG.length == 0) {
+                            LV_VAL_SIS_ORG = 'X';
+                        }
 
                         if (['A', 'R', 'D', 'B'].includes(LV_VAL_SIS_ORG)) {
                             if (!['A', 'R', 'D', 'B'].includes(element.valido_sistema)) {
@@ -833,7 +843,9 @@ export class ComerPaymentService {
                 }
             }
 
-            return { messsage: P_MSG_PROCESO, status: P_EST_PROCESO, data: params }
+            return {  statusCode: HttpStatus.OK, 
+                    messsage: P_MSG_PROCESO, 
+                    status: P_EST_PROCESO, data: params }
         } catch (error) {
             return {
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -1014,62 +1026,92 @@ export class ComerPaymentService {
         }
     }
 
-    async changePayments(typeInconci: number, typeAction: number) {
-        var LV_TOTREGIS: number
-        var LV_INTERA: number
-        var LV_TIPOPAGO: number
-        var LV_ID_CLIENTE: number;
-        var LV_REFERENCIA: string;
-        var LV_ID_LOTE: number;
-        var LV_MENSAJE: string;
-        var LV_ESTATUS: number;
-        var P_MSG_PROCESO: string
-        var P_EST_PROCESO: number
+    async changePayments(typeInconci: number) {
+        let LV_TOTREGIS: number
+        let LV_INTERA: number
+        let P_MSG_PROCESO: string
+        let P_EST_PROCESO: number
         P_EST_PROCESO = 1;
         P_MSG_PROCESO = 'Proceso finalizo.';
 
+        const Cursor_DATEFEC = async (idBusqueda:number) => {
+            return await this.entity.query(`
+            select ID_PROCESO,CVE_BANCO,VALIDO_SISTEMA,ID_TIPO_SAT,FECHA,REFERENCIA_ALT,LOTE_PUBLICO,ID_PAGO
+            from sera.BUSQUEDA_PAGOS_DET
+            where ID_TBUSQUEDA = ${idBusqueda}
+            and ID_SELEC     = 1`);
+        }
         try {
-            var r1 = await this.entity.query(`select count(0) as count 
+            let r1 = await this.entity.query(`select count(0) as count 
                 from sera.BUSQUEDA_PAGOS_DET
-                where ID_TBUSQUEDA   = ${typeInconci}
+                where ID_TBUSQUEDA   = ${typeInconci}   
                 and ID_SELEC = 1`)
-            LV_TOTREGIS = r1[0].count || 0
+            LV_TOTREGIS = r1[0].count || 0 
             if (LV_TOTREGIS == 0) {
                 P_MSG_PROCESO = 'No existe registros para procesar para realizar cambios';
                 P_EST_PROCESO = 0;
             } else {
                 if (typeInconci == 0) {
                     LV_INTERA = 1;
-                    var C_DATEFEC: any[] = await this.entity.query(`select ID_PROCESO,CVE_BANCO,VALIDO_SISTEMA,ID_TIPO_SAT,FECHA,REFERENCIA_ALT,LOTE_PUBLICO,ID_PAGO
-                    from sera.BUSQUEDA_PAGOS_DET
-                    where ID_TBUSQUEDA = 0
-                    and ID_SELEC     = 1`)
-                    for (const dat of C_DATEFEC) {
-                        var valid = await this.validPayment(dat.id_proceso)
-                        if (valid.status == 1) {
-                            await this.entity.query(` update sera.COMER_PAGOREF
-                        set CVE_BANCO      = '${dat.cve_banco}',
-                            VALIDO_SISTEMA = '${dat.valido_sistema}',
-                            FECHA          = '${dat.fecha}',
-                            ID_TIPO_SAT    = '${dat.id_tipo_sat}',
-                            ID_CLIENTE     = '${valid.data.client}',
-                            REFERENCIA     = '${valid.data.reference}', 
-                            ID_LOTE        = '${valid.data.lot}'
-                        where ID_PAGO = '${dat.id_pago}'`)
+                    const C_DATEFEC = await Cursor_DATEFEC(typeInconci);
+                        for (const dat of C_DATEFEC) {
+                            let valid = await this.validPayment(dat.id_proceso)
+                            if (valid.statusCode != 200) {
+                                return valid
+                            }
+                            if (valid.status == 1) {
 
-                            await this.entity.query(`   UPDATE sera.COMER_REF_GARANTIAS
-                        SET ID_LOTE = ${valid.data.lot}
-                        WHERE REF_GSAE||REF_GBANCO = (SELECT REFERENCIA
-                                                    FROM sera.COMER_PAGOREF
-                                                    WHERE ID_PAGO = '${dat.id_pago}');`)
-                            await this.entity.query(` delete from sera.BUSQUEDA_PAGOS_DET where ID_PROCESO = '${dat.id_proceso}'`)
-                        } else {
-                            await this.entity.query(` update sera.BUSQUEDA_PAGOS_DET
-                        set ID_INCONSIS   = 19,
-                            DESC_INCONSIS = '${valid.messsage}'
-                        where ID_PROCESO = '${dat.id_proceso}'`)
+                                try {
+                                    const query = `
+                                    update sera.COMER_PAGOREF
+                                        set CVE_BANCO   = $1,
+                                        VALIDO_SISTEMA = $2,
+                                        FECHA          = $3,
+                                        ID_TIPO_SAT    = $4,
+                                        ID_CLIENTE     = $5,
+                                        REFERENCIA     = $6, 
+                                        ID_LOTE        = $7
+                                    where ID_PAGO = $8
+                                    )
+                                    `;
+                                    const values = [
+                                        dat.cve_banco, dat.valido_sistema, dat.fecha, dat.id_tipo_sat, valid.data.client, valid.data.reference, valid.data.lot,
+                                        dat.id_pago].map(value => (value !== null && value !== undefined) ? value : null);
+                    
+                                    await this.entity.query(query, values);
+    
+                                    await this.entity.query(`   UPDATE sera.COMER_REF_GARANTIAS
+                                    SET ID_LOTE = ${valid.data.lot}
+                                    WHERE REF_GSAE||REF_GBANCO = (SELECT REFERENCIA
+                                                                FROM sera.COMER_PAGOREF
+                                                                WHERE ID_PAGO = '${dat.id_pago}');`)
+                                        await this.entity.query(` delete from sera.BUSQUEDA_PAGOS_DET where ID_PROCESO = '${dat.id_proceso}'`)
+                                } catch (error) {
+                                    const query = `
+                                    update sera.BUSQUEDA_PAGOS_DET
+                                    set ID_INCONSIS   = 19,
+                                        DESC_INCONSIS = 'La referencia tiene problemas al tratar de regostrar en Pagos Referencia (COMER_PAGOREF)'
+                                    where ID_PROCESO = $2
+                                    )
+                                    `;
+                                    const values = [dat.id_proceso].map(value => (value !== null && value !== undefined) ? value : null);
+                                    
+                                    await this.entity.query(query, values);
+                                }
+
+
+                            } else {
+                                const query = `
+                                    update sera.BUSQUEDA_PAGOS_DET
+                                    set ID_INCONSIS   = 19,
+                                        DESC_INCONSIS = $1
+                                    where ID_PROCESO = $2
+                                    `;
+                                    const values = [valid.messsage, dat.id_proceso].map(value => (value !== null && value !== undefined) ? value : null);
+                                    
+                                    await this.entity.query(query, values);
+                            }
                         }
-                    }
                 } else {
                     P_EST_PROCESO = 0;
                     P_MSG_PROCESO = 'No se elegio el proceso y la acción adecuada';
