@@ -953,7 +953,7 @@ export class ComerPaymentService {
         }
     }
 
-    async filesPayment(typeInconci: number, typeAction: number) {
+    async filesPayment(typeInconci: number) {
         const dateNow = LocalDate.getNow();
         var LV_TOTREGIS: number;
         var LV_TIPO_PAGO: string = '';
@@ -987,23 +987,32 @@ export class ComerPaymentService {
                         ID_PAGO,ID_PROCESO,ID_SELEC,ID_TBUSQUEDA,ID_TIPO_SAT,IDORDENINGRESO,LOTE_PUBLICO,MONTO,NO_MOVTO,
                         REFERENCIA,REFERENCIAORI,RESULTADO,TIPO,VALIDO_SISTEMA
                         from sera.BUSQUEDA_PAGOS_DET
-                        where ID_TBUSQUEDA   = ${typeInconci}
+                        where ID_TBUSQUEDA   = ${typeInconci} 
                             and ID_SELEC = 1`)
                     for (const dat of C_DATEFEC) {
                         var r7: any[] = await this.entity.query(`select last_value+1 as id_last from sera.SEQ_COMER_PAGOR`)
                         LV_PAGO = r7[0].id_last
                         var r8: any[] = await this.entity.query(`select last_value+1 as id_last from sera.SEQ_BITACORA`)
                         LV_REGISTRO = r8[0].id_last
-                        const result = await this.entity.query(`insert into sera.COMER_PAGOREF(
-                                    ID_PAGO,REFERENCIA ,REFERENCIAORI ,NO_MOVIMIENTO ,FECHA    ,CVE_BANCO  ,
-                                    MONTO  ,DESCRIPCION,CODIGO        ,IDORDENINGRESO,CUENTA   ,ID_TIPO_SAT,
-                                    TIPO   ,RESULTADO  ,VALIDO_SISTEMA,FECHA_REGISTRO,ID_LOTE  ,NO_REGISTRO
-                            )
-                                values(
-                                    ${LV_PAGO}  ,'${dat.referencia}' ,'${dat.referencia}'    ,'${dat.no_movto}'      ,'${dat.fecha}'  ,'${dat.cve_banco}'  ,
-                                    '${dat.monto}','${dat.descripcion}','${dat.codigo}'        ,${dat.idordeningreso},'${dat.cuenta}' ,'${dat.id_tipo_sat}',
-                                    '${dat.tipo}' ,'${lv_RESULTADO}'   ,'${dat.valido_sistema}','${LV_FREGISTRO}'      ,${dat.id_lote},'${LV_REGISTRO}'    
-                            )`)
+
+                        const query = `
+                        insert into sera.COMER_PAGOREF(
+                            ID_PAGO,REFERENCIA ,REFERENCIAORI ,NO_MOVIMIENTO ,FECHA    ,CVE_BANCO  ,
+                            MONTO  ,DESCRIPCION,CODIGO        ,IDORDENINGRESO,CUENTA   ,ID_TIPO_SAT,
+                            TIPO   ,RESULTADO  ,VALIDO_SISTEMA,FECHA_REGISTRO,ID_LOTE  ,NO_REGISTRO
+                        ) VALUES (
+                            $1, $2, $3, $4, $5, $6, $7,
+                            $8, $9, $10, $11, $12, $13, $14,
+                            $15, $16, $17, $18
+                        )
+                        `;
+                        const values = [
+                            LV_PAGO, dat.referencia, dat.referencia, dat.no_movto, dat.fecha, dat.cve_banco, dat.monto,
+                            dat.descripcion, dat.codigo, dat.idordeningreso, dat.cuenta, dat.id_tipo_sat, dat.tipo, lv_RESULTADO,
+                            dat.valido_sistema, LV_FREGISTRO,dat.id_lote, LV_REGISTRO
+                        ].map(value => (value !== null && value !== undefined) ? value : null);
+
+                        await this.entity.query(query, values);
     
                         await this.entity.query(`delete from sera.BUSQUEDA_PAGOS_DET where ID_PROCESO = '${dat.id_proceso}'`)
     
